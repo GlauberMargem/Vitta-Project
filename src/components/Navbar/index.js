@@ -12,7 +12,7 @@ export function Navbar() {
 
       <div className="h-6 w-px border-1 rounded-full bg-gray-300"></div>
 
-      <Link href={'/'} className="group flex justify-center items-center aspect-square hover:bg-gray-100 rounded-full transition">
+      <Link href={'/dashboard/'} className="group flex justify-center items-center aspect-square hover:bg-gray-100 rounded-full transition">
         <span className="material-symbols-outlined !text-3xl px-2 text-gray-600 group-hover:text-[#6A97C6]">
           bar_chart
         </span>
@@ -20,7 +20,7 @@ export function Navbar() {
 
       <div className="h-6 w-px border-1 rounded-full bg-gray-300"></div>
 
-      <Link href={'/'} className="group flex justify-center items-center aspect-square hover:bg-gray-100 rounded-full transition">
+      <Link href={'/userConfig'} className="group flex justify-center items-center aspect-square hover:bg-gray-100 rounded-full transition">
         <span className="material-symbols-outlined !text-3xl px-2 text-gray-600 group-hover:text-[#6A97C6]">
           manage_accounts
         </span>
