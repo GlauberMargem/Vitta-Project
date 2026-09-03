@@ -47,6 +47,64 @@ Registro de glicemia — RF02/RF03/RF04/RF05/RF11.
 | measured_at | timestamptz | índice, usado nos gráficos e na média de 90 dias |
 | created_at | timestamptz | quando o registro foi salvo no sistema |
 
+## Limites clínicos de hipo/hiperglicemia (RF05)
+
+Fonte: diretrizes oficiais da Sociedade Brasileira de Diabetes (SBD), trazidas
+pelo Glauber em 2026-09-03:
+- [Metas de controle glicêmico](https://diretriz.diabetes.org.br/metas-de-controle-glicemico/)
+- [Manejo da hiperglicemia hospitalar em pacientes não críticos](https://diretriz.diabetes.org.br/manejo-da-hiperglicemia-hospitalar-em-pacientes-nao-criticos/)
+  (usada só como referência complementar — o MVP não é ambiente hospitalar)
+
+**Hipoglicemia** (vale para qualquer contexto de medição):
+- Nível 1 — 54 a 69 mg/dl: já clinicamente relevante, mesmo sem sintomas.
+- Nível 2 — < 54 mg/dl: grave, exige intervenção imediata.
+- Nível 3 (alteração de estado mental, independente do valor) não é
+  detectável a partir só do valor numérico — fora do escopo do alerta
+  automático do MVP.
+- **Regra de alerta do app**: `value_mgdl < 70` → hipoglicemia (usa o limite
+  superior do Nível 1 como corte único; a UI pode diferenciar visualmente
+  quando `< 54`, ver `08-design-system.md`).
+
+**Hiperglicemia** — meta de acompanhamento ambulatorial (não hospitalar) para
+a maioria dos adultos: jejum 80–130 mg/dl, pós-prandial (2h) < 180 mg/dl.
+Mapeamento por `context` de `glucose_records`, decidido com o Glauber em
+2026-09-03:
+
+| `context` | Regra de alerta de hiperglicemia |
+|---|---|
+| `jejum` | `value_mgdl > 130` |
+| `antes_de_dormir` | `value_mgdl > 130` (tratado como jejum prolongado — a diretriz não define meta própria pra esse horário) |
+| `pos_prandial` | `value_mgdl >= 180` |
+| `outro` | `value_mgdl >= 180` (limite mais permissivo do pós-prandial, por não saber a que refere-se a medição) |
+
+Os valores hospitalares (>140 de alerta geral, >180 pra intervenção
+farmacológica) **não** se aplicam aqui — são de outro contexto clínico
+(paciente internado) e foram descartados para o MVP ambulatorial.
+
+## Estimativa de HbA1c (RF11)
+
+Fórmula do estudo ADAG (*A1c-Derived Average Glucose*): Nathan DM, Kuenen J,
+Borg R, Zheng H, Schoenfeld D, Heine RJ; A1c-Derived Average Glucose Study
+Group. "Translating the A1C assay into estimated average glucose values."
+*Diabetes Care*. 2008;31(8):1473-8.
+
+```
+HbA1c (%) = (glicemia média em mg/dL dos últimos 90 dias + 46,7) ÷ 28,7
+```
+
+Glicemia média = média simples de `value_mgdl` de todos os `glucose_records`
+do paciente com `measured_at` nos últimos 90 dias. Sem registros no período,
+não há estimativa a exibir (não mostrar card de HbA1c, não mostrar `0%`).
+
+**Meta de referência exibida junto à estimativa**: `< 7%`, meta geral
+ADA/SBD para a maioria dos adultos com diabetes — confirmado com o Glauber em
+2026-09-03. Não considera ajuste por idade/comorbidade (ex.: idosos com meta
+mais frouxa) — o MVP não modela isso ainda.
+
+⚠️ É uma **estimativa** a partir de registros manuais do paciente, não um
+resultado de exame laboratorial — a UI precisa deixar isso explícito (rótulo
+"estimativa", não "seu HbA1c").
+
 ### `meals`
 Registro de refeição — contexto para variações glicêmicas.
 

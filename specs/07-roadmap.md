@@ -71,9 +71,18 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       glicose + refeição, misturados por data)
 
 ## 3. Visualização (RF04, RF05, RF11)
-- [ ] Componente de gráfico de tendência (semanal)
-- [ ] Cálculo de limites de referência e alerta visual de hipo/hiperglicemia
-- [ ] Cálculo de estimativa de HbA1c (média 90 dias)
+- [x] Componente de gráfico de tendência (semanal) — `GlicemiaChart.tsx`,
+      Recharts via shadcn/ui Charts (ver `05-arquitetura.md`), área com os 7
+      dias da semana corrente, média diária, domínio fixo do eixo Y (50–500
+      mg/dL, conforme `08-design-system.md`)
+- [x] Cálculo de limites de referência e alerta visual de hipo/hiperglicemia
+      — `src/lib/patient/glucose.ts` (`glucoseAlert`), limites e fontes
+      documentados em `04-modelo-de-dados.md`. Badge de alerta (`#FFB5A7`) no
+      histórico do dashboard por registro fora da faixa.
+- [x] Cálculo de estimativa de HbA1c (média 90 dias) — fórmula ADAG
+      (`estimateHbA1c` em `glucose.ts`), card no topo do dashboard com meta
+      de referência `<7%`, só aparece se houver ao menos um registro no
+      período
 
 ## 4. Perfil do paciente
 - [ ] Tela de perfil (dados pessoais / dados clínicos) migrada para TS e ligada

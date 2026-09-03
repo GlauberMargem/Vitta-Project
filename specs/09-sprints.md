@@ -93,28 +93,43 @@ paciente certo no histórico do dashboard (confirmando que
 
 ---
 
-## Sprint 3 — Gráficos, HbA1c estimado e alertas
+## Sprint 3 — Gráficos, HbA1c estimado e alertas ✅ concluído
+**Objetivo:** dashboard do paciente mostra tendência glicêmica, estimativa de
+HbA1c e destaca visualmente registros fora da faixa de referência.
 
-⚠️ **Gaps em aberto** (ver `specs/08-design-system.md` e
-`04-modelo-de-dados.md`) — não bloqueiam o trabalho de agora, mas precisam
-ser resolvidos antes deste sprint começar de verdade:
-1. **Biblioteca de gráficos** — a monografia menciona "bibliotecas de
-   gráficos" de forma genérica, sem escolher uma (ex.: Recharts, Chart.js,
-   Tremor). Não vou inventar essa escolha sozinho.
-2. **Limites clínicos de hipo/hiperglicemia** — RF05 fala em "limites...
-   configurados", mas não existe um valor de referência definido em nenhuma
-   spec. São dados clínicos (ex.: das diretrizes da SBD citadas na
-   monografia); não vou chutar números de mg/dL.
+| Prioridade | Item | Origem | Status |
+|---|---|---|---|
+| P0 | Componente de gráfico de área (semanal), dados reais | roadmap bloco 3 | ✅ |
+| P0 | Cálculo e exibição de HbA1c estimado (média 90 dias) | roadmap bloco 3 (RF11) | ✅ |
+| P0 | Alerta visual quando registro está fora dos limites | roadmap bloco 3 (RF05) | ✅ |
+| P1 | Limites configuráveis (mesmo que só editável via banco por enquanto) | — | ❌ adiado |
 
-| Prioridade | Item | Origem |
-|---|---|---|
-| P0 | Componente de gráfico de área (semanal), dados reais | roadmap bloco 3 |
-| P0 | Cálculo e exibição de HbA1c estimado (média 90 dias) | roadmap bloco 3 (RF11) |
-| P0 | Alerta visual quando registro está fora dos limites | roadmap bloco 3 (RF05) |
-| P1 | Limites configuráveis (mesmo que só editável via banco por enquanto) | — |
+**Gaps resolvidos com o Glauber em 2026-09-03**, com fonte documentada em
+`04-modelo-de-dados.md` e `05-arquitetura.md`:
+- Biblioteca de gráficos: Recharts via shadcn/ui Charts.
+- Limites de hipo/hiperglicemia: diretrizes SBD (metas de controle
+  glicêmico), mapeados por contexto do registro.
+- Fórmula de estimativa de HbA1c: estudo ADAG (Nathan et al., 2008), meta de
+  referência `<7%` (ADA/SBD, maioria dos adultos).
 
-**Definição de pronto:** dashboard do paciente mostra HbA1c, gráfico semanal
-com dados reais, e destaca visualmente registros fora da faixa configurada.
+**Desvios deliberados:**
+- Gráfico mostra os 7 dias da semana corrente (Seg a Dom), não só os 5 dias
+  literalmente listados no mockup — ver `08-design-system.md`.
+- Cor do alerta reaproveita `#FFB5A7` (Atenção/ação) já existente na paleta,
+  não uma cor nova — token `--alert`/`--alert-foreground` em `globals.css`.
+- P1 (limites configuráveis por paciente) adiado: os limites de hoje são
+  globais no código (`src/lib/patient/glucose.ts`), não por paciente/idade.
+  Sem tela de configuração ainda — não bloqueia a definição de pronto do
+  RF05 (o alerta funciona com os limites clínicos padrão).
+
+**Definição de pronto:** ✅ testado ponta a ponta — paciente de teste com
+registros na semana corrente cobrindo hipoglicemia grave (<54), hipoglicemia
+(54–69), hiperglicemia (jejum >130 e pós-prandial ≥180) e um valor normal;
+dashboard mostrou a estimativa de HbA1c correta (fórmula ADAG conferida à
+mão), o gráfico semanal com a média diária certa por dia, e o badge de
+alerta certo (ou ausente) em cada item do histórico. Testado em modo
+produção (`next build && next start`), servidor limpo reiniciado no meio do
+teste pra eliminar dúvida sobre build obsoleto.
 
 ---
 

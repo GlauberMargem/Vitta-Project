@@ -2,17 +2,17 @@
 
 | Código | Descrição | Usuário | Prioridade | Status |
 |---|---|---|---|---|
-| RF01 | Cadastro e autenticação de usuários (paciente e médico) com perfis de acesso distintos | Ambos | Alta | ❌ não iniciado |
-| RF02 | Paciente registra medição de glicose: valor (mg/dL), data, horário, contexto (jejum, pós-prandial, antes de dormir) | Paciente | Alta | ❌ não iniciado |
-| RF03 | Histórico cronológico das medições do paciente | Paciente | Alta | ❌ não iniciado |
-| RF04 | Gráficos de tendência glicêmica (diária, semanal, mensal) | Paciente | Alta | ❌ não iniciado |
-| RF05 | Alertas visuais quando registro está fora dos limites de referência (hipo/hiperglicemia) | Paciente | Alta | ❌ não iniciado |
+| RF01 | Cadastro e autenticação de usuários (paciente e médico) com perfis de acesso distintos | Ambos | Alta | ✅ concluído (Sprint 1) |
+| RF02 | Paciente registra medição de glicose: valor (mg/dL), data, horário, contexto (jejum, pós-prandial, antes de dormir) | Paciente | Alta | ✅ concluído (Sprint 2) |
+| RF03 | Histórico cronológico das medições do paciente | Paciente | Alta | ✅ concluído (Sprint 2) |
+| RF04 | Gráficos de tendência glicêmica (diária, semanal, mensal) | Paciente | Alta | 🟡 parcial (Sprint 3) — só semanal, diária/mensal ficam pro backlog pós-homologação |
+| RF05 | Alertas visuais quando registro está fora dos limites de referência (hipo/hiperglicemia) | Paciente | Alta | ✅ concluído (Sprint 3) |
 | RF06 | Médico visualiza painel com lista de pacientes vinculados e históricos | Médico | Alta | ❌ não iniciado |
 | RF07 | Médico identifica pacientes em risco por indicadores visuais no painel | Médico | Alta | ❌ não iniciado |
 | RF08 | Relatório glicêmico exportável em PDF | Ambos | Média | ❌ não iniciado |
 | RF09 | Médico adiciona anotações clínicas ao histórico do paciente vinculado | Médico | Média | ❌ não iniciado |
 | RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ❌ não iniciado |
-| RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ❌ não iniciado |
+| RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ✅ concluído (Sprint 3) |
 | RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ❌ não iniciado |
 
 Regras de negócio associadas (não repetir no código como comentário — só aplicar):

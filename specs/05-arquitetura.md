@@ -18,6 +18,7 @@
 | Linguagem | TypeScript | tipagem estática em dados de saúde reduz risco de erro silencioso |
 | Banco | PostgreSQL | integridade referencial, relacional, adequado a dados sensíveis |
 | Auth | NextAuth/OAuth | evita implementar autenticação própria (risco de segurança) |
+| Gráficos | Recharts (via shadcn/ui Charts) | ver seção dedicada abaixo |
 | Hospedagem | Vercel | integração nativa com Next.js |
 
 ## Convenções de projeto
@@ -110,6 +111,24 @@ Google (via `<link>` manual no `layout.tsx`), resquício do bootstrap anterior
 às specs. Corrigido: ícones trocados para `lucide-react` (já mandatado pelo
 `CLAUDE.md`) e o `<link>` manual removido — carregar fonte via `<link>` em vez
 de `next/font` bloqueia renderização e não é otimizado.
+
+## Gráficos: Recharts via shadcn/ui Charts
+
+A monografia menciona "bibliotecas de gráficos" de forma genérica, sem
+escolher uma — decisão tomada em 2026-09-03, com o Glauber. Opção cogitada:
+Apache ECharts. Descartada porque é uma engine de canvas própria, API
+imperativa, ~1MB de bundle — overhead desnecessário pro gráfico de área
+simples do Sprint 3 (tendência semanal de glicemia, poucos pontos), e pesa
+contra o RNF01 (resposta <2s em conexão móvel lenta).
+
+Escolhido: **Recharts**, via os componentes de gráfico do shadcn/ui
+(`npx shadcn add chart`). Motivos:
+- SVG declarativo, componentes React normais — sem API imperativa separada.
+- Já estilizado com as variáveis de cor do Tailwind/`08-design-system.md`,
+  em vez de exigir um tema próprio.
+- Consistente com o resto da UI (shadcn já usado em `Button`, `Input`,
+  `Dialog`, `Select`).
+- Bundle bem menor que ECharts.
 
 ## Migração de JS → TS
 

@@ -50,10 +50,10 @@ src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
 src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
 src/app/(app)/                 route group com Header/Navbar: /dashboard, /userConfig
-src/app/(app)/dashboard/       home real do paciente (Ações + histórico recente)
+src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar, Header, src/components/ui (shadcn), icons/
-src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog)
+src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
@@ -61,6 +61,8 @@ src/lib/auth/config.ts         config Auth.js completa (provider de credenciais)
 src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro)
 src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
+src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativa de HbA1c (fórmula ADAG),
+                                agregação semanal — fontes em specs/04-modelo-de-dados.md
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
@@ -80,7 +82,8 @@ middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
 Ainda não existem: diferenciação de perfis paciente/médico nas rotas (só
 existe uma área logada `(app)` comum até agora — vem no bloco 6, painel do
-médico), gráficos, cálculo de HbA1c, alertas de hipo/hiperglicemia, vínculo
+médico), gráfico diário/mensal (só semanal existe), limites de hipo/hiper
+configuráveis por paciente (hoje são globais no código), vínculo
 paciente-médico, painel do médico.
 
 ## Dois perfis de usuário — regras de negócio

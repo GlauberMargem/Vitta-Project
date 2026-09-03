@@ -17,9 +17,9 @@ aqui, sem inventar variações.
 | Texto principal | Cinza grafite suave | `#3D3D3D` | contraste equilibrado |
 | Texto secundário | Cinza médio | `#6B6B6B` | descrições e legendas |
 
-⚠️ A folha de referência não define uma cor específica para os alertas de
-hipo/hiperglicemia (RF05). Ao implementar RF05, perguntar se deve reutilizar
-`#FFB5A7` (Atenção/ação) ou se é necessária uma cor própria.
+✅ Cor do alerta de hipo/hiperglicemia (RF05) definida com o Glauber em
+2026-09-03: reaproveita `#FFB5A7` (Atenção/ação) — não introduz cor nova.
+Token `--alert`/`--alert-foreground` em `globals.css`.
 
 ### Implementado em `src/app/globals.css` (tokens shadcn)
 
@@ -114,6 +114,11 @@ carboidratos da refeição" · "Insira a hora da refeição" · botão "Inserir 
 ### Gráficos
 "Glicemia ao longo da semana" · gráfico de área, eixo Y em mg/dL (50 a 500), eixo
 X com dias da semana abreviados (Seg, Ter, Qua, Qui, Sex)
+
+⚠️ **Desvio deliberado**: implementado com os 7 dias da semana (Seg a Dom), não
+só os 5 listados acima. O mockup provavelmente só tinha espaço visível para 5
+rótulos na captura de tela — glicemia de fim de semana é tão relevante quanto
+a de dia útil, não faz sentido omitir do gráfico.
 
 ### Perfil (2 sub-telas)
 Sub-tela 1 (dados pessoais): avatar, Nome completo, Senha (mascarada), Data de
