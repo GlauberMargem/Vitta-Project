@@ -1,31 +1,25 @@
+import Link from "next/link";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
 import { NovaGlicoseDialog } from "@/components/patient/NovaGlicoseDialog";
 import { NovaRefeicaoDialog } from "@/components/patient/NovaRefeicaoDialog";
 import { GlicemiaChart } from "@/components/patient/GlicemiaChart";
 import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
+import { HbA1cCard } from "@/components/patient/HbA1cCard";
+import { HistoricoList } from "@/components/patient/HistoricoList";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
-import { contextLabel, formatDateTime } from "@/lib/patient/format";
+import { buildHistory } from "@/lib/patient/history";
 import {
   buildWeeklyGlucoseSeries,
   estimateHbA1c,
   glucoseAlert,
   glucoseAlertLabel,
-  HBA1C_TARGET_PERCENT,
-  type GlucoseAlert,
+  mostSevereAlert,
 } from "@/lib/patient/glucose";
 import { cn } from "@/lib/utils";
 
-type HistoryItem = {
-  kind: "glucose" | "meal";
-  id: string;
-  date: Date;
-  label: string;
-  detail: string;
-  alert: GlucoseAlert;
-};
-
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+const RISK_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -84,26 +78,7 @@ export default async function DashboardPage() {
       }),
     ]);
 
-  const history: HistoryItem[] = [
-    ...glucoseRecords.map((record) => ({
-      kind: "glucose" as const,
-      id: record.id,
-      date: record.measuredAt,
-      label: `${record.valueMgdl} mg/dL`,
-      detail: contextLabel(record.context),
-      alert: glucoseAlert(record.valueMgdl, record.context),
-    })),
-    ...meals.map((meal) => ({
-      kind: "meal" as const,
-      id: meal.id,
-      date: meal.eatenAt,
-      label: meal.name ?? "Refeição",
-      detail: `${meal.carbsG} g de carboidratos`,
-      alert: null,
-    })),
-  ]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 10);
+  const history = buildHistory(glucoseRecords, meals);
 
   const mealNameSuggestions = mealNameRows
     .map((row) => row.name)
@@ -125,21 +100,7 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      {hba1c !== null ? (
-        <section className="rounded-3xl bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">
-            Sua hemoglobina glicada estimada está em{" "}
-            <span className="font-semibold text-foreground">
-              {hba1c.toFixed(1)}%
-            </span>
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Não desanime, nossa meta é de até {HBA1C_TARGET_PERCENT}%.
-            Estimativa calculada a partir dos seus registros dos últimos 90
-            dias, não substitui o exame laboratorial.
-          </p>
-        </section>
-      ) : null}
+      <HbA1cCard hba1c={hba1c} />
 
       <section className="rounded-3xl bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
@@ -162,41 +123,7 @@ export default async function DashboardPage() {
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Histórico recente
         </h2>
-        {history.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhum registro ainda.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {history.map((item) => (
-              <li
-                key={`${item.kind}-${item.id}`}
-                className={cn(
-                  "flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-sm",
-                  item.alert ? "bg-alert/20" : undefined
-                )}
-              >
-                <div>
-                  <p className="font-medium text-foreground">{item.label}</p>
-                  <p className="text-muted-foreground">{item.detail}</p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <time
-                    className="text-xs text-muted-foreground"
-                    dateTime={item.date.toISOString()}
-                  >
-                    {formatDateTime(item.date)}
-                  </time>
-                  {item.alert ? (
-                    <span className="text-xs font-medium text-alert-foreground">
-                      {glucoseAlertLabel(item.alert)}
-                    </span>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        <HistoricoList history={history} />
       </section>
 
       <VinculoMedicoCard activeLink={activeLink} />
@@ -222,6 +149,30 @@ async function DoctorDashboard({
       orderBy: { createdAt: "desc" },
     }),
   ]);
+
+  const patientIds = activeLinks
+    .map((link) => link.patientId)
+    .filter((id): id is string => Boolean(id));
+
+  const riskWindowStart = new Date(Date.now() - RISK_WINDOW_MS);
+  const recentRecords = patientIds.length
+    ? await db.glucoseRecord.findMany({
+        where: {
+          patientId: { in: patientIds },
+          measuredAt: { gte: riskWindowStart },
+        },
+        select: { patientId: true, valueMgdl: true, context: true },
+      })
+    : [];
+
+  const alertsByPatient = new Map<string, ReturnType<typeof glucoseAlert>[]>();
+  for (const record of recentRecords) {
+    const alert = glucoseAlert(record.valueMgdl, record.context);
+    if (!alert) continue;
+    const list = alertsByPatient.get(record.patientId) ?? [];
+    list.push(alert);
+    alertsByPatient.set(record.patientId, list);
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
@@ -256,20 +207,36 @@ async function DoctorDashboard({
         </h2>
         {activeLinks.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Nenhum paciente vinculado ainda. Painel completo (histórico,
-            indicadores de risco) vem no próximo sprint — ver
-            specs/07-roadmap.md, bloco 6.
+            Nenhum paciente vinculado ainda.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {activeLinks.map((link) => (
-              <li
-                key={link.id}
-                className="rounded-2xl px-3 py-2 text-sm text-foreground"
-              >
-                {link.patient?.user.name ?? "Paciente"}
-              </li>
-            ))}
+            {activeLinks.map((link) => {
+              if (!link.patientId) return null;
+              const risk = mostSevereAlert(
+                alertsByPatient.get(link.patientId) ?? []
+              );
+              return (
+                <li key={link.id}>
+                  <Link
+                    href={`/dashboard/pacientes/${link.patientId}`}
+                    className={cn(
+                      "flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-sm transition-colors hover:bg-muted",
+                      risk ? "bg-alert/20" : undefined
+                    )}
+                  >
+                    <span className="font-medium text-foreground">
+                      {link.patient?.user.name ?? "Paciente"}
+                    </span>
+                    {risk ? (
+                      <span className="text-xs font-medium text-alert-foreground">
+                        {glucoseAlertLabel(risk)} (últimos 7 dias)
+                      </span>
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

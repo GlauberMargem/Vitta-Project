@@ -50,11 +50,13 @@ src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
 src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
 src/app/(app)/                 route group com Header/Navbar: /dashboard, /userConfig
-src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico)
+src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico) OU painel do
+                                médico (gerar convite, pacientes vinculados com indicador de risco), por role
+src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um paciente vinculado, pro médico
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar, Header, src/components/ui (shadcn), icons/
 src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts),
-                                VinculoMedicoCard (consumir código / revogar vínculo)
+                                VinculoMedicoCard, HbA1cCard, HistoricoList (reaproveitados no painel do médico)
 src/components/doctor/         GerarConviteCard (gerar código de convite)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
@@ -64,7 +66,8 @@ src/lib/auth/actions.ts        server actions: authenticate (login), registerUse
 src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal, consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativa de HbA1c (fórmula ADAG),
-                                agregação semanal — fontes em specs/04-modelo-de-dados.md
+                                agregação semanal, risco mais grave — fontes em specs/04-modelo-de-dados.md
+src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a mesma)
 src/lib/doctor/actions.ts      server action: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L)
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
@@ -83,12 +86,10 @@ acesso externo/webhook).
 há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
-Ainda não existem: painel do médico de verdade (bloco 6 — hoje o médico só
-tem, no mesmo `/dashboard`, o card de gerar convite e uma lista simples de
-pacientes vinculados, sem histórico/indicador de risco), gráfico
+Ainda não existem: anotação clínica do médico (RF09, Sprint 6), gráfico
 diário/mensal (só semanal existe), limites de hipo/hiper configuráveis por
 paciente (hoje são globais no código), tela de perfil real (`/userConfig`
-ainda é placeholder).
+ainda é placeholder), exportação de relatório em PDF (RF08).
 
 ## Dois perfis de usuário — regras de negócio
 

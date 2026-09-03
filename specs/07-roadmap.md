@@ -102,10 +102,21 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
 
 ## 6. Painel do médico (RF06, RF07, RF09)
 - [x] Migration `clinical_notes` — já existe desde o bloco 0
-- [ ] Rota/layout exclusivo do médico
-- [ ] Listagem de pacientes vinculados com indicador de risco
-- [ ] Tela de histórico do paciente (somente leitura) para o médico
-- [ ] Criação de anotação clínica
+- [x] Rota/layout exclusivo do médico — `/dashboard` já renderiza conteúdo
+      totalmente diferente por `role` desde o Sprint 4 (`DoctorDashboard`);
+      não criei um path `/medico` separado (custaria lógica extra de
+      redirecionamento pós-login sem ganho real) — ver `09-sprints.md`,
+      Sprint 5
+- [x] Listagem de pacientes vinculados com indicador de risco —
+      `src/app/(app)/dashboard/page.tsx` (`DoctorDashboard`), risco calculado
+      com `mostSevereAlert` sobre os registros dos últimos 7 dias de cada
+      paciente vinculado
+- [x] Tela de histórico do paciente (somente leitura) para o médico —
+      `/dashboard/pacientes/[patientId]`, reaproveita `GlicemiaChart`,
+      `HbA1cCard`, `HistoricoList` já criados nos Sprints 3/4. Acesso
+      valida vínculo `ACTIVE` do médico com aquele paciente antes de
+      qualquer leitura (nunca por `patientId` direto) — `notFound()` senão
+- [ ] Criação de anotação clínica — Sprint 6
 
 ## 7. Extras de prioridade Média/Baixa
 - [ ] Exportação de relatório em PDF (RF08)

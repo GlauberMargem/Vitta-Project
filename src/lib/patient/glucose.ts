@@ -41,6 +41,14 @@ export function glucoseAlert(
   return null;
 }
 
+/** Prioriza o alerta mais grave entre vários registros (RF07 — risco do paciente no painel do médico). */
+export function mostSevereAlert(alerts: GlucoseAlert[]): GlucoseAlert {
+  if (alerts.includes("HIPOGLICEMIA_GRAVE")) return "HIPOGLICEMIA_GRAVE";
+  if (alerts.includes("HIPOGLICEMIA")) return "HIPOGLICEMIA";
+  if (alerts.includes("HIPERGLICEMIA")) return "HIPERGLICEMIA";
+  return null;
+}
+
 export function glucoseAlertLabel(alert: GlucoseAlert): string {
   switch (alert) {
     case "HIPOGLICEMIA_GRAVE":

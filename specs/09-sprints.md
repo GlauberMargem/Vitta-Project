@@ -170,22 +170,41 @@ vínculo. Testado em modo produção.
 
 ---
 
-## Sprint 5 — Painel do médico
+## Sprint 5 — Painel do médico ✅ concluído
 **Objetivo:** médico loga e vê os pacientes vinculados, com destaque pra quem
 está em risco.
 
-| Prioridade | Item | Origem |
-|---|---|---|
-| P0 | Rota/layout exclusivo do médico | roadmap bloco 6 (RF06) |
-| P0 | Listagem de pacientes vinculados | roadmap bloco 6 (RF06) |
-| P0 | Indicador visual de risco (usa os limites do Sprint 3) | roadmap bloco 6 (RF07) |
-| P1 | Histórico do paciente (somente leitura) ao abrir um paciente da lista | roadmap bloco 6 |
+| Prioridade | Item | Origem | Status |
+|---|---|---|---|
+| P0 | Rota/layout exclusivo do médico | roadmap bloco 6 (RF06) | ✅ |
+| P0 | Listagem de pacientes vinculados | roadmap bloco 6 (RF06) | ✅ |
+| P0 | Indicador visual de risco (usa os limites do Sprint 3) | roadmap bloco 6 (RF07) | ✅ |
+| P1 | Histórico do paciente (somente leitura) ao abrir um paciente da lista | roadmap bloco 6 | ✅ |
 
-**Riscos:** é a maior peça do plano — com 5-10h/semana pode estourar a
-semana. Se estourar, cortar o histórico detalhado (P1) pro Sprint 6 e manter
-só a listagem com indicador de risco (P0) aqui.
-**Definição de pronto:** médico logado vê pacientes reais vinculados a ele,
-com indicador de risco calculado a partir dos dados de verdade.
+Coube tudo numa sprint só — não estourou como o risco previa, porque grande
+parte da UI (gráfico, card de HbA1c, lista de histórico) já existia dos
+Sprints 3/4 e só precisou virar componente reaproveitável
+(`HbA1cCard`, `HistoricoList`, `src/lib/patient/history.ts`) em vez de
+código novo do zero.
+
+**Decisões tomadas sem pausar pra perguntar** (técnicas, não clínicas —
+dentro do padrão já estabelecido nos sprints anteriores):
+- Janela de "risco recente" = últimos 7 dias, mesma da tendência semanal —
+  registrado em `02-requisitos-funcionais.md`.
+- Sem rota `/medico` separada — `/dashboard` já diverge 100% por `role`
+  desde o Sprint 4; criar um path novo só adicionaria lógica de
+  redirecionamento pós-login sem mudar o comportamento real.
+- Histórico do médico em `/dashboard/pacientes/[patientId]`, protegido pelo
+  mesmo matcher do middleware (`/dashboard/:path*`) — não precisou tocar em
+  `middleware.ts`.
+
+**Definição de pronto:** ✅ testado ponta a ponta com um médico e dois
+pacientes de teste (um com hipoglicemia grave nos últimos 7 dias, outro só
+com valores normais) — listagem mostra o badge de risco só no paciente
+certo, com o rótulo certo; abrir o paciente mostra HbA1c/gráfico/histórico
+reais dele; tentar abrir um paciente **não vinculado** (id inventado) dá
+404; um **paciente** tentando abrir a rota do médico não vê nenhum dado
+(sem vazamento). Testado em modo produção.
 
 ---
 
