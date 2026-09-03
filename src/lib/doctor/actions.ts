@@ -61,3 +61,36 @@ export async function generateInviteCode(
     error: "Não foi possível gerar um código único. Tente novamente.",
   };
 }
+
+export async function createClinicalNote(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const doctorId = await requireDoctorId();
+
+  const linkId = formData.get("linkId");
+  const note = formData.get("note");
+
+  if (typeof linkId !== "string" || !linkId) {
+    return "Vínculo inválido.";
+  }
+  if (typeof note !== "string" || !note.trim()) {
+    return "Escreva uma anotação antes de salvar.";
+  }
+
+  // Confirma que o vínculo é deste médico e ainda está ativo antes de
+  // permitir a anotação — nunca cria a partir de um linkId "solto".
+  const link = await db.patientDoctorLink.findFirst({
+    where: { id: linkId, doctorId, status: "ACTIVE" },
+  });
+  if (!link || !link.patientId) {
+    return "Vínculo inválido ou não está mais ativo.";
+  }
+
+  await db.clinicalNote.create({
+    data: { linkId, doctorId, note: note.trim() },
+  });
+
+  revalidatePath(`/dashboard/pacientes/${link.patientId}`);
+  return null;
+}

@@ -116,13 +116,20 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       `HbA1cCard`, `HistoricoList` já criados nos Sprints 3/4. Acesso
       valida vínculo `ACTIVE` do médico com aquele paciente antes de
       qualquer leitura (nunca por `patientId` direto) — `notFound()` senão
-- [ ] Criação de anotação clínica — Sprint 6
+- [x] Criação de anotação clínica — `createClinicalNote` em
+      `src/lib/doctor/actions.ts`, `NovaAnotacaoForm.tsx`. Visível só pro
+      médico que escreveu (decisão confirmada com o Glauber em 2026-09-03) —
+      ver `02-requisitos-funcionais.md`
 
 ## 7. Extras de prioridade Média/Baixa
 - [ ] Exportação de relatório em PDF (RF08)
 - [ ] Feedbacks motivacionais (RF12)
 
 ## 8. Não-funcionais transversais (revisar a cada bloco acima)
-- [ ] Checklist LGPD (RNF03) antes de cada release
-- [ ] Auditoria de acessibilidade (RNF05) nas telas novas
-- [ ] Índices de banco conforme `04-modelo-de-dados.md` (RNF06)
+- [x] Checklist LGPD (RNF03) — feito no Sprint 6, ver `09-sprints.md`
+- [x] Auditoria de acessibilidade (RNF05) nas telas novas — feito no
+      Sprint 6, achados registrados em `09-sprints.md` (nenhum bloqueante,
+      um item de tamanho de toque anotado como backlog)
+- [x] Índices de banco conforme `04-modelo-de-dados.md` (RNF06) — os 4
+      índices listados já existiam desde a migração `20260902225148_init`
+      (bloco 0); conferido no Sprint 6 que nenhum ficou pra trás

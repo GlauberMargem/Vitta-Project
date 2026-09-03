@@ -57,7 +57,7 @@ src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar, Header, src/components/ui (shadcn), icons/
 src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts),
                                 VinculoMedicoCard, HbA1cCard, HistoricoList (reaproveitados no painel do médico)
-src/components/doctor/         GerarConviteCard (gerar código de convite)
+src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
@@ -68,7 +68,8 @@ src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTi
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativa de HbA1c (fórmula ADAG),
                                 agregação semanal, risco mais grave — fontes em specs/04-modelo-de-dados.md
 src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a mesma)
-src/lib/doctor/actions.ts      server action: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L)
+src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
+                                createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
@@ -86,10 +87,12 @@ acesso externo/webhook).
 há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
-Ainda não existem: anotação clínica do médico (RF09, Sprint 6), gráfico
-diário/mensal (só semanal existe), limites de hipo/hiper configuráveis por
-paciente (hoje são globais no código), tela de perfil real (`/userConfig`
-ainda é placeholder), exportação de relatório em PDF (RF08).
+**MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
+`specs/09-sprints.md`). Ainda não existem, deliberadamente fora do corte
+inicial: gráfico diário/mensal (só semanal existe), limites de hipo/hiper
+configuráveis por paciente (hoje são globais no código), tela de perfil real
+(`/userConfig` ainda é placeholder), exportação de relatório em PDF (RF08),
+feedbacks motivacionais (RF12), login social Google.
 
 ## Dois perfis de usuário — regras de negócio
 

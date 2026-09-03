@@ -208,21 +208,86 @@ reais dele; tentar abrir um paciente **não vinculado** (id inventado) dá
 
 ---
 
-## Sprint 6 — Anotações clínicas e fechamento pra homologação
+## Sprint 6 — Anotações clínicas e fechamento pra homologação ✅ concluído
 **Objetivo:** médico registra uma observação sobre o paciente; sistema está
 estável o bastante pra chamar os primeiros participantes reais.
 
-| Prioridade | Item | Origem |
-|---|---|---|
-| P0 | Anotação clínica (criar + listar, vinculada ao `patient_doctor_link`) | roadmap bloco 6 (RF09) |
-| P0 | Histórico do paciente somente leitura pro médico, se ficou pendente do Sprint 5 | roadmap bloco 6 |
-| P1 | Checklist LGPD rápido (nada de dado sensível logado em texto claro, etc.) | roadmap bloco 8 (RNF03) |
-| P1 | Checklist de acessibilidade básica (contraste, tamanho de toque, textos) | roadmap bloco 8 (RNF05) |
-| P1 | Rodar os dois fluxos completos do zero (paciente e médico) caçando bugs | — |
+| Prioridade | Item | Origem | Status |
+|---|---|---|---|
+| P0 | Anotação clínica (criar + listar, vinculada ao `patient_doctor_link`) | roadmap bloco 6 (RF09) | ✅ |
+| P0 | Histórico do paciente somente leitura pro médico, se ficou pendente do Sprint 5 | roadmap bloco 6 | ✅ (já tinha ficado pronto no Sprint 5) |
+| P1 | Checklist LGPD rápido (nada de dado sensível logado em texto claro, etc.) | roadmap bloco 8 (RNF03) | ✅ |
+| P1 | Checklist de acessibilidade básica (contraste, tamanho de toque, textos) | roadmap bloco 8 (RNF05) | ✅ |
+| P1 | Rodar os dois fluxos completos do zero (paciente e médico) caçando bugs | — | ✅ |
 
-**Definição de pronto:** fluxo completo — cadastro → vínculo → registro →
+**Decisão tomada com o Glauber em 2026-09-03**: anotação clínica é visível só
+para o médico que a escreveu, não para o paciente — registrado em
+`02-requisitos-funcionais.md`.
+
+### Checklist LGPD (RNF03) — achados
+
+- Sem `console.log`/`console.error` em nenhum arquivo de `src/` — conferido
+  por busca no código inteiro.
+- `.env` está no `.gitignore`; só `.env.example` é versionado, e não contém
+  segredo real (placeholder pro `AUTH_SECRET`, credenciais padrão de
+  Postgres local).
+- `authorize` do Auth.js (`src/lib/auth/config.ts`) retorna só
+  `id`/`name`/`email`/`role` pro NextAuth — `passwordHash` nunca sai da
+  função, nunca chega no JWT/sessão.
+- `registerUser`/`authenticate` (`src/lib/auth/actions.ts`) nunca retornam
+  objeto de usuário pro client, só `string | undefined` — sem risco de
+  vazar `passwordHash` na resposta de uma server action.
+- Toda leitura de dado clínico por médico (glicose, refeição, HbA1c,
+  anotação) passa por uma checagem de vínculo `ACTIVE` antes de tocar no
+  banco — testado com tentativa de acesso direto (id de paciente não
+  vinculado → 404; troca de sessão pra tentar chamar a server action de
+  anotação como paciente → rejeitado com "Não autorizado.", nada é criado).
+- Nenhum achado bloqueante. Não avaliado ainda (fora do MVP/homologação):
+  criptografia em repouso a nível de coluna (hoje depende só da criptografia
+  do disco/Postgres), política de retenção de dados.
+
+### Checklist de acessibilidade (RNF05) — achados
+
+- Todas as mensagens de erro de formulário usam `role="alert"` — paridade
+  entre os componentes novos (Sprint 4/5/6) e os antigos (Sprint 1/2).
+- Indicadores de risco/alerta (badges de hipo/hiperglicemia) sempre vêm com
+  **texto**, nunca só cor — não depende de percepção de cor pra entender o
+  alerta.
+- Labels (`<Label htmlFor>`) associados a todo campo de formulário novo.
+- **Achado, não bloqueante**: o `Button` padrão do shadcn (`size="default"`)
+  tem `h-9` (36px) de altura — abaixo da recomendação de 44px de alvo de
+  toque (WCAG 2.5.5, nível AAA, mas relevante pro público-alvo do RNF05:
+  idosos/baixo letramento digital). É um padrão herdado desde o Sprint 1
+  (botões de Login/Cadastro já usavam esse tamanho) — mudar agora é uma
+  decisão de design system que afeta toda a base já aprovada visualmente,
+  não só o Sprint 6. Registrado como item de backlog, não corrigido sem
+  validar com o Glauber antes.
+
+### Fluxo completo do zero — achados
+
+Rodado com contas criadas via **cadastro real** (não seed direto no banco,
+diferente dos testes de sprints anteriores): paciente e médico se
+cadastram → médico gera código → paciente vincula → glicemia registrada do
+paciente aparece no indicador de risco do médico → médico abre o histórico
+do paciente e salva uma anotação clínica. Nenhum bug encontrado — é a
+primeira vez que as features dos Sprints 1–6 rodam encadeadas na mesma
+sessão, e não só isoladas com dados semeados a cada sprint.
+
+**Definição de pronto:** ✅ fluxo completo — cadastro → vínculo → registro →
 visualização → anotação médica — funciona sem travar. Dá pra convidar os
 primeiros participantes da amostra (até 20, conforme `specs/01`).
+
+---
+
+## MVP pronto para homologação
+
+RF01–RF07, RF09, RF10 e RF11 (todos os itens da "Definição de pronto pra
+homologação" no topo deste arquivo, com RF04 parcial — só gráfico semanal,
+o que já é o padrão do MVP definido lá) estão implementados e testados
+ponta a ponta. 6 sprints, como estimado. Gaps conhecidos e deliberados pra
+depois da homologação: RF08 (PDF), RF12 (motivacional), Google OAuth,
+limites de hipo/hiper configuráveis por paciente, tela de perfil real,
+tamanho de toque dos botões (ver checklist de acessibilidade acima).
 
 ---
 
@@ -238,10 +303,14 @@ paralelo se sobrar tempo:
 - Refino visual do Header/Navbar (hoje só os ícones foram trocados pra
   lucide-react — o layout/cores ainda são os antigos, pré-specs)
 - Tela de perfil completa (hoje ainda é placeholder)
+- Tamanho de toque dos botões (36px hoje, recomendação é 44px) — ver
+  checklist de acessibilidade do Sprint 6
+- Limites de hipo/hiperglicemia configuráveis por paciente (hoje são
+  globais em `src/lib/patient/glucose.ts`)
 
 ## Resumo
 
-6 sprints de 1 semana ≈ **6 semanas de calendário** até "pronto pra
-homologação", assumindo 5-10h/semana sem imprevistos grandes. É uma
-estimativa, não uma promessa — recalibrar depois do Sprint 2 com a
-velocidade real observada.
+Os 6 sprints planejados aqui estão **concluídos**. O ritmo real não seguiu o
+calendário de 1 semana por sprint estimado no início — coube tudo numa única
+sessão de trabalho contínua em 2026-09-03. MVP cumpre a definição de pronto
+pra homologação — ver "MVP pronto para homologação" acima.

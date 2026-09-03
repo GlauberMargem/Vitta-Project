@@ -6,7 +6,9 @@ import { db } from "@/lib/db/client";
 import { GlicemiaChart } from "@/components/patient/GlicemiaChart";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
+import { NovaAnotacaoForm } from "@/components/doctor/NovaAnotacaoForm";
 import { buildHistory } from "@/lib/patient/history";
+import { formatDateTime } from "@/lib/patient/format";
 import { buildWeeklyGlucoseSeries, estimateHbA1c } from "@/lib/patient/glucose";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
@@ -38,23 +40,28 @@ export default async function PatientDetailPage({
   const patientName = link.patient.user.name;
   const ninetyDaysAgo = new Date(Date.now() - NINETY_DAYS_MS);
 
-  const [glucoseRecords, meals, glucoseRecords90d] = await Promise.all([
-    db.glucoseRecord.findMany({
-      where: { patientId },
-      orderBy: { measuredAt: "desc" },
-      take: 10,
-    }),
-    db.meal.findMany({
-      where: { patientId },
-      orderBy: { eatenAt: "desc" },
-      take: 10,
-    }),
-    db.glucoseRecord.findMany({
-      where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
-      select: { valueMgdl: true, measuredAt: true },
-      orderBy: { measuredAt: "asc" },
-    }),
-  ]);
+  const [glucoseRecords, meals, glucoseRecords90d, clinicalNotes] =
+    await Promise.all([
+      db.glucoseRecord.findMany({
+        where: { patientId },
+        orderBy: { measuredAt: "desc" },
+        take: 10,
+      }),
+      db.meal.findMany({
+        where: { patientId },
+        orderBy: { eatenAt: "desc" },
+        take: 10,
+      }),
+      db.glucoseRecord.findMany({
+        where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
+        select: { valueMgdl: true, measuredAt: true },
+        orderBy: { measuredAt: "asc" },
+      }),
+      db.clinicalNote.findMany({
+        where: { linkId: link.id },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
   const history = buildHistory(glucoseRecords, meals);
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
@@ -99,9 +106,27 @@ export default async function PatientDetailPage({
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Anotações clínicas
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Ainda não implementado — ver specs/09-sprints.md, Sprint 6.
+        <p className="mb-3 text-xs text-muted-foreground">
+          Visíveis só para você — o paciente não tem acesso a essas notas.
         </p>
+        <NovaAnotacaoForm linkId={link.id} />
+        {clinicalNotes.length > 0 ? (
+          <ul className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
+            {clinicalNotes.map((clinicalNote) => (
+              <li key={clinicalNote.id} className="text-sm">
+                <p className="whitespace-pre-wrap text-foreground">
+                  {clinicalNote.note}
+                </p>
+                <time
+                  className="text-xs text-muted-foreground"
+                  dateTime={clinicalNote.createdAt.toISOString()}
+                >
+                  {formatDateTime(clinicalNote.createdAt)}
+                </time>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </section>
     </main>
   );

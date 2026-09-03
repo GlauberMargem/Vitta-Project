@@ -10,7 +10,7 @@
 | RF06 | Médico visualiza painel com lista de pacientes vinculados e históricos | Médico | Alta | ✅ concluído (Sprint 5) |
 | RF07 | Médico identifica pacientes em risco por indicadores visuais no painel | Médico | Alta | ✅ concluído (Sprint 5) |
 | RF08 | Relatório glicêmico exportável em PDF | Ambos | Média | ❌ não iniciado |
-| RF09 | Médico adiciona anotações clínicas ao histórico do paciente vinculado | Médico | Média | ❌ não iniciado |
+| RF09 | Médico adiciona anotações clínicas ao histórico do paciente vinculado | Médico | Média | ✅ concluído (Sprint 6) |
 | RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ✅ concluído (Sprint 4) |
 | RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ✅ concluído (Sprint 3) |
 | RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ❌ não iniciado |
@@ -26,5 +26,8 @@ Regras de negócio associadas (não repetir no código como comentário — só 
   2026-09-03, não é um valor clínico da SBD.
 - RF09: anotação clínica é uma entidade separada dos registros de glicose/refeição
   do paciente — não deve ser confundida ou misturada no mesmo histórico.
+- RF09: anotação clínica é visível **só para o médico que a escreveu** — decisão
+  confirmada com o Glauber em 2026-09-03 (não estava definido em spec anterior).
+  Paciente não tem acesso a essas notas em nenhuma tela.
 - RF10: vínculo é sempre iniciado pelo **paciente** informando um código gerado pelo
   médico (não o médico buscando/adicionando paciente livremente).
