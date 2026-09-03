@@ -20,7 +20,16 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       atualizado; `layout.js` migrado para `layout.tsx`)
 
 ## 1. Autenticação e cadastro (RF01)
-- [ ] Tela de login (migrar `/login` para TS, ligar ao NextAuth)
+- [x] Tela de login (`src/app/login/page.tsx` + `LoginForm.tsx`, server action
+      em `src/lib/auth/actions.ts`, ligada ao NextAuth). Testada ponta a ponta
+      simulando o POST real do formulário (login válido redireciona a
+      `/dashboard` com sessão criada). Reestruturou `src/app/(app)/` como
+      route group para isolar Header/Navbar das telas de autenticação —
+      `/login` e futuramente `/cadastro` ficam fora desse grupo.
+      Botão do Google renderizado desabilitado (OAuth não configurado ainda).
+      Link "Esqueci minha senha" é só texto por enquanto (sem fluxo por trás).
+      Link "Cadastre-se aqui" aponta para `/cadastro`, que ainda não existe
+      (próximo item abaixo).
 - [ ] Fluxo de cadastro em 2 etapas com seleção de perfil
 - [ ] Middleware/guard de rota: redireciona por `role` após login
 

@@ -45,20 +45,26 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 ## Estrutura atual do projeto
 
 ```
-src/app/                    rotas (App Router): /, /dashboard, /login, /userConfig
+src/app/layout.tsx           layout raiz (fontes, sem Header/Navbar)
+src/app/login/                tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
+src/app/(app)/                route group com Header/Navbar: /dashboard, /userConfig
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
-src/components/             Navbar, Header, e src/components/ui (shadcn)
-src/lib/utils.js            helpers (cn, etc.)
-src/lib/db/client.ts        singleton do Prisma Client (com driver adapter)
-src/lib/auth/config.ts      configuração do Auth.js (providers, callbacks)
-src/types/next-auth.d.ts    augmentation de tipos (Session/JWT com id/role)
-src/generated/prisma        client do Prisma gerado (não editar à mão, não commitado)
-prisma/schema.prisma        schema do banco — ver specs/04-modelo-de-dados.md
+src/components/               Navbar, Header, src/components/ui (shadcn), icons/
+src/lib/utils.js              helpers (cn, etc.)
+src/lib/db/client.ts          singleton do Prisma Client (com driver adapter)
+src/lib/auth/config.ts        configuração do Auth.js (providers, callbacks)
+src/lib/auth/actions.ts       server action de login (authenticate)
+src/types/next-auth.d.ts      augmentation de tipos (Session/JWT com id/role)
+src/generated/prisma          client do Prisma gerado (não editar à mão, não commitado)
+prisma/schema.prisma          schema do banco — ver specs/04-modelo-de-dados.md
 ```
 
-Ainda não existem: diferenciação de perfis paciente/médico nas rotas (middleware/
-guard), páginas de login/cadastro ligadas ao NextAuth, formulários de registro de
-glicose/refeição, gráficos, cálculo de HbA1c.
+Rotas que precisam de Header/Navbar (área logada) vão dentro de `src/app/(app)/`;
+login/cadastro ficam fora desse grupo (tela cheia, sem navegação do app).
+
+Ainda não existem: cadastro (`/cadastro`), diferenciação de perfis paciente/médico
+nas rotas (middleware/guard), formulários de registro de glicose/refeição,
+gráficos, cálculo de HbA1c.
 
 ## Dois perfis de usuário — regras de negócio
 
