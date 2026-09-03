@@ -302,11 +302,14 @@ paralelo se sobrar tempo:
 - Filtros de período no gráfico (mensal/trimestral)
 - Refino visual do Header/Navbar (hoje só os ícones foram trocados pra
   lucide-react — o layout/cores ainda são os antigos, pré-specs)
-- Tela de perfil completa (hoje ainda é placeholder)
 - Tamanho de toque dos botões (36px hoje, recomendação é 44px) — ver
   checklist de acessibilidade do Sprint 6
 - Limites de hipo/hiperglicemia configuráveis por paciente (hoje são
   globais em `src/lib/patient/glucose.ts`)
+
+✅ **Tela de perfil completa** — feita em 2026-09-03, depois do Sprint 6 (fora
+do plano original de sprints). Ver `07-roadmap.md`, bloco 4, e o desvio
+registrado lá (estrutura estendida pro médico, que nunca teve mockup).
 
 ## Resumo
 

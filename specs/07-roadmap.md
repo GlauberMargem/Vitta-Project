@@ -84,9 +84,16 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       de referência `<7%`, só aparece se houver ao menos um registro no
       período
 
-## 4. Perfil do paciente
-- [ ] Tela de perfil (dados pessoais / dados clínicos) migrada para TS e ligada
-      ao banco
+## 4. Perfil do usuário
+- [x] Tela de perfil (dados pessoais / dados clínicos) migrada para TS e ligada
+      ao banco — `src/app/(app)/userConfig/page.tsx`, 2 sub-telas com
+      paginação (`ProfileView.tsx`), dados pessoais (nome/email/senha) +
+      dados clínicos (paciente) ou profissionais (médico). Implementado
+      depois da homologação, backlog pós-Sprint 6 — ver `09-sprints.md`.
+      **Desvio**: o mockup original só cobria a tela de perfil do paciente
+      (a área do médico nunca foi prototipada); estendi a mesma estrutura
+      pro médico (dados pessoais + CRM/especialidade) por consistência, não
+      por estar em nenhuma spec visual.
 
 ## 5. Vínculo paciente-médico (RF10)
 - [x] Migration `patient_doctor_links` — já existe desde o bloco 0. Alterada

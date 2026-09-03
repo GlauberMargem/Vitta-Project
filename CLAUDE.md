@@ -53,11 +53,15 @@ src/app/(app)/                 route group com Header/Navbar: /dashboard, /userC
 src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico) OU painel do
                                 médico (gerar convite, pacientes vinculados com indicador de risco), por role
 src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um paciente vinculado, pro médico
+src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
+                                dados clínicos (paciente) ou profissionais (médico)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar, Header, src/components/ui (shadcn), icons/
 src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts),
                                 VinculoMedicoCard, HbA1cCard, HistoricoList (reaproveitados no painel do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
+src/components/profile/        ProfileView (paginação), DadosPessoaisForm (+ troca de senha),
+                                DadosClinicosForm, DadosProfissionaisForm
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
@@ -70,6 +74,8 @@ src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativ
 src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a mesma)
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
+src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
+                                updatePatientClinicalData, updateDoctorProfessionalData
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
@@ -90,9 +96,8 @@ middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 **MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
 `specs/09-sprints.md`). Ainda não existem, deliberadamente fora do corte
 inicial: gráfico diário/mensal (só semanal existe), limites de hipo/hiper
-configuráveis por paciente (hoje são globais no código), tela de perfil real
-(`/userConfig` ainda é placeholder), exportação de relatório em PDF (RF08),
-feedbacks motivacionais (RF12), login social Google.
+configuráveis por paciente (hoje são globais no código), exportação de
+relatório em PDF (RF08), feedbacks motivacionais (RF12), login social Google.
 
 ## Dois perfis de usuário — regras de negócio
 

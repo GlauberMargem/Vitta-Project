@@ -130,6 +130,28 @@ Escolhido: **Recharts**, via os componentes de gráfico do shadcn/ui
   `Dialog`, `Select`).
 - Bundle bem menor que ECharts.
 
+## Sessão JWT não reflete edição de perfil até novo login
+
+`src/lib/auth/config.base.ts` usa `session: { strategy: "jwt" }`. O token é
+populado com `name`/`email` só no momento do login (quando o parâmetro
+`user` chega no callback `jwt`); em requisições seguintes o callback reusa o
+que já está no token, sem reconsultar o banco. Consequência prática: depois
+que o usuário edita nome/email em `/userConfig`
+(`src/lib/profile/actions.ts`), o dado já está correto no banco e na própria
+tela de perfil (que lê direto do Prisma), mas o nome exibido no cabeçalho/
+saudação (que vem de `session.user.name`) só atualiza depois de sair e
+entrar de novo. Não implementei correção (exigiria reconsultar o banco a
+cada request, ou adicionar `SessionProvider` + `update()` no client, que o
+app não usa hoje) — é uma limitação conhecida, não um bug a caçar.
+
+## Alteração de senha exige a senha atual
+
+`changePassword` (`src/lib/profile/actions.ts`) exige a senha atual antes de
+gravar a nova (`bcrypt.compare` contra o hash salvo) — mesmo com sessão
+autenticada. Decisão de segurança: sem essa checagem, qualquer sessão
+comprometida (ex.: dispositivo destravado) poderia trocar a senha e travar o
+dono da conta fora.
+
 ## Migração de JS → TS
 
 O bootstrap atual (`src/app/*.js`, `src/components/**/*.jsx`) não é TypeScript.
