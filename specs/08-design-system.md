@@ -21,6 +21,28 @@ aqui, sem inventar variações.
 hipo/hiperglicemia (RF05). Ao implementar RF05, perguntar se deve reutilizar
 `#FFB5A7` (Atenção/ação) ou se é necessária uma cor própria.
 
+### Implementado em `src/app/globals.css` (tokens shadcn)
+
+| Token shadcn | Cor da paleta | Observação |
+|---|---|---|
+| `--background` | `#F6F5FA` | |
+| `--foreground` | `#3D3D3D` | |
+| `--card` / `--popover` | `#FFFFFF` | |
+| `--primary` | `#A7C7E7` (azul serenity) | botões de ação principal (Login, Próxima etapa) |
+| `--secondary` | `#B8E4C9` (verde-menta) | botão de finalização positiva (Finalizar cadastro) |
+| `--accent` | `#FFD6A5` (pêssego pastel) | destaques secundários |
+| `--muted-foreground` | `#6B6B6B` | texto secundário |
+| `--ring` | `#A7C7E7` | anel de foco reaproveitando a cor primária |
+| `--radius` | `1rem` (era `0.625rem`) | para bater com os cantos bem arredondados do protótipo |
+
+⚠️ **Desvio deliberado do protótipo**: `--primary-foreground` e
+`--secondary-foreground` foram definidos como `#3D3D3D` (texto escuro), não
+branco como aparece nas imagens. Motivo: texto branco sobre `#A7C7E7` e
+`#B8E4C9` (cores pasteis, claras) não atinge contraste mínimo AA (WCAG), o que
+conflita com RNF05 (acessibilidade para idosos/baixo letramento digital). Se
+Glauber preferir manter o branco por identidade visual mesmo assim, é só
+avisar que eu reverto.
+
 ## Tipografia (confirmado)
 
 - **Logo / títulos**: Poppins (SemiBold para destaque).

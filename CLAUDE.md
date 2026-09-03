@@ -34,8 +34,10 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
   `vitta_dev` já criado (serviço Windows `postgresql-x64-17`). ORM: **Prisma 7**,
   já configurado com o driver adapter `@prisma/adapter-pg` (ver
   `specs/05-arquitetura.md`).
-- **NextAuth/OAuth** para autenticação. Ainda não configurado — falta Client
-  ID/Secret do Google.
+- **NextAuth/OAuth** para autenticação. Configurado com **Auth.js v5**
+  (`next-auth@5.0.0-beta.32`, config em `src/lib/auth/config.ts`) — por ora só
+  provider de credenciais (email/senha com bcrypt), sessão JWT. Login social
+  Google ainda não habilitado — falta Client ID/Secret.
 - Componentes de UI seguem o padrão shadcn/ui (`components.json`, `src/components/ui`,
   `class-variance-authority`, `tailwind-merge`, `lucide-react` para ícones).
 - Hospedagem alvo: Vercel.
@@ -43,16 +45,19 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 ## Estrutura atual do projeto
 
 ```
-src/app/            rotas (App Router): /, /dashboard, /login, /userConfig
-src/components/      Navbar, Header, e src/components/ui (shadcn)
-src/lib/utils.js     helpers (cn, etc.)
-src/lib/db/client.ts singleton do Prisma Client (com driver adapter)
-src/generated/prisma client do Prisma gerado (não editar à mão, não commitado)
-prisma/schema.prisma  schema do banco — ver specs/04-modelo-de-dados.md
+src/app/                    rotas (App Router): /, /dashboard, /login, /userConfig
+src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
+src/components/             Navbar, Header, e src/components/ui (shadcn)
+src/lib/utils.js            helpers (cn, etc.)
+src/lib/db/client.ts        singleton do Prisma Client (com driver adapter)
+src/lib/auth/config.ts      configuração do Auth.js (providers, callbacks)
+src/types/next-auth.d.ts    augmentation de tipos (Session/JWT com id/role)
+src/generated/prisma        client do Prisma gerado (não editar à mão, não commitado)
+prisma/schema.prisma        schema do banco — ver specs/04-modelo-de-dados.md
 ```
 
-Ainda não existem: autenticação real (NextAuth), diferenciação de perfis
-paciente/médico nas rotas, API Routes, formulários de registro de
+Ainda não existem: diferenciação de perfis paciente/médico nas rotas (middleware/
+guard), páginas de login/cadastro ligadas ao NextAuth, formulários de registro de
 glicose/refeição, gráficos, cálculo de HbA1c.
 
 ## Dois perfis de usuário — regras de negócio

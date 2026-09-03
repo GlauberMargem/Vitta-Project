@@ -41,6 +41,17 @@ pacote `pg`). Ver `src/lib/db/client.ts` para o singleton configurado. Não
 remover o adapter nem tentar instanciar `new PrismaClient()` sem argumentos —
 isso não compila.
 
+## Auth.js v5 — callbacks precisam de tipos explícitos
+
+`declare module "next-auth/jwt"` (em `src/types/next-auth.d.ts`) adiciona `id` e
+`role` ao tipo `JWT`, mas a inferência automática de parâmetros do callback
+`session` não pega esse augmentation (o tipo do parâmetro vem de uma
+interseção complexa em `@auth/core`, e a inferência contextual falha nesse
+caso). Por isso os callbacks em `src/lib/auth/config.ts` anotam os parâmetros
+explicitamente (`{ session, token }: { session: Session; token: JWT }`) em vez
+de confiar na inferência. Se remover essas anotações, `token.id`/`token.role`
+voltam a ser `unknown` e o build quebra.
+
 ## Migração de JS → TS
 
 O bootstrap atual (`src/app/*.js`, `src/components/**/*.jsx`) não é TypeScript.

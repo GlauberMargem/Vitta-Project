@@ -11,10 +11,13 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       `vitta_dev` criado) + `.env`
 - [x] Criar schema/migrations iniciais (todas as tabelas de
       `04-modelo-de-dados.md`) — migração `20260902225148_init` aplicada
-- [ ] Configurar NextAuth (credenciais + Google OAuth) — precisa de Client
-      ID/Secret do Google Cloud Console, não posso gerar isso
-- [ ] Configurar tokens de cor/tipografia do Tailwind conforme
-      `08-design-system.md` (depende de resolver as decisões pendentes de fonte)
+- [x] Configurar NextAuth — Auth.js v5 (`next-auth@5.0.0-beta.32`), provider de
+      credenciais com bcrypt, sessão JWT com `id`/`role` customizados. Testado
+      ponta a ponta (login válido, senha errada rejeitada). Google OAuth fica
+      para quando houver Client ID/Secret
+- [x] Configurar tokens de cor/tipografia do Tailwind conforme
+      `08-design-system.md` (Poppins + Inter confirmados; `globals.css`
+      atualizado; `layout.js` migrado para `layout.tsx`)
 
 ## 1. Autenticação e cadastro (RF01)
 - [ ] Tela de login (migrar `/login` para TS, ligar ao NextAuth)
