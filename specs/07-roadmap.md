@@ -89,9 +89,16 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       ao banco
 
 ## 5. Vínculo paciente-médico (RF10)
-- [x] Migration `patient_doctor_links` — já existe desde o bloco 0
-- [ ] Médico gera código de convite
-- [ ] Paciente consome código de convite
+- [x] Migration `patient_doctor_links` — já existe desde o bloco 0. Alterada
+      no Sprint 4 (`patient_id` nullable, `invite_code` unique) — ver
+      `04-modelo-de-dados.md`
+- [x] Médico gera código de convite — `generateInviteCode` em
+      `src/lib/doctor/actions.ts`, código de 8 caracteres sem 0/O/1/I/L
+- [x] Paciente consome código de convite — `consumeInviteCode` em
+      `src/lib/patient/actions.ts`; regra de um vínculo `active` por vez
+      (paciente precisa revogar antes de trocar de médico)
+- [x] Paciente vê a quem está vinculado / pode revogar — `revokeLink`,
+      `VinculoMedicoCard.tsx`
 
 ## 6. Painel do médico (RF06, RF07, RF09)
 - [x] Migration `clinical_notes` — já existe desde o bloco 0

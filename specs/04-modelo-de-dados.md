@@ -122,11 +122,25 @@ Vínculo opcional paciente↔médico — RF10.
 | Campo | Tipo | Observação |
 |---|---|---|
 | id | uuid PK | |
-| patient_id | uuid FK → patient_profiles.user_id | |
+| patient_id | uuid FK → patient_profiles.user_id, **nullable** | nulo até o código ser consumido |
 | doctor_id | uuid FK → doctor_profiles.user_id | |
-| invite_code | text | gerado pelo médico, consumido pelo paciente |
+| invite_code | text, unique | gerado pelo médico, consumido pelo paciente |
 | status | enum('pending','active','revoked') | |
 | created_at | timestamptz | |
+
+**Desvio do modelo original** (2026-09-03, Sprint 4): `patient_id` mudou de
+obrigatório para nullable. Motivo: o fluxo real (RF10, `06-fluxos-e-telas.md`)
+é o médico gerar um código **sem saber ainda qual paciente vai usá-lo** — a
+linha nasce com `status = 'pending'` e `patient_id = null`; quando um
+paciente consome o código, a mesma linha ganha `patient_id` e vira `status =
+'active'`. Um `patient_id` obrigatório desde a criação não permitiria
+representar o código pendente. `invite_code` ganhou `unique` pra a busca do
+paciente por código ser direta e sem ambiguidade.
+
+Regra: um paciente só pode ter **um vínculo `active` por vez** — se já tiver
+um, precisa revogar antes de consumir outro código (decisão de produto, não
+está em nenhuma spec anterior — o app é descrito como "vínculo a **um**
+médico", não vários simultâneos).
 
 Regra: toda leitura de dados de paciente pelo médico (RF06/RF07/RF09) deve passar
 por `WHERE status = 'active'` neste vínculo — nunca acesso direto por `patient_id`.

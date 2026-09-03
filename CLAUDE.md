@@ -53,16 +53,19 @@ src/app/(app)/                 route group com Header/Navbar: /dashboard, /userC
 src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar, Header, src/components/ui (shadcn), icons/
-src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts)
+src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts),
+                                VinculoMedicoCard (consumir código / revogar vínculo)
+src/components/doctor/         GerarConviteCard (gerar código de convite)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
 src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app
 src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro)
-src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal
+src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal, consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativa de HbA1c (fórmula ADAG),
                                 agregação semanal — fontes em specs/04-modelo-de-dados.md
+src/lib/doctor/actions.ts      server action: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L)
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
@@ -80,11 +83,12 @@ acesso externo/webhook).
 há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
-Ainda não existem: diferenciação de perfis paciente/médico nas rotas (só
-existe uma área logada `(app)` comum até agora — vem no bloco 6, painel do
-médico), gráfico diário/mensal (só semanal existe), limites de hipo/hiper
-configuráveis por paciente (hoje são globais no código), vínculo
-paciente-médico, painel do médico.
+Ainda não existem: painel do médico de verdade (bloco 6 — hoje o médico só
+tem, no mesmo `/dashboard`, o card de gerar convite e uma lista simples de
+pacientes vinculados, sem histórico/indicador de risco), gráfico
+diário/mensal (só semanal existe), limites de hipo/hiper configuráveis por
+paciente (hoje são globais no código), tela de perfil real (`/userConfig`
+ainda é placeholder).
 
 ## Dois perfis de usuário — regras de negócio
 

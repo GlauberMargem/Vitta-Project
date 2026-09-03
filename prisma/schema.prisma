@@ -112,14 +112,14 @@ model Meal {
 
 model PatientDoctorLink {
   id         String     @id @default(uuid()) @db.Uuid
-  patientId  String     @map("patient_id") @db.Uuid
+  patientId  String?    @map("patient_id") @db.Uuid
   doctorId   String     @map("doctor_id") @db.Uuid
-  inviteCode String     @map("invite_code")
+  inviteCode String     @unique @map("invite_code")
   status     LinkStatus @default(PENDING)
   createdAt  DateTime   @default(now()) @map("created_at")
 
-  patient PatientProfile @relation(fields: [patientId], references: [userId], onDelete: Cascade)
-  doctor  DoctorProfile  @relation(fields: [doctorId], references: [userId], onDelete: Cascade)
+  patient PatientProfile? @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  doctor  DoctorProfile   @relation(fields: [doctorId], references: [userId], onDelete: Cascade)
   notes   ClinicalNote[]
 
   @@index([doctorId, status])

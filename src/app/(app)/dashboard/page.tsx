@@ -3,6 +3,8 @@ import { db } from "@/lib/db/client";
 import { NovaGlicoseDialog } from "@/components/patient/NovaGlicoseDialog";
 import { NovaRefeicaoDialog } from "@/components/patient/NovaRefeicaoDialog";
 import { GlicemiaChart } from "@/components/patient/GlicemiaChart";
+import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
+import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
 import { contextLabel, formatDateTime } from "@/lib/patient/format";
 import {
   buildWeeklyGlucoseSeries,
@@ -31,12 +33,20 @@ export default async function DashboardPage() {
     return null;
   }
 
+  if (session.user.role === "DOCTOR") {
+    return (
+      <DoctorDashboard
+        doctorId={session.user.id}
+        name={session.user.name ?? "Médico"}
+      />
+    );
+  }
+
   if (session.user.role !== "PATIENT") {
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col gap-4 px-4 pb-28 pt-6">
         <p className="text-sm text-muted-foreground">
-          Painel do médico ainda não implementado (ver specs/07-roadmap.md,
-          bloco 6).
+          Perfil não reconhecido.
         </p>
       </main>
     );
@@ -45,7 +55,7 @@ export default async function DashboardPage() {
   const patientId = session.user.id;
   const ninetyDaysAgo = new Date(Date.now() - NINETY_DAYS_MS);
 
-  const [glucoseRecords, meals, mealNameRows, glucoseRecords90d] =
+  const [glucoseRecords, meals, mealNameRows, glucoseRecords90d, activeLinkRow] =
     await Promise.all([
       db.glucoseRecord.findMany({
         where: { patientId },
@@ -67,6 +77,10 @@ export default async function DashboardPage() {
         where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
         select: { valueMgdl: true, measuredAt: true },
         orderBy: { measuredAt: "asc" },
+      }),
+      db.patientDoctorLink.findFirst({
+        where: { patientId, status: "ACTIVE" },
+        include: { doctor: { include: { user: { select: { name: true } } } } },
       }),
     ]);
 
@@ -97,6 +111,10 @@ export default async function DashboardPage() {
 
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
   const hba1c = estimateHbA1c(glucoseRecords90d);
+
+  const activeLink = activeLinkRow
+    ? { id: activeLinkRow.id, doctorName: activeLinkRow.doctor.user.name }
+    : null;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
@@ -175,6 +193,81 @@ export default async function DashboardPage() {
                     </span>
                   ) : null}
                 </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <VinculoMedicoCard activeLink={activeLink} />
+    </main>
+  );
+}
+
+async function DoctorDashboard({
+  doctorId,
+  name,
+}: {
+  doctorId: string;
+  name: string;
+}) {
+  const [pendingCodes, activeLinks] = await Promise.all([
+    db.patientDoctorLink.findMany({
+      where: { doctorId, status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.patientDoctorLink.findMany({
+      where: { doctorId, status: "ACTIVE" },
+      include: { patient: { include: { user: { select: { name: true } } } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  return (
+    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
+      <div>
+        <p className="text-sm text-muted-foreground">Bom dia!</p>
+        <h1 className="text-xl font-semibold text-foreground">{name}</h1>
+      </div>
+
+      <GerarConviteCard />
+
+      {pendingCodes.length > 0 ? (
+        <section className="rounded-3xl bg-card p-5 shadow-sm">
+          <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
+            Códigos pendentes
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {pendingCodes.map((link) => (
+              <li
+                key={link.id}
+                className="rounded-2xl bg-muted px-4 py-2 text-center font-mono text-sm tracking-widest text-foreground"
+              >
+                {link.inviteCode}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className="rounded-3xl bg-card p-5 shadow-sm">
+        <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
+          Pacientes vinculados
+        </h2>
+        {activeLinks.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhum paciente vinculado ainda. Painel completo (histórico,
+            indicadores de risco) vem no próximo sprint — ver
+            specs/07-roadmap.md, bloco 6.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {activeLinks.map((link) => (
+              <li
+                key={link.id}
+                className="rounded-2xl px-3 py-2 text-sm text-foreground"
+              >
+                {link.patient?.user.name ?? "Paciente"}
               </li>
             ))}
           </ul>

@@ -11,7 +11,7 @@
 | RF07 | Médico identifica pacientes em risco por indicadores visuais no painel | Médico | Alta | ❌ não iniciado |
 | RF08 | Relatório glicêmico exportável em PDF | Ambos | Média | ❌ não iniciado |
 | RF09 | Médico adiciona anotações clínicas ao histórico do paciente vinculado | Médico | Média | ❌ não iniciado |
-| RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ❌ não iniciado |
+| RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ✅ concluído (Sprint 4) |
 | RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ✅ concluído (Sprint 3) |
 | RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ❌ não iniciado |
 

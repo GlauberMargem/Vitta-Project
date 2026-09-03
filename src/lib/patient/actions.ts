@@ -89,3 +89,58 @@ export async function createMeal(
   revalidatePath("/dashboard");
   return null;
 }
+
+export async function consumeInviteCode(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const patientId = await requirePatientId();
+
+  const rawCode = formData.get("code");
+  if (typeof rawCode !== "string" || !rawCode.trim()) {
+    return "Informe o código de convite.";
+  }
+  const inviteCode = rawCode.trim().toUpperCase();
+
+  const existingActiveLink = await db.patientDoctorLink.findFirst({
+    where: { patientId, status: "ACTIVE" },
+  });
+  if (existingActiveLink) {
+    return "Você já está vinculado a um médico. Revogue o vínculo atual antes de usar outro código.";
+  }
+
+  const link = await db.patientDoctorLink.findUnique({
+    where: { inviteCode },
+  });
+  if (!link || link.status !== "PENDING" || link.patientId) {
+    return "Código inválido ou já utilizado.";
+  }
+
+  await db.patientDoctorLink.update({
+    where: { id: link.id },
+    data: { patientId, status: "ACTIVE" },
+  });
+
+  revalidatePath("/dashboard");
+  return null;
+}
+
+export async function revokeLink(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const patientId = await requirePatientId();
+
+  const linkId = formData.get("linkId");
+  if (typeof linkId !== "string" || !linkId) {
+    return "Vínculo inválido.";
+  }
+
+  await db.patientDoctorLink.updateMany({
+    where: { id: linkId, patientId, status: "ACTIVE" },
+    data: { status: "REVOKED" },
+  });
+
+  revalidatePath("/dashboard");
+  return null;
+}

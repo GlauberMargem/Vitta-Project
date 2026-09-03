@@ -133,20 +133,40 @@ teste pra eliminar dúvida sobre build obsoleto.
 
 ---
 
-## Sprint 4 — Vínculo paciente-médico
+## Sprint 4 — Vínculo paciente-médico ✅ concluído
 **Objetivo:** um médico gera um código, um paciente usa esse código pra se
 vincular a ele.
 
-| Prioridade | Item | Origem |
-|---|---|---|
-| P0 | Médico gera código de convite | roadmap bloco 5 (RF10) |
-| P0 | Paciente consome código de convite | roadmap bloco 5 (RF10) |
-| P1 | Paciente vê a quem está vinculado / pode revogar | — |
+| Prioridade | Item | Origem | Status |
+|---|---|---|---|
+| P0 | Médico gera código de convite | roadmap bloco 5 (RF10) | ✅ |
+| P0 | Paciente consome código de convite | roadmap bloco 5 (RF10) | ✅ |
+| P1 | Paciente vê a quem está vinculado / pode revogar | — | ✅ |
 
-**Riscos:** depende de já existir pelo menos uma conta médico (Sprint 1) —
-sem risco técnico, só ordem.
-**Definição de pronto:** vínculo aparece em `patient_doctor_links` com
-`status = active`, visível pelos dois lados.
+**Mudança de schema**: `patient_doctor_links.patient_id` virou nullable e
+`invite_code` ganhou `unique` — o fluxo real precisa do médico gerar um
+código antes de saber qual paciente vai consumi-lo. Detalhes e justificativa
+em `04-modelo-de-dados.md`. Migração `20260903034632_...` escrita à mão
+porque `prisma migrate dev` recusa rodar em terminal não-interativo nesta
+versão — usei `prisma migrate deploy` pra aplicar.
+
+**Onde ficou a UI**: dentro do próprio `/dashboard` (paciente: card "Vínculo
+com médico"; médico: card "Vincular paciente" + lista de pacientes
+vinculados), não em `/userConfig` — o mockup não define uma tela específica
+pra isso (`06-fluxos-e-telas.md` só diz "tela/ação" genérica), e a tela de
+perfil real (bloco 4 do roadmap) ainda não foi construída. A listagem de
+pacientes vinculados do médico aqui é só uma lista simples — o painel
+completo com indicador de risco é o Sprint 5.
+
+**Regra de produto**: um paciente só pode ter um vínculo `active` por vez
+(precisa revogar antes de usar outro código) — não estava em nenhuma spec
+anterior, decisão registrada em `04-modelo-de-dados.md`.
+
+**Definição de pronto:** ✅ testado ponta a ponta com médico e paciente de
+teste reais — médico gera código, paciente consome (rejeita código
+inexistente com mensagem clara), vínculo aparece nos dois dashboards
+(`status = active`), paciente revoga e ambos os lados voltam ao estado sem
+vínculo. Testado em modo produção.
 
 ---
 
