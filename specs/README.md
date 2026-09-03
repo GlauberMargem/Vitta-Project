@@ -15,6 +15,9 @@ Ordem de leitura sugerida:
 7. `07-roadmap.md` — backlog do MVP, checklist do que falta implementar.
 8. `08-design-system.md` — cores, tipografia e textos exatos do template de
    referência (fonte de verdade visual, não inventar variações).
+9. `09-sprints.md` — o roadmap organizado em sprints semanais, com o objetivo
+   de chegar rápido a um MVP pronto pra homologação (testes com usuários
+   reais).
 
 Regras:
 
