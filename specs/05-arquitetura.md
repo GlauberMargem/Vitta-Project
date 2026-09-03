@@ -52,6 +52,22 @@ explicitamente (`{ session, token }: { session: Session; token: JWT }`) em vez
 de confiar na inferência. Se remover essas anotações, `token.id`/`token.role`
 voltam a ser `unknown` e o build quebra.
 
+## Next.js 16 — middleware chama-se `proxy.ts`
+
+Ao implementar o item "Middleware/guard de rota" do roadmap (bloco 1), usar
+`proxy.ts` na raiz do projeto (`export function proxy()` +
+`export const proxyConfig`), **não** `middleware.ts`/`middleware()`/`config` —
+esse é o nome antigo (Next 14/15). O Next 16.1.1, fixado neste projeto, já usa
+a convenção nova.
+
+## Ícones: lucide-react, não Material Symbols
+
+`Navbar`/`Header` usavam a fonte de ícones "Material Symbols Outlined" do
+Google (via `<link>` manual no `layout.tsx`), resquício do bootstrap anterior
+às specs. Corrigido: ícones trocados para `lucide-react` (já mandatado pelo
+`CLAUDE.md`) e o `<link>` manual removido — carregar fonte via `<link>` em vez
+de `next/font` bloqueia renderização e não é otimizado.
+
 ## Migração de JS → TS
 
 O bootstrap atual (`src/app/*.js`, `src/components/**/*.jsx`) não é TypeScript.
