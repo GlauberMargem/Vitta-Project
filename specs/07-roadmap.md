@@ -53,10 +53,22 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
 ## 2. Registro de dados do paciente (RF02, RF03)
 - [x] Migrations `glucose_records`, `meals` — já existem desde a migração
       `20260902225148_init` (bloco 0), o schema completo foi criado de uma vez
-- [ ] API Route: criar/listar `glucose_records`
-- [ ] API Route: criar/listar `meals`
-- [ ] Modal "Nova Glicose" + "Nova Refeição" na home do paciente
-- [ ] Home do paciente exibindo histórico recente
+- [x] Criar/listar `glucose_records` — via server action (`createGlucoseRecord`
+      em `src/lib/patient/actions.ts`), não API Route. Seguindo o
+      `data-patterns.md` da skill `next-best-practices`: Server Component lê
+      direto do Prisma (sem API própria), Server Action pra mutação — API
+      Route só faz sentido pra acesso externo/webhook, que não é o caso aqui.
+- [x] Criar/listar `meals` — mesmo padrão (`createMeal`)
+- [x] Modal "Nova Glicose" + "Nova Refeição" na home do paciente
+      (`src/components/patient/NovaGlicoseDialog.tsx` e
+      `NovaRefeicaoDialog.tsx`, shadcn Dialog). RF02 exige campo de contexto
+      (jejum/pós-prandial/etc.) que o mockup original não mostrava — mantive
+      o requisito formal, não o mockup incompleto. Campo "Buscar refeição já
+      registrada" do mockup virou um `<datalist>` sugerindo nomes de
+      refeições já usadas pelo paciente (não existe uma tabela de "refeições
+      salvas" separada no schema).
+- [x] Home do paciente exibindo histórico recente (últimos 10 registros de
+      glicose + refeição, misturados por data)
 
 ## 3. Visualização (RF04, RF05, RF11)
 - [ ] Componente de gráfico de tendência (semanal)

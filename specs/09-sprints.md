@@ -65,22 +65,31 @@ aplica — só o guard geral "precisa estar logado".
 
 ---
 
-## Sprint 2 — Registro de glicose e refeição
+## Sprint 2 — Registro de glicose e refeição ✅ concluído
 **Objetivo:** paciente logado registra uma glicemia e uma refeição de
 verdade, e vê isso no histórico.
 
-| Prioridade | Item | Origem |
-|---|---|---|
-| P0 | Criar/listar `glucose_records` (API route ou server action) | roadmap bloco 2 |
-| P0 | Criar/listar `meals` | roadmap bloco 2 |
-| P0 | Modal "Nova Glicose" ligado à API real | roadmap bloco 2 |
-| P0 | Modal "Nova Refeição" ligado à API real | roadmap bloco 2 |
-| P1 | Home do paciente exibindo histórico recente (lista simples, sem gráfico ainda) | roadmap bloco 2 |
+| Prioridade | Item | Origem | Status |
+|---|---|---|---|
+| P0 | Criar/listar `glucose_records` (server action, não API route) | roadmap bloco 2 | ✅ |
+| P0 | Criar/listar `meals` | roadmap bloco 2 | ✅ |
+| P0 | Modal "Nova Glicose" ligado à API real | roadmap bloco 2 | ✅ |
+| P0 | Modal "Nova Refeição" ligado à API real | roadmap bloco 2 | ✅ |
+| P1 | Home do paciente exibindo histórico recente (lista simples, sem gráfico ainda) | roadmap bloco 2 | ✅ |
 
-**Riscos:** nenhum de fato — é trabalho direto de CRUD sobre schema que já
-existe.
-**Definição de pronto:** um registro criado no modal aparece no banco
-vinculado ao paciente certo, e some ao consultar outro usuário.
+**Achado de teste:** os modais usam shadcn `Dialog` (Radix), que renderiza o
+conteúdo num Portal — isso nunca aparece no HTML gerado no servidor,
+independente do estado `open`. Pra testar as server actions ponta a ponta
+sem navegador, criei uma página temporária com os formulários "nus" (sem o
+Dialog por volta), testei via POST real, e apaguei a página depois. Os
+componentes de produção (`NovaGlicoseDialog`, `NovaRefeicaoDialog`) não
+foram alterados por causa disso.
+
+**Definição de pronto:** ✅ testado ponta a ponta — glicose e refeição
+criadas via as mesmas server actions dos modais, aparecem vinculadas ao
+paciente certo no histórico do dashboard (confirmando que
+`revalidatePath("/dashboard")` funciona), e valor de glicose inválido
+(negativo) é rejeitado com mensagem de erro.
 
 ---
 

@@ -50,13 +50,17 @@ src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
 src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
 src/app/(app)/                 route group com Header/Navbar: /dashboard, /userConfig
+src/app/(app)/dashboard/       home real do paciente (Ações + histórico recente)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar, Header, src/components/ui (shadcn), icons/
+src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
 src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app
 src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro)
+src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal
+src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
@@ -65,14 +69,19 @@ prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.
 Rotas que precisam de Header/Navbar (área logada) vão dentro de `src/app/(app)/`;
 login/cadastro ficam fora desse grupo (tela cheia, sem navegação do app).
 
+Mutação de dados do paciente é sempre via server action (`src/lib/patient/actions.ts`),
+lendo direto do Prisma em Server Components — sem API Routes próprias, seguindo
+`data-patterns.md` da skill `next-best-practices` (API Route só se justifica pra
+acesso externo/webhook).
+
 ⚠️ `middleware.ts` só funciona testado em `npm run build && npm run start` —
 há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
 Ainda não existem: diferenciação de perfis paciente/médico nas rotas (só
 existe uma área logada `(app)` comum até agora — vem no bloco 6, painel do
-médico), formulários de registro de glicose/refeição, gráficos, cálculo de
-HbA1c.
+médico), gráficos, cálculo de HbA1c, alertas de hipo/hiperglicemia, vínculo
+paciente-médico, painel do médico.
 
 ## Dois perfis de usuário — regras de negócio
 
