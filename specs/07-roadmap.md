@@ -31,10 +31,24 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       `/login` e futuramente `/cadastro` ficam fora desse grupo.
       Botão do Google renderizado desabilitado (OAuth não configurado ainda).
       Link "Esqueci minha senha" é só texto por enquanto (sem fluxo por trás).
-      Link "Cadastre-se aqui" aponta para `/cadastro`, que ainda não existe
-      (próximo item abaixo).
-- [ ] Fluxo de cadastro em 2 etapas com seleção de perfil
-- [ ] Middleware/guard de rota: redireciona por `role` após login
+      Link "Cadastre-se aqui" aponta para `/cadastro`.
+- [x] Fluxo de cadastro em 2 etapas com seleção de perfil
+      (`src/app/cadastro/page.tsx` + `CadastroForm.tsx`, server action
+      `registerUser` em `src/lib/auth/actions.ts`). Cria `User` +
+      `PatientProfile`/`DoctorProfile` numa escrita aninhada do Prisma, loga
+      automaticamente após criar a conta. Testado ponta a ponta: paciente,
+      médico e rejeição de email duplicado — todos via POST real simulando o
+      formulário. Campo "RQE" do protótipo virou "Especialidade" (texto
+      livre), porque o schema não define uma lista fechada de especialidades
+      e eu não ia inventar uma.
+- [x] Middleware/guard de rota: redireciona por `role` após login —
+      `middleware.ts` (não `proxy.ts`, ver `05-arquitetura.md`) bloqueia
+      `/dashboard` e `/userConfig` sem sessão via callback `authorized` do
+      Auth.js. ⚠️ Bug confirmado: não funciona em `next dev` nesta versão do
+      Next (16.1.1) — só testável com `npm run build && npm run start`. Guard
+      por `role` específico (paciente vs. médico) ainda não existe porque só
+      existe uma área logada `(app)` até agora; farei a divisão quando o
+      painel do médico existir (bloco 6).
 
 ## 2. Registro de dados do paciente (RF02, RF03)
 - [x] Migrations `glucose_records`, `meals` — já existem desde a migração

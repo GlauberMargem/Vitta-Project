@@ -32,22 +32,36 @@ ficam fora do corte inicial — ver "Backlog pós-homologação" no fim.
 
 ---
 
-## Sprint 1 — Cadastro e guarda de rota
+## Sprint 1 — Cadastro e guarda de rota ✅ concluído
 **Objetivo:** qualquer pessoa cria conta (paciente ou médico) e, ao logar, cai
 automaticamente na área certa; quem não está logado não acessa a área logada.
 
-| Prioridade | Item | Origem |
-|---|---|---|
-| P0 | Cadastro etapa 1 (dados gerais + seletor Paciente/Médico) | roadmap bloco 1 |
-| P0 | Cadastro etapa 2 (paciente: nascimento + tipo de diabetes / médico: CRM + especialidade) | roadmap bloco 1 |
-| P0 | `proxy.ts`: bloqueia `(app)/*` sem sessão, redireciona pra `/login`; usuário já logado não vê `/login` de novo | roadmap bloco 1, `05-arquitetura.md` |
-| P1 | Validação de senha (confirmação, tamanho mínimo) | — |
+| Prioridade | Item | Origem | Status |
+|---|---|---|---|
+| P0 | Cadastro etapa 1 (dados gerais + seletor Paciente/Médico) | roadmap bloco 1 | ✅ |
+| P0 | Cadastro etapa 2 (paciente: nascimento + tipo de diabetes / médico: CRM + especialidade) | roadmap bloco 1 | ✅ |
+| P0 | `middleware.ts`: bloqueia `(app)/*` sem sessão, redireciona pra `/login`; usuário já logado não vê `/login`/`/cadastro` de novo | roadmap bloco 1, `05-arquitetura.md` | ✅ |
+| P1 | Validação de senha (confirmação, tamanho mínimo) | — | ✅ (mínimo 8 caracteres) |
 
-**Riscos:** ainda não existe área separada para médico, então o "redireciona
-por role" fica só parcial nesta sprint (o guard geral já vale).
-**Definição de pronto:** dá pra criar conta paciente, criar conta médico,
-logar com as duas, e um usuário deslogado não consegue abrir `/dashboard`
-direto pela URL.
+**Riscos que viraram achados reais:**
+- O arquivo é `middleware.ts`, não `proxy.ts` como o sprint original previa
+  (a skill `next-best-practices` errou nesse ponto — corrigido e documentado
+  em `05-arquitetura.md`).
+- `middleware.ts` roda em Edge Runtime, e a config completa do Auth.js importa
+  Prisma/`pg`, que não roda no Edge — precisou separar em
+  `config.base.ts` (edge-safe) + `config.ts` (completo).
+- **Bug confirmado no `next dev`** desta versão do Next (16.1.1): o
+  middleware nunca é invocado em modo dev (nem com um `throw`
+  incondicional), mas funciona perfeitamente em `next build && next start`.
+  Testar guard de rota sempre em modo produção local até o Next ser
+  atualizado.
+
+**Definição de pronto:** ✅ testado ponta a ponta em modo produção — criar
+conta paciente, criar conta médico, logar com as duas, email duplicado é
+rejeitado, e um usuário deslogado é redirecionado ao tentar abrir
+`/dashboard` direto pela URL. Ainda não existe área separada pro médico
+(fica pro Sprint 5), então o guard por `role` específico ainda não se
+aplica — só o guard geral "precisa estar logado".
 
 ---
 
@@ -72,17 +86,16 @@ vinculado ao paciente certo, e some ao consultar outro usuário.
 
 ## Sprint 3 — Gráficos, HbA1c estimado e alertas
 
-⚠️ **Duas decisões pendentes antes de começar** (ver `specs/08-design-system.md`
-e `04-modelo-de-dados.md`):
+⚠️ **Gaps em aberto** (ver `specs/08-design-system.md` e
+`04-modelo-de-dados.md`) — não bloqueiam o trabalho de agora, mas precisam
+ser resolvidos antes deste sprint começar de verdade:
 1. **Biblioteca de gráficos** — a monografia menciona "bibliotecas de
-   gráficos" de forma genérica, sem escolher uma. Preciso que você decida
-   (ex.: Recharts, Chart.js, Tremor) antes de eu começar, ou que me autorize a
-   escolher — não vou inventar isso sozinho.
-2. **Limites clínicos de hipo/hiperglicemia** — RF05 fala em "limites... 
+   gráficos" de forma genérica, sem escolher uma (ex.: Recharts, Chart.js,
+   Tremor). Não vou inventar essa escolha sozinho.
+2. **Limites clínicos de hipo/hiperglicemia** — RF05 fala em "limites...
    configurados", mas não existe um valor de referência definido em nenhuma
-   spec. São dados clínicos; não vou chutar números de mg/dL. Preciso de um
-   valor de referência (ex.: das diretrizes da SBD citadas na monografia) ou
-   que você me diga qual usar como padrão.
+   spec. São dados clínicos (ex.: das diretrizes da SBD citadas na
+   monografia); não vou chutar números de mg/dL.
 
 | Prioridade | Item | Origem |
 |---|---|---|

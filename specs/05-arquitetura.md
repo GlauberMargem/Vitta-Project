@@ -52,13 +52,56 @@ explicitamente (`{ session, token }: { session: Session; token: JWT }`) em vez
 de confiar na inferência. Se remover essas anotações, `token.id`/`token.role`
 voltam a ser `unknown` e o build quebra.
 
-## Next.js 16 — middleware chama-se `proxy.ts`
+## Middleware é `middleware.ts`, não `proxy.ts`
 
-Ao implementar o item "Middleware/guard de rota" do roadmap (bloco 1), usar
-`proxy.ts` na raiz do projeto (`export function proxy()` +
-`export const proxyConfig`), **não** `middleware.ts`/`middleware()`/`config` —
-esse é o nome antigo (Next 14/15). O Next 16.1.1, fixado neste projeto, já usa
-a convenção nova.
+A skill `next-best-practices` (instalada via `npx skills add`) afirma que o
+Next.js 16+ renomeou `middleware.ts` para `proxy.ts`. **Isso está errado para
+a versão instalada neste projeto** (`next@16.1.1`): conferido direto em
+`node_modules/next/dist/lib/constants.js`, a constante é
+`MIDDLEWARE_FILENAME = 'middleware'` — não existe suporte a `proxy.ts` nesse
+pacote. O arquivo certo é `middleware.ts` na raiz do projeto (o build
+internamente rotula a feature como "Proxy (Middleware)" no output, então o
+*conceito* mudou de nome, mas não o arquivo).
+
+Isso é um lembrete de que conteúdo de skill de terceiros pode estar
+desatualizado ou errado para a versão exata das dependências do projeto —
+vale conferir contra o pacote instalado antes de aplicar, principalmente em
+convenções que mudam entre versões.
+
+## Middleware precisa de config separada do Auth.js (roda no Edge)
+
+`middleware.ts` roda em Edge Runtime por padrão. A config completa do Auth.js
+(`src/lib/auth/config.ts`) importa `src/lib/db/client.ts`, que usa `pg` — e
+`pg` não roda no Edge (`Module not found: Can't resolve 'util/types'`).
+Solução: a config foi dividida em duas.
+
+- `src/lib/auth/config.base.ts` — só sessão/callbacks/páginas, **sem**
+  providers, sem import de banco. Edge-safe. `trustHost: true` também está
+  aqui (necessário pra rodar fora da Vercel sem erro `UntrustedHost`).
+- `src/lib/auth/config.ts` — importa `config.base.ts` e adiciona o provider
+  de credenciais (que usa Prisma/bcrypt). Usado em toda parte que não é
+  Edge: route handler, server actions, server components.
+- `middleware.ts` importa só `config.base.ts` e cria sua própria instância
+  `NextAuth()` local — nunca importar `src/lib/auth/config.ts` (o completo)
+  dentro de `middleware.ts`.
+
+## ⚠️ `next dev` (Turbopack e Webpack) não executa `middleware.ts` nesta versão
+
+Bug/limitação confirmada em `next@16.1.1`: o middleware é compilado e
+aparece corretamente no manifest (`.next/dev/server/middleware-manifest.json`,
+matchers certos), mas **não é invocado em nenhuma requisição** durante
+`next dev` — nem com matcher amplo, nem com uma função que dá `throw`
+incondicional. Testado nas duas opções de bundler (`--turbopack` e
+`--webpack`), mesmo resultado.
+
+Em produção (`next build && next start`) o middleware funciona
+perfeitamente — testado ponta a ponta (bloqueia sem sessão, redireciona pra
+`/login?callbackUrl=...`, libera com sessão válida).
+
+**Implicação prática**: pra testar qualquer coisa que dependa do middleware
+(guard de rota), rodar `npm run build && npm run start` em vez de `npm run
+dev`. Isso deve ser revisto quando o Next.js for atualizado — pode ser que
+uma versão mais nova corrija esse bug do dev server.
 
 ## Ícones: lucide-react, não Material Symbols
 
