@@ -64,7 +64,8 @@ src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dia
                                 HbA1cCard, HistoricoList (reaproveitados no painel do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
 src/components/profile/        ProfileView (paginação), DadosPessoaisForm (+ troca de senha),
-                                DadosClinicosForm, DadosProfissionaisForm
+                                DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
+                                (limites de hipo/hiperglicemia configuráveis, RF05)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
@@ -72,10 +73,11 @@ src/lib/auth/config.ts         config Auth.js completa (provider de credenciais)
 src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro)
 src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal, consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
-src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativa de HbA1c (fórmula ADAG),
-                                agregação diária/semanal/mensal, getPeriodRange (janelas dia/semana/mês,
-                                usada pelo gráfico e pelo PDF), risco mais grave — fontes em
-                                specs/04-modelo-de-dados.md
+src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
+                                2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
+                                HbA1c (fórmula ADAG), agregação diária/semanal/mensal, getPeriodRange
+                                (janelas dia/semana/mês, usada pelo gráfico e pelo PDF), risco mais grave
+                                — fontes em specs/04-modelo-de-dados.md
 src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a
                                 mesma); buildReportHistories: idem, sem limite de linhas, por período
                                 (RF08)
@@ -84,7 +86,8 @@ src/lib/patient/motivation.ts  RF12: dias distintos com glicose nos últimos 7 d
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
-                                updatePatientClinicalData, updateDoctorProfessionalData
+                                updatePatientClinicalData, updateDoctorProfessionalData,
+                                updateGlucoseThresholds (RF05)
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
@@ -103,9 +106,8 @@ há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
 **MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
-`specs/09-sprints.md`). Ainda não existem, deliberadamente fora do corte
-inicial: limites de hipo/hiper configuráveis por paciente (hoje são globais
-no código), login social Google.
+`specs/09-sprints.md`). Ainda não existe, deliberadamente fora do corte
+inicial: login social Google (falta Client ID/Secret).
 
 ## Dois perfis de usuário — regras de negócio
 

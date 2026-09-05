@@ -1,27 +1,64 @@
 import type { GlucoseContext } from "@/generated/prisma/client";
 
-const HYPOGLYCEMIA_THRESHOLD_MGDL = 70;
-const SEVERE_HYPOGLYCEMIA_THRESHOLD_MGDL = 54;
+/** Limites de hipo/hiperglicemia (RF05) — fontes em specs/04-modelo-de-dados.md
+ * (diretrizes SBD). Usados como valor padrão em `PatientProfile`; o paciente
+ * pode ajustar em `/userConfig` (backlog pós-homologação, ver 09-sprints.md). */
+export type GlucoseThresholds = {
+  hypo: number;
+  severeHypo: number;
+  hyperFasting: number;
+  hyperPostprandial: number;
+};
 
-export function isHypoglycemia(valueMgdl: number): boolean {
-  return valueMgdl < HYPOGLYCEMIA_THRESHOLD_MGDL;
+export const DEFAULT_GLUCOSE_THRESHOLDS: GlucoseThresholds = {
+  hypo: 70,
+  severeHypo: 54,
+  hyperFasting: 130,
+  hyperPostprandial: 180,
+};
+
+/** Converte as 4 colunas de `PatientProfile` pro formato usado pelas funções
+ * de alerta — evita repetir esse mapeamento em cada página que lê o perfil. */
+export function toGlucoseThresholds(profile: {
+  hypoThreshold: number;
+  severeHypoThreshold: number;
+  hyperFastingThreshold: number;
+  hyperPostprandialThreshold: number;
+}): GlucoseThresholds {
+  return {
+    hypo: profile.hypoThreshold,
+    severeHypo: profile.severeHypoThreshold,
+    hyperFasting: profile.hyperFastingThreshold,
+    hyperPostprandial: profile.hyperPostprandialThreshold,
+  };
 }
 
-export function isSevereHypoglycemia(valueMgdl: number): boolean {
-  return valueMgdl < SEVERE_HYPOGLYCEMIA_THRESHOLD_MGDL;
+export function isHypoglycemia(
+  valueMgdl: number,
+  thresholds: GlucoseThresholds
+): boolean {
+  return valueMgdl < thresholds.hypo;
+}
+
+export function isSevereHypoglycemia(
+  valueMgdl: number,
+  thresholds: GlucoseThresholds
+): boolean {
+  return valueMgdl < thresholds.severeHypo;
 }
 
 export function isHyperglycemia(
   valueMgdl: number,
-  context: GlucoseContext
+  context: GlucoseContext,
+  thresholds: GlucoseThresholds
 ): boolean {
   switch (context) {
     case "JEJUM":
     case "ANTES_DE_DORMIR":
-      return valueMgdl > 130;
+      return valueMgdl > thresholds.hyperFasting;
     case "POS_PRANDIAL":
     case "OUTRO":
-      return valueMgdl >= 180;
+      return valueMgdl >= thresholds.hyperPostprandial;
   }
 }
 
@@ -33,11 +70,12 @@ export type GlucoseAlert =
 
 export function glucoseAlert(
   valueMgdl: number,
-  context: GlucoseContext
+  context: GlucoseContext,
+  thresholds: GlucoseThresholds
 ): GlucoseAlert {
-  if (isSevereHypoglycemia(valueMgdl)) return "HIPOGLICEMIA_GRAVE";
-  if (isHypoglycemia(valueMgdl)) return "HIPOGLICEMIA";
-  if (isHyperglycemia(valueMgdl, context)) return "HIPERGLICEMIA";
+  if (isSevereHypoglycemia(valueMgdl, thresholds)) return "HIPOGLICEMIA_GRAVE";
+  if (isHypoglycemia(valueMgdl, thresholds)) return "HIPOGLICEMIA";
+  if (isHyperglycemia(valueMgdl, context, thresholds)) return "HIPERGLICEMIA";
   return null;
 }
 

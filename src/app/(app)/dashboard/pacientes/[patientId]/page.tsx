@@ -15,6 +15,7 @@ import {
   buildMonthlyGlucoseSeries,
   buildWeeklyGlucoseSeries,
   estimateHbA1c,
+  toGlucoseThresholds,
 } from "@/lib/patient/glucose";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
@@ -85,8 +86,13 @@ export default async function PatientDetailPage({
     }),
   ]);
 
-  const history = buildHistory(glucoseRecords, meals);
-  const reportHistories = buildReportHistories(glucoseRecords30d, meals30d);
+  const thresholds = toGlucoseThresholds(link.patient);
+  const history = buildHistory(glucoseRecords, meals, thresholds);
+  const reportHistories = buildReportHistories(
+    glucoseRecords30d,
+    meals30d,
+    thresholds
+  );
   const dailySeries = buildDailyGlucoseSeries(glucoseRecords90d);
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
   const monthlySeries = buildMonthlyGlucoseSeries(glucoseRecords90d);

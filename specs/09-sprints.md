@@ -102,7 +102,7 @@ HbA1c e destaca visualmente registros fora da faixa de referência.
 | P0 | Componente de gráfico de área (semanal), dados reais | roadmap bloco 3 | ✅ |
 | P0 | Cálculo e exibição de HbA1c estimado (média 90 dias) | roadmap bloco 3 (RF11) | ✅ |
 | P0 | Alerta visual quando registro está fora dos limites | roadmap bloco 3 (RF05) | ✅ |
-| P1 | Limites configuráveis (mesmo que só editável via banco por enquanto) | — | ❌ adiado |
+| P1 | Limites configuráveis (mesmo que só editável via banco por enquanto) | — | ✅ feito em 2026-09-05 (backlog pós-homologação, ver bloco no fim do arquivo) |
 
 **Gaps resolvidos com o Glauber em 2026-09-03**, com fonte documentada em
 `04-modelo-de-dados.md` e `05-arquitetura.md`:
@@ -117,10 +117,11 @@ HbA1c e destaca visualmente registros fora da faixa de referência.
   literalmente listados no mockup — ver `08-design-system.md`.
 - Cor do alerta reaproveita `#FFB5A7` (Atenção/ação) já existente na paleta,
   não uma cor nova — token `--alert`/`--alert-foreground` em `globals.css`.
-- P1 (limites configuráveis por paciente) adiado: os limites de hoje são
-  globais no código (`src/lib/patient/glucose.ts`), não por paciente/idade.
-  Sem tela de configuração ainda — não bloqueia a definição de pronto do
-  RF05 (o alerta funciona com os limites clínicos padrão).
+- P1 (limites configuráveis por paciente) adiado nesse sprint: os limites
+  eram globais no código (`src/lib/patient/glucose.ts`), não por
+  paciente/idade. Sem tela de configuração ainda — não bloqueava a definição
+  de pronto do RF05 (o alerta funcionava com os limites clínicos padrão).
+  Implementado no backlog pós-homologação — ver bloco no fim deste arquivo.
 
 **Definição de pronto:** ✅ testado ponta a ponta — paciente de teste com
 registros na semana corrente cobrindo hipoglicemia grave (<54), hipoglicemia
@@ -297,8 +298,6 @@ Não bloqueiam o início dos testes de usabilidade — fazer depois, ou em
 paralelo se sobrar tempo:
 
 - Login social via Google (falta Client ID/Secret)
-- Limites de hipo/hiperglicemia configuráveis por paciente (hoje são
-  globais em `src/lib/patient/glucose.ts`)
 
 ✅ **Tela de perfil completa** — feita em 2026-09-03, depois do Sprint 6 (fora
 do plano original de sprints). Ver `07-roadmap.md`, bloco 4, e o desvio
@@ -337,6 +336,27 @@ Ações) e tom das mensagens (acolhedor/informal). Os 5 textos exatos
 Só aparece pro paciente — RF12 nunca foi um requisito do médico. Testado
 com contas reais forçando 0, 3 e 7 dias distintos de registro, confirmando
 a mensagem certa em cada faixa. Ver `07-roadmap.md`, bloco 7.
+
+✅ **Limites de hipo/hiperglicemia configuráveis por paciente** — feito em
+2026-09-05. Decisão do Glauber: usar os valores da literatura (SBD, os
+mesmos já documentados no RF05) como padrão, e permitir que o paciente
+ajuste. 4 campos novos em `PatientProfile` (migration
+`20260905220000_patient_glucose_thresholds`), default = valores atuais
+(hipo 70, hipo grave 54, hiper jejum/antes de dormir 130, hiper
+pós-prandial 180). Editável em `/userConfig` → dados clínicos →
+`LimitesAlertaForm.tsx`, com botão "Restaurar padrão". Validação: inteiros
+entre 50-500 mg/dL (mesmo domínio já usado no eixo Y do gráfico) e ordem
+coerente (hipo grave < hipo < cada limite de hiper). `glucoseAlert` e
+`buildHistory`/`buildReportHistories` passaram a exigir os limites como
+parâmetro (sem valor global implícito) — cada tela busca os limites do
+paciente certo: o próprio paciente busca os seus, e o médico busca os do
+paciente que está vendo (tanto na lista com indicador de risco quanto no
+histórico individual), nunca um limite global. Testado ponta a ponta:
+paciente customizou o limite de hiperglicemia em jejum pra 200 mg/dL, um
+registro de 150 mg/dL em jejum deixou de ser marcado como alerta — e o
+médico vinculado a esse paciente viu o mesmo resultado (nem no indicador
+de risco, nem no histórico), confirmando que o limite é por paciente, não
+global. Ver `07-roadmap.md`, bloco 3, e `04-modelo-de-dados.md`.
 
 ## Resumo
 

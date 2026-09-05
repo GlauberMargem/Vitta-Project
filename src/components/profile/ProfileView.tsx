@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DadosClinicosForm } from "./DadosClinicosForm";
 import { DadosProfissionaisForm } from "./DadosProfissionaisForm";
+import { LimitesAlertaForm } from "./LimitesAlertaForm";
 import type { DiabetesType } from "@/generated/prisma/client";
 
 type Props =
@@ -14,6 +15,10 @@ type Props =
       email: string;
       birthDate: Date;
       diabetesType: DiabetesType;
+      hypoThreshold: number;
+      severeHypoThreshold: number;
+      hyperFastingThreshold: number;
+      hyperPostprandialThreshold: number;
     }
   | {
       role: "DOCTOR";
@@ -40,10 +45,18 @@ export function ProfileView(props: Props) {
       {page === 0 ? (
         <DadosPessoaisForm name={props.name} email={props.email} />
       ) : props.role === "PATIENT" ? (
-        <DadosClinicosForm
-          birthDate={props.birthDate}
-          diabetesType={props.diabetesType}
-        />
+        <>
+          <DadosClinicosForm
+            birthDate={props.birthDate}
+            diabetesType={props.diabetesType}
+          />
+          <LimitesAlertaForm
+            hypoThreshold={props.hypoThreshold}
+            severeHypoThreshold={props.severeHypoThreshold}
+            hyperFastingThreshold={props.hyperFastingThreshold}
+            hyperPostprandialThreshold={props.hyperPostprandialThreshold}
+          />
+        </>
       ) : (
         <DadosProfissionaisForm
           crm={props.crm}

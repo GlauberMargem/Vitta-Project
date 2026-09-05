@@ -64,6 +64,14 @@ model PatientProfile {
   birthDate     DateTime     @map("birth_date") @db.Date
   diabetesType  DiabetesType @map("diabetes_type")
 
+  // Limites de alerta de hipo/hiperglicemia (RF05). Default = valores da
+  // literatura (SBD, ver specs/04-modelo-de-dados.md); paciente pode
+  // ajustar em /userConfig (backlog pós-homologação, ver 09-sprints.md).
+  hypoThreshold              Int @default(70)  @map("hypo_threshold")
+  severeHypoThreshold        Int @default(54)  @map("severe_hypo_threshold")
+  hyperFastingThreshold      Int @default(130) @map("hyper_fasting_threshold")
+  hyperPostprandialThreshold Int @default(180) @map("hyper_postprandial_threshold")
+
   user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   glucoseRecords  GlucoseRecord[]
   meals           Meal[]

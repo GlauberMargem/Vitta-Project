@@ -15,10 +15,12 @@ import {
   buildDailyGlucoseSeries,
   buildMonthlyGlucoseSeries,
   buildWeeklyGlucoseSeries,
+  DEFAULT_GLUCOSE_THRESHOLDS,
   estimateHbA1c,
   glucoseAlert,
   glucoseAlertLabel,
   mostSevereAlert,
+  toGlucoseThresholds,
 } from "@/lib/patient/glucose";
 import {
   countDaysWithGlucoseRecord,
@@ -67,6 +69,7 @@ export default async function DashboardPage() {
     glucoseRecords30d,
     meals30d,
     activeLinkRow,
+    thresholdsRow,
   ] = await Promise.all([
     db.glucoseRecord.findMany({
       where: { patientId },
@@ -101,10 +104,24 @@ export default async function DashboardPage() {
       where: { patientId, status: "ACTIVE" },
       include: { doctor: { include: { user: { select: { name: true } } } } },
     }),
+    db.patientProfile.findUniqueOrThrow({
+      where: { userId: patientId },
+      select: {
+        hypoThreshold: true,
+        severeHypoThreshold: true,
+        hyperFastingThreshold: true,
+        hyperPostprandialThreshold: true,
+      },
+    }),
   ]);
 
-  const history = buildHistory(glucoseRecords, meals);
-  const reportHistories = buildReportHistories(glucoseRecords30d, meals30d);
+  const thresholds = toGlucoseThresholds(thresholdsRow);
+  const history = buildHistory(glucoseRecords, meals, thresholds);
+  const reportHistories = buildReportHistories(
+    glucoseRecords30d,
+    meals30d,
+    thresholds
+  );
   const motivationMessage = motivationalMessage(
     countDaysWithGlucoseRecord(glucoseRecords30d)
   );
@@ -193,19 +210,39 @@ async function DoctorDashboard({
     .filter((id): id is string => Boolean(id));
 
   const riskWindowStart = new Date(Date.now() - RISK_WINDOW_MS);
-  const recentRecords = patientIds.length
-    ? await db.glucoseRecord.findMany({
-        where: {
-          patientId: { in: patientIds },
-          measuredAt: { gte: riskWindowStart },
-        },
-        select: { patientId: true, valueMgdl: true, context: true },
-      })
-    : [];
+  const [recentRecords, thresholdRows] = await Promise.all([
+    patientIds.length
+      ? db.glucoseRecord.findMany({
+          where: {
+            patientId: { in: patientIds },
+            measuredAt: { gte: riskWindowStart },
+          },
+          select: { patientId: true, valueMgdl: true, context: true },
+        })
+      : Promise.resolve([]),
+    patientIds.length
+      ? db.patientProfile.findMany({
+          where: { userId: { in: patientIds } },
+          select: {
+            userId: true,
+            hypoThreshold: true,
+            severeHypoThreshold: true,
+            hyperFastingThreshold: true,
+            hyperPostprandialThreshold: true,
+          },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const thresholdsByPatient = new Map(
+    thresholdRows.map((row) => [row.userId, toGlucoseThresholds(row)])
+  );
 
   const alertsByPatient = new Map<string, ReturnType<typeof glucoseAlert>[]>();
   for (const record of recentRecords) {
-    const alert = glucoseAlert(record.valueMgdl, record.context);
+    const thresholds =
+      thresholdsByPatient.get(record.patientId) ?? DEFAULT_GLUCOSE_THRESHOLDS;
+    const alert = glucoseAlert(record.valueMgdl, record.context, thresholds);
     if (!alert) continue;
     const list = alertsByPatient.get(record.patientId) ?? [];
     list.push(alert);

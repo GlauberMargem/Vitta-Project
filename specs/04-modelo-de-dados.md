@@ -25,6 +25,10 @@ Conta genérica, base para os dois perfis.
 | user_id | uuid PK/FK → users.id | |
 | birth_date | date | |
 | diabetes_type | enum('tipo_1','tipo_2','gestacional','outro') | |
+| hypo_threshold | integer, default 70 | RF05 — editável pelo paciente, ver seção abaixo |
+| severe_hypo_threshold | integer, default 54 | RF05 — editável pelo paciente |
+| hyper_fasting_threshold | integer, default 130 | RF05 — jejum/antes de dormir, editável pelo paciente |
+| hyper_postprandial_threshold | integer, default 180 | RF05 — pós-prandial/outro, editável pelo paciente |
 
 ### `doctor_profiles`
 1:1 com `users` onde `role = 'doctor'`.
@@ -80,6 +84,19 @@ Mapeamento por `context` de `glucose_records`, decidido com o Glauber em
 Os valores hospitalares (>140 de alerta geral, >180 pra intervenção
 farmacológica) **não** se aplicam aqui — são de outro contexto clínico
 (paciente internado) e foram descartados para o MVP ambulatorial.
+
+**Configurável por paciente (backlog pós-homologação, 2026-09-05)**: os 4
+valores acima (`hypo_threshold`, `severe_hypo_threshold`,
+`hyper_fasting_threshold`, `hyper_postprandial_threshold`) viraram colunas
+em `patient_profiles`, com os valores da literatura como default. Decisão do
+Glauber: usar a literatura como base e permitir que o paciente ajuste
+(ex.: médico recomendou uma meta mais rígida ou mais permissiva pro caso
+dele). Editável em `/userConfig`, com opção de restaurar o padrão. Validação
+de aplicação (não é regra clínica nova): inteiros entre 50-500 mg/dL (mesmo
+domínio do eixo Y do gráfico) e ordem coerente (`severe_hypo_threshold` <
+`hypo_threshold` < cada limite de hiperglicemia). `glucoseAlert` deixou de
+ter um limite global implícito — toda tela que calcula alerta busca os
+limites do `patient_profiles` da pessoa certa.
 
 ## Estimativa de HbA1c (RF11)
 

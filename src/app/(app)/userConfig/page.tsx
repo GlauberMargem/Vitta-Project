@@ -14,6 +14,10 @@ export default async function UserConfigPage() {
       select: {
         birthDate: true,
         diabetesType: true,
+        hypoThreshold: true,
+        severeHypoThreshold: true,
+        hyperFastingThreshold: true,
+        hyperPostprandialThreshold: true,
         user: { select: { name: true, email: true } },
       },
     });
@@ -25,6 +29,10 @@ export default async function UserConfigPage() {
         email={profile.user.email}
         birthDate={profile.birthDate}
         diabetesType={profile.diabetesType}
+        hypoThreshold={profile.hypoThreshold}
+        severeHypoThreshold={profile.severeHypoThreshold}
+        hyperFastingThreshold={profile.hyperFastingThreshold}
+        hyperPostprandialThreshold={profile.hyperPostprandialThreshold}
       />
     );
   }

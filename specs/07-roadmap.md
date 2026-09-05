@@ -85,6 +85,14 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       — `src/lib/patient/glucose.ts` (`glucoseAlert`), limites e fontes
       documentados em `04-modelo-de-dados.md`. Badge de alerta (`#FFB5A7`) no
       histórico do dashboard por registro fora da faixa.
+- [x] Limites configuráveis por paciente (backlog pós-homologação,
+      2026-09-05) — 4 colunas em `PatientProfile` com os valores da
+      literatura como default, editáveis em `/userConfig` →
+      `LimitesAlertaForm.tsx`. `glucoseAlert` passou a receber os limites
+      como parâmetro obrigatório (sem default global implícito); cada tela
+      (dashboard do paciente, lista de risco do médico, histórico do médico
+      sobre um paciente) busca os limites do paciente certo antes de
+      calcular o alerta.
 - [x] Cálculo de estimativa de HbA1c (média 90 dias) — fórmula ADAG
       (`estimateHbA1c` em `glucose.ts`), card no topo do dashboard com meta
       de referência `<7%`, só aparece se houver ao menos um registro no

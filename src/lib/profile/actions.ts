@@ -118,6 +118,70 @@ export async function updatePatientClinicalData(
   return null;
 }
 
+const MIN_THRESHOLD_MGDL = 50;
+const MAX_THRESHOLD_MGDL = 500;
+
+/** RF05 — paciente pode ajustar os limites de alerta a partir do padrão da
+ * literatura (ver DEFAULT_GLUCOSE_THRESHOLDS em glucose.ts). Faixa 50-500
+ * mg/dL reaproveita o mesmo domínio já usado no eixo Y do gráfico
+ * (08-design-system.md), não é um novo valor clínico. */
+export async function updateGlucoseThresholds(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const { id, role } = await requireUser();
+  if (role !== "PATIENT") {
+    throw new Error("Não autorizado.");
+  }
+
+  const hypoThreshold = Number(formData.get("hypoThreshold"));
+  const severeHypoThreshold = Number(formData.get("severeHypoThreshold"));
+  const hyperFastingThreshold = Number(formData.get("hyperFastingThreshold"));
+  const hyperPostprandialThreshold = Number(
+    formData.get("hyperPostprandialThreshold")
+  );
+
+  const values = [
+    hypoThreshold,
+    severeHypoThreshold,
+    hyperFastingThreshold,
+    hyperPostprandialThreshold,
+  ];
+  if (
+    values.some(
+      (value) =>
+        !Number.isInteger(value) ||
+        value < MIN_THRESHOLD_MGDL ||
+        value > MAX_THRESHOLD_MGDL
+    )
+  ) {
+    return `Os limites devem ser números inteiros entre ${MIN_THRESHOLD_MGDL} e ${MAX_THRESHOLD_MGDL} mg/dL.`;
+  }
+  if (severeHypoThreshold >= hypoThreshold) {
+    return "O limite de hipoglicemia grave precisa ser menor que o de hipoglicemia.";
+  }
+  if (hypoThreshold >= hyperFastingThreshold) {
+    return "O limite de hiperglicemia em jejum/antes de dormir precisa ser maior que o de hipoglicemia.";
+  }
+  if (hypoThreshold >= hyperPostprandialThreshold) {
+    return "O limite de hiperglicemia pós-prandial precisa ser maior que o de hipoglicemia.";
+  }
+
+  await db.patientProfile.update({
+    where: { userId: id },
+    data: {
+      hypoThreshold,
+      severeHypoThreshold,
+      hyperFastingThreshold,
+      hyperPostprandialThreshold,
+    },
+  });
+
+  revalidatePath("/userConfig");
+  revalidatePath("/dashboard");
+  return null;
+}
+
 export async function updateDoctorProfessionalData(
   _previousState: string | null,
   formData: FormData

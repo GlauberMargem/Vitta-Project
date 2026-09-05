@@ -6,7 +6,7 @@
 | RF02 | Paciente registra medição de glicose: valor (mg/dL), data, horário, contexto (jejum, pós-prandial, antes de dormir) | Paciente | Alta | ✅ concluído (Sprint 2) |
 | RF03 | Histórico cronológico das medições do paciente | Paciente | Alta | ✅ concluído (Sprint 2) |
 | RF04 | Gráficos de tendência glicêmica (diária, semanal, mensal) | Paciente | Alta | ✅ concluído — semanal desde o Sprint 3, diária/mensal implementadas pós-homologação (seletor de período) |
-| RF05 | Alertas visuais quando registro está fora dos limites de referência (hipo/hiperglicemia) | Paciente | Alta | ✅ concluído (Sprint 3) |
+| RF05 | Alertas visuais quando registro está fora dos limites de referência (hipo/hiperglicemia) | Paciente | Alta | ✅ concluído (Sprint 3; limites configuráveis por paciente desde 2026-09-05) |
 | RF06 | Médico visualiza painel com lista de pacientes vinculados e históricos | Médico | Alta | ✅ concluído (Sprint 5) |
 | RF07 | Médico identifica pacientes em risco por indicadores visuais no painel | Médico | Alta | ✅ concluído (Sprint 5) |
 | RF08 | Relatório glicêmico exportável em PDF | Ambos | Média | ✅ concluído (pós-homologação, 2026-09-05) |
@@ -36,6 +36,10 @@ Regras de negócio associadas (não repetir no código como comentário — só 
   histórico recente que mostra só os 10 últimos) + resumo de HbA1c estimado.
   Sem o gráfico embutido como imagem — decisão de simplicidade técnica.
   Gerado inteiramente no navegador (client-side, `jsPDF`), sem rota de API.
+- RF05: limites de hipo/hiperglicemia configuráveis por paciente desde
+  2026-09-05 (backlog pós-homologação) — literatura SBD como padrão, o
+  paciente pode ajustar em `/userConfig`. Ver `04-modelo-de-dados.md` e
+  `09-sprints.md`.
 - RF12: "consistência dos registros" definida (confirmado com o Glauber em
   2026-09-05) como número de dias distintos, dentre os últimos 7 dias corridos
   (hoje + 6 anteriores), com pelo menos um registro **de glicose** — refeição

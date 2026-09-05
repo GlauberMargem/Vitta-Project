@@ -4,6 +4,7 @@ import {
   getPeriodRange,
   glucoseAlert,
   type GlucoseAlert,
+  type GlucoseThresholds,
   type ReportPeriod,
 } from "./glucose";
 
@@ -35,6 +36,7 @@ type MealLike = {
 export function buildHistory(
   glucoseRecords: GlucoseRecordLike[],
   meals: MealLike[],
+  thresholds: GlucoseThresholds,
   limit = 10
 ): HistoryItem[] {
   return [
@@ -44,7 +46,7 @@ export function buildHistory(
       date: record.measuredAt,
       label: `${record.valueMgdl} mg/dL`,
       detail: contextLabel(record.context),
-      alert: glucoseAlert(record.valueMgdl, record.context),
+      alert: glucoseAlert(record.valueMgdl, record.context, thresholds),
     })),
     ...meals.map((meal) => ({
       kind: "meal" as const,
@@ -67,6 +69,7 @@ const REPORT_PERIODS: ReportPeriod[] = ["daily", "weekly", "monthly"];
 export function buildReportHistories(
   glucoseRecords: GlucoseRecordLike[],
   meals: MealLike[],
+  thresholds: GlucoseThresholds,
   referenceDate: Date = new Date()
 ): Record<ReportPeriod, HistoryItem[]> {
   const result = {} as Record<ReportPeriod, HistoryItem[]>;
@@ -78,7 +81,7 @@ export function buildReportHistories(
     const periodMeals = meals.filter(
       (meal) => meal.eatenAt >= start && meal.eatenAt < end
     );
-    result[period] = buildHistory(records, periodMeals, Infinity);
+    result[period] = buildHistory(records, periodMeals, thresholds, Infinity);
   }
   return result;
 }
