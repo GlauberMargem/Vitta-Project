@@ -37,7 +37,9 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 - **NextAuth/OAuth** para autenticação. Configurado com **Auth.js v5**
   (`next-auth@5.0.0-beta.32`, config em `src/lib/auth/config.ts`) — por ora só
   provider de credenciais (email/senha com bcrypt), sessão JWT. Login social
-  Google ainda não habilitado — falta Client ID/Secret.
+  Google ainda não habilitado — não é só falta de credenciais, falta definir
+  o fluxo de onboarding pós-login (ver `specs/05-arquitetura.md`, seção
+  "Login social Google").
 - Componentes de UI seguem o padrão shadcn/ui (`components.json`, `src/components/ui`,
   `class-variance-authority`, `tailwind-merge`, `lucide-react` para ícones).
 - Hospedagem alvo: Vercel.
@@ -106,8 +108,9 @@ há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
 **MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
-`specs/09-sprints.md`). Ainda não existe, deliberadamente fora do corte
-inicial: login social Google (falta Client ID/Secret).
+`specs/09-sprints.md`). Ainda não existe: login social Google — não é só
+falta de credenciais, falta definir o fluxo de onboarding pós-login (ver
+`specs/05-arquitetura.md`, seção "Login social Google").
 
 ## Dois perfis de usuário — regras de negócio
 

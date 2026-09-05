@@ -175,6 +175,51 @@ autenticada. Decisão de segurança: sem essa checagem, qualquer sessão
 comprometida (ex.: dispositivo destravado) poderia trocar a senha e travar o
 dono da conta fora.
 
+## Login social Google — não implementado, gap de design identificado
+
+`CLAUDE.md` e o mockup de login (`08-design-system.md`) preveem um botão de
+login com Google, hoje renderizado desabilitado. Investigado em 2026-09-05:
+não é só uma questão de configurar credenciais — falta resolver um problema
+de fluxo antes de implementar. Decisão do Glauber: documentar o que falta,
+não implementar agora.
+
+**O gap**: o cadastro atual (`CadastroForm.tsx`) exige escolher o perfil
+(paciente/médico) e preencher dados específicos de cada um (data de
+nascimento + tipo de diabetes, ou CRM + especialidade) antes de criar a
+conta — `PatientProfile`/`DoctorProfile` são obrigatórios e 1:1 com `User`.
+O provider do Google só devolve nome e email; não há como saber o `role`
+nem os dados do perfil a partir disso. Uma conta criada via Google precisa
+de uma tela de onboarding pós-login pra completar esses dados — essa tela
+nunca foi desenhada em nenhum mockup ou spec, e inventar esse fluxo sem
+confirmar com o Glauber violaria a diretriz de não inventar comportamento
+não especificado.
+
+**O que falta definir antes de implementar** (perguntar ao Glauber quando
+for retomar):
+- Como fica a tela de "complete seu cadastro" depois do primeiro login via
+  Google (campos, textos, layout).
+- O que acontece se o email do Google já existir como conta de
+  email/senha — vincula automaticamente, ou bloqueia com um aviso?
+
+**O que já se sabe tecnicamente** (não é o bloqueio):
+- Auth.js v5 detecta credenciais automaticamente via variáveis de ambiente
+  `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — bastaria adicionar
+  `Google()` (import de `next-auth/providers/google`) à lista de
+  `providers` em `src/lib/auth/config.ts` (nunca em `config.base.ts`, que é
+  Edge-safe e não deve ganhar peso extra).
+- Client ID/Secret são gerados no
+  [Google Cloud Console](https://console.cloud.google.com/), em "APIs e
+  Serviços" → "Credenciais" → "Criar credenciais" → "ID do cliente OAuth",
+  tipo "Aplicativo da Web", com a URI de redirecionamento
+  `<URL_DO_APP>/api/auth/callback/google` (em produção na Vercel, a URL
+  real do deploy; em desenvolvimento local,
+  `http://localhost:3000/api/auth/callback/google`).
+- Mesmo com credenciais reais, esse fluxo não é testável por
+  curl/simulação de formulário (o padrão usado em todo o resto do projeto)
+  — o OAuth do Google exige um redirecionamento de navegador real pra
+  `accounts.google.com` e de volta. Testar exige um navegador de verdade e
+  uma conta Google real.
+
 ## Migração de JS → TS
 
 O bootstrap atual (`src/app/*.js`, `src/components/**/*.jsx`) não é TypeScript.

@@ -297,7 +297,10 @@ tamanho de toque dos botões (ver checklist de acessibilidade acima).
 Não bloqueiam o início dos testes de usabilidade — fazer depois, ou em
 paralelo se sobrar tempo:
 
-- Login social via Google (falta Client ID/Secret)
+- Login social via Google — investigado em 2026-09-05, não é só uma questão
+  de credenciais: falta definir o fluxo de onboarding pós-login (escolher
+  paciente/médico + completar dados específicos, que o Google não fornece).
+  Detalhes e passo a passo técnico documentados em `05-arquitetura.md`.
 
 ✅ **Tela de perfil completa** — feita em 2026-09-03, depois do Sprint 6 (fora
 do plano original de sprints). Ver `07-roadmap.md`, bloco 4, e o desvio
