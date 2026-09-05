@@ -13,7 +13,7 @@
 | RF09 | Médico adiciona anotações clínicas ao histórico do paciente vinculado | Médico | Média | ✅ concluído (Sprint 6) |
 | RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ✅ concluído (Sprint 4) |
 | RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ✅ concluído (Sprint 3) |
-| RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ❌ não iniciado |
+| RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ✅ concluído (pós-homologação, 2026-09-05) |
 
 Regras de negócio associadas (não repetir no código como comentário — só aplicar):
 
@@ -36,6 +36,16 @@ Regras de negócio associadas (não repetir no código como comentário — só 
   histórico recente que mostra só os 10 últimos) + resumo de HbA1c estimado.
   Sem o gráfico embutido como imagem — decisão de simplicidade técnica.
   Gerado inteiramente no navegador (client-side, `jsPDF`), sem rota de API.
+- RF12: "consistência dos registros" definida (confirmado com o Glauber em
+  2026-09-05) como número de dias distintos, dentre os últimos 7 dias corridos
+  (hoje + 6 anteriores), com pelo menos um registro **de glicose** — refeição
+  não conta. Essa janela é própria do RF12 (`countDaysWithGlucoseRecord` em
+  `motivation.ts`), diferente da semana corrente do gráfico (segunda a
+  domingo) e da janela rolante em horas do indicador de risco do médico
+  (RF07) — as três representam "7 dias" de formas ligeiramente diferentes,
+  cada uma com um motivo de UX próprio, nenhuma é valor clínico. Textos das
+  5 faixas de mensagem (0, 1–2, 3–4, 5–6, 7 dias) confirmados literalmente
+  com o Glauber — não parafrasear, ver `motivation.ts`.
 - RF09: anotação clínica é uma entidade separada dos registros de glicose/refeição
   do paciente — não deve ser confundida ou misturada no mesmo histórico.
 - RF09: anotação clínica é visível **só para o médico que a escreveu** — decisão

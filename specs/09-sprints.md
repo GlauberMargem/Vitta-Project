@@ -296,7 +296,6 @@ tamanho de toque dos botões (ver checklist de acessibilidade acima).
 Não bloqueiam o início dos testes de usabilidade — fazer depois, ou em
 paralelo se sobrar tempo:
 
-- RF12 — Feedbacks motivacionais
 - Login social via Google (falta Client ID/Secret)
 - Limites de hipo/hiperglicemia configuráveis por paciente (hoje são
   globais em `src/lib/patient/glucose.ts`)
@@ -328,6 +327,16 @@ tela do médico sobre um paciente vinculado. Testado com o pipeline real de
 geração de PDF rodado em Node (mesma chamada de biblioteca do componente),
 confirmando tabela, alertas e acentuação corretos. Ver `07-roadmap.md`,
 bloco 7.
+
+✅ **RF12 — Feedbacks motivacionais** — feito em 2026-09-05. Antes de
+implementar, três decisões foram confirmadas com o Glauber: regra de
+gatilho (dias distintos com registro de glicose nos últimos 7 dias
+corridos), posicionamento (card próprio no dashboard, entre o HbA1c e as
+Ações) e tom das mensagens (acolhedor/informal). Os 5 textos exatos
+(0, 1–2, 3–4, 5–6, 7 dias) também foram aprovados antes da implementação.
+Só aparece pro paciente — RF12 nunca foi um requisito do médico. Testado
+com contas reais forçando 0, 3 e 7 dias distintos de registro, confirmando
+a mensagem certa em cada faixa. Ver `07-roadmap.md`, bloco 7.
 
 ## Resumo
 

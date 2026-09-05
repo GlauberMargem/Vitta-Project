@@ -146,7 +146,16 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       vinculado — como já indicava `06-fluxos-e-telas.md`. Bibliotecas
       importadas via `import()` dinâmico (só carregam quando o botão é
       clicado, não pesam no carregamento inicial da página — RNF01).
-- [ ] Feedbacks motivacionais (RF12)
+- [x] Feedbacks motivacionais (RF12) — feito em 2026-09-05, backlog
+      pós-homologação. `MotivacaoCard.tsx` no dashboard do paciente (só
+      paciente, o médico não tem esse card). "Consistência" = dias distintos
+      com registro de glicose nos últimos 7 dias corridos (hoje + 6
+      anteriores) — `countDaysWithGlucoseRecord`/`motivationalMessage` em
+      `src/lib/patient/motivation.ts`. Sem tabela nova no banco, calculado a
+      partir dos mesmos `glucoseRecords` de 30 dias já buscados pro
+      relatório em PDF (RF08). Regra de gatilho, posicionamento na tela e
+      tom das 5 mensagens (0/1–2/3–4/5–6/7 dias) confirmados com o Glauber
+      antes de implementar.
 
 ## 9. Refino de Header/Navbar e acessibilidade (backlog pós-homologação)
 - [x] Tamanho de toque dos botões — `src/components/ui/button.tsx`: tamanho
