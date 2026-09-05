@@ -5,7 +5,7 @@
 | RF01 | Cadastro e autenticação de usuários (paciente e médico) com perfis de acesso distintos | Ambos | Alta | ✅ concluído (Sprint 1) |
 | RF02 | Paciente registra medição de glicose: valor (mg/dL), data, horário, contexto (jejum, pós-prandial, antes de dormir) | Paciente | Alta | ✅ concluído (Sprint 2) |
 | RF03 | Histórico cronológico das medições do paciente | Paciente | Alta | ✅ concluído (Sprint 2) |
-| RF04 | Gráficos de tendência glicêmica (diária, semanal, mensal) | Paciente | Alta | 🟡 parcial (Sprint 3) — só semanal, diária/mensal ficam pro backlog pós-homologação |
+| RF04 | Gráficos de tendência glicêmica (diária, semanal, mensal) | Paciente | Alta | ✅ concluído — semanal desde o Sprint 3, diária/mensal implementadas pós-homologação (seletor de período) |
 | RF05 | Alertas visuais quando registro está fora dos limites de referência (hipo/hiperglicemia) | Paciente | Alta | ✅ concluído (Sprint 3) |
 | RF06 | Médico visualiza painel com lista de pacientes vinculados e históricos | Médico | Alta | ✅ concluído (Sprint 5) |
 | RF07 | Médico identifica pacientes em risco por indicadores visuais no painel | Médico | Alta | ✅ concluído (Sprint 5) |
@@ -24,6 +24,11 @@ Regras de negócio associadas (não repetir no código como comentário — só 
 - RF07: "recentemente" (fora dos limites de referência) definido como **últimos 7
   dias** — mesma janela do gráfico semanal (RF04). Decisão de UX registrada em
   2026-09-03, não é um valor clínico da SBD.
+- RF04: janelas do gráfico — "diária" mostra os registros do dia corrente sem
+  média (cada aferição é um ponto, pra ver a variação intradiária); "semanal" é a
+  semana corrente (segunda a domingo), média por dia; "mensal" são os últimos 30
+  dias corridos, média por dia. Nenhuma é um mês-calendário — decisão de
+  implementação, não um valor clínico.
 - RF09: anotação clínica é uma entidade separada dos registros de glicose/refeição
   do paciente — não deve ser confundida ou misturada no mesmo histórico.
 - RF09: anotação clínica é visível **só para o médico que a escreveu** — decisão

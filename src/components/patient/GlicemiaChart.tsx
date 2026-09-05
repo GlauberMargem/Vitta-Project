@@ -7,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { WeeklyGlucosePoint } from "@/lib/patient/glucose";
+import type { GlucosePoint } from "@/lib/patient/glucose";
 
 const chartConfig = {
   value: {
@@ -16,13 +16,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function GlicemiaChart({ data }: { data: WeeklyGlucosePoint[] }) {
+export function GlicemiaChart({ data }: { data: GlucosePoint[] }) {
   return (
     <ChartContainer config={chartConfig} className="aspect-auto h-48 w-full">
       <AreaChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
         <CartesianGrid vertical={false} />
         <XAxis
-          dataKey="day"
+          dataKey="label"
           tickLine={false}
           axisLine={false}
           tickMargin={8}

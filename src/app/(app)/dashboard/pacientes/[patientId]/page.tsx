@@ -3,13 +3,18 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
-import { GlicemiaChart } from "@/components/patient/GlicemiaChart";
+import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { NovaAnotacaoForm } from "@/components/doctor/NovaAnotacaoForm";
 import { buildHistory } from "@/lib/patient/history";
 import { formatDateTime } from "@/lib/patient/format";
-import { buildWeeklyGlucoseSeries, estimateHbA1c } from "@/lib/patient/glucose";
+import {
+  buildDailyGlucoseSeries,
+  buildMonthlyGlucoseSeries,
+  buildWeeklyGlucoseSeries,
+  estimateHbA1c,
+} from "@/lib/patient/glucose";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 
@@ -64,7 +69,9 @@ export default async function PatientDetailPage({
     ]);
 
   const history = buildHistory(glucoseRecords, meals);
+  const dailySeries = buildDailyGlucoseSeries(glucoseRecords90d);
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
+  const monthlySeries = buildMonthlyGlucoseSeries(glucoseRecords90d);
   const hba1c = estimateHbA1c(glucoseRecords90d);
 
   return (
@@ -88,12 +95,11 @@ export default async function PatientDetailPage({
 
       <HbA1cCard hba1c={hba1c} patientName={patientName} />
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
-        <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
-          Glicemia ao longo da semana
-        </h2>
-        <GlicemiaChart data={weeklySeries} />
-      </section>
+      <GlicemiaChartCard
+        daily={dailySeries}
+        weekly={weeklySeries}
+        monthly={monthlySeries}
+      />
 
       <section className="rounded-3xl bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">

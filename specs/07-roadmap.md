@@ -75,6 +75,12 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       Recharts via shadcn/ui Charts (ver `05-arquitetura.md`), área com os 7
       dias da semana corrente, média diária, domínio fixo do eixo Y (50–500
       mg/dL, conforme `08-design-system.md`)
+- [x] Gráficos diário e mensal (backlog pós-homologação) — `GlicemiaChartCard.tsx`
+      adiciona um seletor de período (Dia/Semana/Mês) reaproveitando o mesmo
+      `GlicemiaChart`; diário lista cada aferição do dia corrente (sem média),
+      mensal agrega média diária dos últimos 30 dias corridos — funções
+      `buildDailyGlucoseSeries`/`buildMonthlyGlucoseSeries` em `glucose.ts`.
+      Reaproveitado também na tela do médico (`/dashboard/pacientes/[patientId]`)
 - [x] Cálculo de limites de referência e alerta visual de hipo/hiperglicemia
       — `src/lib/patient/glucose.ts` (`glucoseAlert`), limites e fontes
       documentados em `04-modelo-de-dados.md`. Badge de alerta (`#FFB5A7`) no

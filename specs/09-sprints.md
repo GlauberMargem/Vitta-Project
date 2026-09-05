@@ -299,7 +299,6 @@ paralelo se sobrar tempo:
 - RF08 — Exportação de relatório em PDF
 - RF12 — Feedbacks motivacionais
 - Login social via Google (falta Client ID/Secret)
-- Filtros de período no gráfico (mensal/trimestral)
 - Refino visual do Header/Navbar (hoje só os ícones foram trocados pra
   lucide-react — o layout/cores ainda são os antigos, pré-specs)
 - Tamanho de toque dos botões (36px hoje, recomendação é 44px) — ver
@@ -310,6 +309,11 @@ paralelo se sobrar tempo:
 ✅ **Tela de perfil completa** — feita em 2026-09-03, depois do Sprint 6 (fora
 do plano original de sprints). Ver `07-roadmap.md`, bloco 4, e o desvio
 registrado lá (estrutura estendida pro médico, que nunca teve mockup).
+
+✅ **Gráficos diário e mensal** (RF04) — feito em 2026-09-05. Seletor de
+período (Dia/Semana/Mês) em `GlicemiaChartCard.tsx`, reaproveitado no
+dashboard do paciente e na tela de histórico do médico. Ver `07-roadmap.md`,
+bloco 3.
 
 ## Resumo
 

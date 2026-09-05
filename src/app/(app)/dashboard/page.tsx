@@ -3,13 +3,15 @@ import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
 import { NovaGlicoseDialog } from "@/components/patient/NovaGlicoseDialog";
 import { NovaRefeicaoDialog } from "@/components/patient/NovaRefeicaoDialog";
-import { GlicemiaChart } from "@/components/patient/GlicemiaChart";
+import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
 import { buildHistory } from "@/lib/patient/history";
 import {
+  buildDailyGlucoseSeries,
+  buildMonthlyGlucoseSeries,
   buildWeeklyGlucoseSeries,
   estimateHbA1c,
   glucoseAlert,
@@ -84,7 +86,9 @@ export default async function DashboardPage() {
     .map((row) => row.name)
     .filter((name): name is string => Boolean(name));
 
+  const dailySeries = buildDailyGlucoseSeries(glucoseRecords90d);
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
+  const monthlySeries = buildMonthlyGlucoseSeries(glucoseRecords90d);
   const hba1c = estimateHbA1c(glucoseRecords90d);
 
   const activeLink = activeLinkRow
@@ -112,12 +116,11 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
-        <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
-          Glicemia ao longo da semana
-        </h2>
-        <GlicemiaChart data={weeklySeries} />
-      </section>
+      <GlicemiaChartCard
+        daily={dailySeries}
+        weekly={weeklySeries}
+        monthly={monthlySeries}
+      />
 
       <section className="rounded-3xl bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">

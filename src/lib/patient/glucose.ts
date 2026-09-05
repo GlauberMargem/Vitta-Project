@@ -75,13 +75,13 @@ export const HBA1C_TARGET_PERCENT = 7;
 
 const WEEKDAY_LABELS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
-export type WeeklyGlucosePoint = { day: string; value: number | null };
+export type GlucosePoint = { label: string; value: number | null };
 
 /** Semana corrente (segunda a domingo), média diária dos registros. */
 export function buildWeeklyGlucoseSeries(
   records: { valueMgdl: number; measuredAt: Date }[],
   referenceDate: Date = new Date()
-): WeeklyGlucosePoint[] {
+): GlucosePoint[] {
   const startOfWeek = new Date(referenceDate);
   const isoWeekday = (startOfWeek.getDay() + 6) % 7; // 0 = segunda
   startOfWeek.setDate(startOfWeek.getDate() - isoWeekday);
@@ -99,11 +99,78 @@ export function buildWeeklyGlucoseSeries(
   }
 
   return buckets.map((values, index) => ({
-    day: WEEKDAY_LABELS[index],
+    label: WEEKDAY_LABELS[index],
     value: values.length
       ? Math.round(
           values.reduce((sum, value) => sum + value, 0) / values.length
         )
       : null,
   }));
+}
+
+/** Dia corrente, um ponto por registro (sem média) — mostra a variação intradiária. */
+export function buildDailyGlucoseSeries(
+  records: { valueMgdl: number; measuredAt: Date }[],
+  referenceDate: Date = new Date()
+): GlucosePoint[] {
+  const startOfDay = new Date(referenceDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+
+  return records
+    .filter(
+      (record) =>
+        record.measuredAt >= startOfDay && record.measuredAt < endOfDay
+    )
+    .sort((a, b) => a.measuredAt.getTime() - b.measuredAt.getTime())
+    .map((record) => ({
+      label: record.measuredAt.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      value: record.valueMgdl,
+    }));
+}
+
+const MONTHLY_WINDOW_DAYS = 30;
+
+/** Últimos 30 dias (janela corrente), média diária dos registros. */
+export function buildMonthlyGlucoseSeries(
+  records: { valueMgdl: number; measuredAt: Date }[],
+  referenceDate: Date = new Date()
+): GlucosePoint[] {
+  const startDate = new Date(referenceDate);
+  startDate.setHours(0, 0, 0, 0);
+  startDate.setDate(startDate.getDate() - (MONTHLY_WINDOW_DAYS - 1));
+
+  const buckets: number[][] = Array.from(
+    { length: MONTHLY_WINDOW_DAYS },
+    () => []
+  );
+
+  for (const record of records) {
+    const diffDays = Math.floor(
+      (record.measuredAt.getTime() - startDate.getTime()) / 86_400_000
+    );
+    if (diffDays >= 0 && diffDays < MONTHLY_WINDOW_DAYS) {
+      buckets[diffDays].push(record.valueMgdl);
+    }
+  }
+
+  return buckets.map((values, index) => {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + index);
+    return {
+      label: date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+      value: values.length
+        ? Math.round(
+            values.reduce((sum, value) => sum + value, 0) / values.length
+          )
+        : null,
+    };
+  });
 }
