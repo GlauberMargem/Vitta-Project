@@ -296,7 +296,6 @@ tamanho de toque dos botões (ver checklist de acessibilidade acima).
 Não bloqueiam o início dos testes de usabilidade — fazer depois, ou em
 paralelo se sobrar tempo:
 
-- RF08 — Exportação de relatório em PDF
 - RF12 — Feedbacks motivacionais
 - Login social via Google (falta Client ID/Secret)
 - Limites de hipo/hiperglicemia configuráveis por paciente (hoje são
@@ -318,6 +317,17 @@ Header, estado ativo na Navbar. Dois desvios documentados em
 `08-design-system.md`: sem sino de notificação (não existe sistema de
 notificação no MVP) e Navbar reduzida de 3 pra 2 ícones (nunca existiu rota
 separada de "Gráficos"). Ver `07-roadmap.md`, bloco 9.
+
+✅ **RF08 — Relatório glicêmico em PDF** — feito em 2026-09-05. Antes de
+implementar, três decisões foram confirmadas com o Glauber (não são coisa
+pra inventar): conteúdo do PDF (tabela completa do período + resumo de
+HbA1c, sem o gráfico), período (selecionável dia/semana/mês, como o
+gráfico) e biblioteca (`jsPDF` + `jspdf-autotable`, gerando o PDF 100% no
+navegador — ver `05-arquitetura.md`). Disponível na home do paciente e na
+tela do médico sobre um paciente vinculado. Testado com o pipeline real de
+geração de PDF rodado em Node (mesma chamada de biblioteca do componente),
+confirmando tabela, alertas e acentuação corretos. Ver `07-roadmap.md`,
+bloco 7.
 
 ## Resumo
 

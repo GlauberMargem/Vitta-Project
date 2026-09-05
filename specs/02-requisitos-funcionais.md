@@ -9,7 +9,7 @@
 | RF05 | Alertas visuais quando registro está fora dos limites de referência (hipo/hiperglicemia) | Paciente | Alta | ✅ concluído (Sprint 3) |
 | RF06 | Médico visualiza painel com lista de pacientes vinculados e históricos | Médico | Alta | ✅ concluído (Sprint 5) |
 | RF07 | Médico identifica pacientes em risco por indicadores visuais no painel | Médico | Alta | ✅ concluído (Sprint 5) |
-| RF08 | Relatório glicêmico exportável em PDF | Ambos | Média | ❌ não iniciado |
+| RF08 | Relatório glicêmico exportável em PDF | Ambos | Média | ✅ concluído (pós-homologação, 2026-09-05) |
 | RF09 | Médico adiciona anotações clínicas ao histórico do paciente vinculado | Médico | Média | ✅ concluído (Sprint 6) |
 | RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ✅ concluído (Sprint 4) |
 | RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ✅ concluído (Sprint 3) |
@@ -29,6 +29,13 @@ Regras de negócio associadas (não repetir no código como comentário — só 
   semana corrente (segunda a domingo), média por dia; "mensal" são os últimos 30
   dias corridos, média por dia. Nenhuma é um mês-calendário — decisão de
   implementação, não um valor clínico.
+- RF08: relatório em PDF usa as mesmas três janelas de período do RF04 (dia/
+  semana/mês) — `getPeriodRange` em `glucose.ts` é compartilhada pelos dois.
+  Conteúdo confirmado com o Glauber em 2026-09-05: tabela com todos os
+  registros de glicose/refeição do período (sem limite de linhas, diferente do
+  histórico recente que mostra só os 10 últimos) + resumo de HbA1c estimado.
+  Sem o gráfico embutido como imagem — decisão de simplicidade técnica.
+  Gerado inteiramente no navegador (client-side, `jsPDF`), sem rota de API.
 - RF09: anotação clínica é uma entidade separada dos registros de glicose/refeição
   do paciente — não deve ser confundida ou misturada no mesmo histórico.
 - RF09: anotação clínica é visível **só para o médico que a escreveu** — decisão

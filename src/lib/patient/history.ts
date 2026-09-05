@@ -1,6 +1,11 @@
 import type { GlucoseContext } from "@/generated/prisma/client";
 import { contextLabel } from "./format";
-import { glucoseAlert, type GlucoseAlert } from "./glucose";
+import {
+  getPeriodRange,
+  glucoseAlert,
+  type GlucoseAlert,
+  type ReportPeriod,
+} from "./glucose";
 
 export type HistoryItem = {
   kind: "glucose" | "meal";
@@ -52,4 +57,28 @@ export function buildHistory(
   ]
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .slice(0, limit);
+}
+
+const REPORT_PERIODS: ReportPeriod[] = ["daily", "weekly", "monthly"];
+
+/** Histórico completo (sem limite) de cada período — usado no relatório em PDF
+ * (RF08). `glucoseRecords`/`meals` devem cobrir pelo menos os últimos 30 dias
+ * (a maior janela), já que "diária"/"semanal" são recortes dela. */
+export function buildReportHistories(
+  glucoseRecords: GlucoseRecordLike[],
+  meals: MealLike[],
+  referenceDate: Date = new Date()
+): Record<ReportPeriod, HistoryItem[]> {
+  const result = {} as Record<ReportPeriod, HistoryItem[]>;
+  for (const period of REPORT_PERIODS) {
+    const { start, end } = getPeriodRange(period, referenceDate);
+    const records = glucoseRecords.filter(
+      (record) => record.measuredAt >= start && record.measuredAt < end
+    );
+    const periodMeals = meals.filter(
+      (meal) => meal.eatenAt >= start && meal.eatenAt < end
+    );
+    result[period] = buildHistory(records, periodMeals, Infinity);
+  }
+  return result;
 }

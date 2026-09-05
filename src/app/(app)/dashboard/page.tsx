@@ -7,8 +7,9 @@ import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
+import { RelatorioPdfButton } from "@/components/patient/RelatorioPdfButton";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
-import { buildHistory } from "@/lib/patient/history";
+import { buildHistory, buildReportHistories } from "@/lib/patient/history";
 import {
   buildDailyGlucoseSeries,
   buildMonthlyGlucoseSeries,
@@ -21,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const RISK_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default async function DashboardPage() {
@@ -50,37 +52,54 @@ export default async function DashboardPage() {
 
   const patientId = session.user.id;
   const ninetyDaysAgo = new Date(Date.now() - NINETY_DAYS_MS);
+  const thirtyDaysAgo = new Date(Date.now() - THIRTY_DAYS_MS);
 
-  const [glucoseRecords, meals, mealNameRows, glucoseRecords90d, activeLinkRow] =
-    await Promise.all([
-      db.glucoseRecord.findMany({
-        where: { patientId },
-        orderBy: { measuredAt: "desc" },
-        take: 10,
-      }),
-      db.meal.findMany({
-        where: { patientId },
-        orderBy: { eatenAt: "desc" },
-        take: 10,
-      }),
-      db.meal.findMany({
-        where: { patientId, name: { not: null } },
-        distinct: ["name"],
-        select: { name: true },
-        take: 20,
-      }),
-      db.glucoseRecord.findMany({
-        where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
-        select: { valueMgdl: true, measuredAt: true },
-        orderBy: { measuredAt: "asc" },
-      }),
-      db.patientDoctorLink.findFirst({
-        where: { patientId, status: "ACTIVE" },
-        include: { doctor: { include: { user: { select: { name: true } } } } },
-      }),
-    ]);
+  const [
+    glucoseRecords,
+    meals,
+    mealNameRows,
+    glucoseRecords90d,
+    glucoseRecords30d,
+    meals30d,
+    activeLinkRow,
+  ] = await Promise.all([
+    db.glucoseRecord.findMany({
+      where: { patientId },
+      orderBy: { measuredAt: "desc" },
+      take: 10,
+    }),
+    db.meal.findMany({
+      where: { patientId },
+      orderBy: { eatenAt: "desc" },
+      take: 10,
+    }),
+    db.meal.findMany({
+      where: { patientId, name: { not: null } },
+      distinct: ["name"],
+      select: { name: true },
+      take: 20,
+    }),
+    db.glucoseRecord.findMany({
+      where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
+      select: { valueMgdl: true, measuredAt: true },
+      orderBy: { measuredAt: "asc" },
+    }),
+    db.glucoseRecord.findMany({
+      where: { patientId, measuredAt: { gte: thirtyDaysAgo } },
+      orderBy: { measuredAt: "desc" },
+    }),
+    db.meal.findMany({
+      where: { patientId, eatenAt: { gte: thirtyDaysAgo } },
+      orderBy: { eatenAt: "desc" },
+    }),
+    db.patientDoctorLink.findFirst({
+      where: { patientId, status: "ACTIVE" },
+      include: { doctor: { include: { user: { select: { name: true } } } } },
+    }),
+  ]);
 
   const history = buildHistory(glucoseRecords, meals);
+  const reportHistories = buildReportHistories(glucoseRecords30d, meals30d);
 
   const mealNameSuggestions = mealNameRows
     .map((row) => row.name)
@@ -128,6 +147,12 @@ export default async function DashboardPage() {
         </h2>
         <HistoricoList history={history} />
       </section>
+
+      <RelatorioPdfButton
+        patientName={session.user.name ?? "Paciente"}
+        hba1c={hba1c}
+        histories={reportHistories}
+      />
 
       <VinculoMedicoCard activeLink={activeLink} />
     </main>

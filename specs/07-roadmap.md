@@ -135,7 +135,17 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       ver `02-requisitos-funcionais.md`
 
 ## 7. Extras de prioridade Média/Baixa
-- [ ] Exportação de relatório em PDF (RF08)
+- [x] Exportação de relatório em PDF (RF08) — feito em 2026-09-05, backlog
+      pós-homologação. `RelatorioPdfButton.tsx` (client), biblioteca `jsPDF` +
+      `jspdf-autotable` (decisão confirmada com o Glauber: gerar 100% no
+      navegador, sem servidor/Chromium — mais leve e compatível com Vercel
+      serverless). Período selecionável (dia/semana/mês, reaproveitando
+      `getPeriodRange` de `glucose.ts`), conteúdo = tabela completa de
+      glicose/refeição do período (sem limite de linhas) + resumo de HbA1c.
+      Disponível na home do paciente e na tela do médico sobre um paciente
+      vinculado — como já indicava `06-fluxos-e-telas.md`. Bibliotecas
+      importadas via `import()` dinâmico (só carregam quando o botão é
+      clicado, não pesam no carregamento inicial da página — RNF01).
 - [ ] Feedbacks motivacionais (RF12)
 
 ## 9. Refino de Header/Navbar e acessibilidade (backlog pós-homologação)

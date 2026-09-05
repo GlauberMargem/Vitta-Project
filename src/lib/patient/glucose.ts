@@ -74,6 +74,43 @@ export function estimateHbA1c(records: { valueMgdl: number }[]): number | null {
 export const HBA1C_TARGET_PERCENT = 7;
 
 const WEEKDAY_LABELS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+const MONTHLY_WINDOW_DAYS = 30;
+
+export type ReportPeriod = "daily" | "weekly" | "monthly";
+
+/** Janela de datas [start, end) de cada período — usada pelos gráficos e pelo
+ * relatório em PDF (RF04, RF08), pra não duplicar a definição de "semana
+ * corrente"/"últimos 30 dias" em mais de um lugar. */
+export function getPeriodRange(
+  period: ReportPeriod,
+  referenceDate: Date = new Date()
+): { start: Date; end: Date } {
+  if (period === "daily") {
+    const start = new Date(referenceDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    return { start, end };
+  }
+
+  if (period === "weekly") {
+    const start = new Date(referenceDate);
+    const isoWeekday = (start.getDay() + 6) % 7; // 0 = segunda
+    start.setDate(start.getDate() - isoWeekday);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return { start, end };
+  }
+
+  const start = new Date(referenceDate);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (MONTHLY_WINDOW_DAYS - 1));
+  const end = new Date(referenceDate);
+  end.setHours(0, 0, 0, 0);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
 
 export type GlucosePoint = { label: string; value: number | null };
 
@@ -82,16 +119,13 @@ export function buildWeeklyGlucoseSeries(
   records: { valueMgdl: number; measuredAt: Date }[],
   referenceDate: Date = new Date()
 ): GlucosePoint[] {
-  const startOfWeek = new Date(referenceDate);
-  const isoWeekday = (startOfWeek.getDay() + 6) % 7; // 0 = segunda
-  startOfWeek.setDate(startOfWeek.getDate() - isoWeekday);
-  startOfWeek.setHours(0, 0, 0, 0);
+  const { start } = getPeriodRange("weekly", referenceDate);
 
   const buckets: number[][] = Array.from({ length: 7 }, () => []);
 
   for (const record of records) {
     const diffDays = Math.floor(
-      (record.measuredAt.getTime() - startOfWeek.getTime()) / 86_400_000
+      (record.measuredAt.getTime() - start.getTime()) / 86_400_000
     );
     if (diffDays >= 0 && diffDays < 7) {
       buckets[diffDays].push(record.valueMgdl);
@@ -113,16 +147,10 @@ export function buildDailyGlucoseSeries(
   records: { valueMgdl: number; measuredAt: Date }[],
   referenceDate: Date = new Date()
 ): GlucosePoint[] {
-  const startOfDay = new Date(referenceDate);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setDate(endOfDay.getDate() + 1);
+  const { start, end } = getPeriodRange("daily", referenceDate);
 
   return records
-    .filter(
-      (record) =>
-        record.measuredAt >= startOfDay && record.measuredAt < endOfDay
-    )
+    .filter((record) => record.measuredAt >= start && record.measuredAt < end)
     .sort((a, b) => a.measuredAt.getTime() - b.measuredAt.getTime())
     .map((record) => ({
       label: record.measuredAt.toLocaleTimeString("pt-BR", {
@@ -133,16 +161,12 @@ export function buildDailyGlucoseSeries(
     }));
 }
 
-const MONTHLY_WINDOW_DAYS = 30;
-
 /** Últimos 30 dias (janela corrente), média diária dos registros. */
 export function buildMonthlyGlucoseSeries(
   records: { valueMgdl: number; measuredAt: Date }[],
   referenceDate: Date = new Date()
 ): GlucosePoint[] {
-  const startDate = new Date(referenceDate);
-  startDate.setHours(0, 0, 0, 0);
-  startDate.setDate(startDate.getDate() - (MONTHLY_WINDOW_DAYS - 1));
+  const { start } = getPeriodRange("monthly", referenceDate);
 
   const buckets: number[][] = Array.from(
     { length: MONTHLY_WINDOW_DAYS },
@@ -151,7 +175,7 @@ export function buildMonthlyGlucoseSeries(
 
   for (const record of records) {
     const diffDays = Math.floor(
-      (record.measuredAt.getTime() - startDate.getTime()) / 86_400_000
+      (record.measuredAt.getTime() - start.getTime()) / 86_400_000
     );
     if (diffDays >= 0 && diffDays < MONTHLY_WINDOW_DAYS) {
       buckets[diffDays].push(record.valueMgdl);
@@ -159,7 +183,7 @@ export function buildMonthlyGlucoseSeries(
   }
 
   return buckets.map((values, index) => {
-    const date = new Date(startDate);
+    const date = new Date(start);
     date.setDate(date.getDate() + index);
     return {
       label: date.toLocaleDateString("pt-BR", {

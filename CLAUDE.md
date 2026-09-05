@@ -59,8 +59,9 @@ src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/components/                Navbar/Header (TS, tokens do design system, avatar/iniciais, toque de 44px),
                                 src/components/ui (shadcn), icons/
 src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts) +
-                                GlicemiaChartCard (seletor de período dia/semana/mês), VinculoMedicoCard,
-                                HbA1cCard, HistoricoList (reaproveitados no painel do médico)
+                                GlicemiaChartCard (seletor de período dia/semana/mês), RelatorioPdfButton
+                                (jsPDF, RF08), VinculoMedicoCard, HbA1cCard, HistoricoList (reaproveitados
+                                no painel do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
 src/components/profile/        ProfileView (paginação), DadosPessoaisForm (+ troca de senha),
                                 DadosClinicosForm, DadosProfissionaisForm
@@ -72,9 +73,12 @@ src/lib/auth/actions.ts        server actions: authenticate (login), registerUse
 src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal, consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia), estimativa de HbA1c (fórmula ADAG),
-                                agregação diária/semanal/mensal, risco mais grave — fontes em
+                                agregação diária/semanal/mensal, getPeriodRange (janelas dia/semana/mês,
+                                usada pelo gráfico e pelo PDF), risco mais grave — fontes em
                                 specs/04-modelo-de-dados.md
-src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a mesma)
+src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a
+                                mesma); buildReportHistories: idem, sem limite de linhas, por período
+                                (RF08)
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
@@ -99,8 +103,7 @@ middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 **MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
 `specs/09-sprints.md`). Ainda não existem, deliberadamente fora do corte
 inicial: limites de hipo/hiper configuráveis por paciente (hoje são globais
-no código), exportação de relatório em PDF (RF08), feedbacks motivacionais
-(RF12), login social Google.
+no código), feedbacks motivacionais (RF12), login social Google.
 
 ## Dois perfis de usuário — regras de negócio
 

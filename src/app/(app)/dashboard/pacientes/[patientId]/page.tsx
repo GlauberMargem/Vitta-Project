@@ -6,8 +6,9 @@ import { db } from "@/lib/db/client";
 import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
+import { RelatorioPdfButton } from "@/components/patient/RelatorioPdfButton";
 import { NovaAnotacaoForm } from "@/components/doctor/NovaAnotacaoForm";
-import { buildHistory } from "@/lib/patient/history";
+import { buildHistory, buildReportHistories } from "@/lib/patient/history";
 import { formatDateTime } from "@/lib/patient/format";
 import {
   buildDailyGlucoseSeries,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/patient/glucose";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export default async function PatientDetailPage({
   params,
@@ -44,31 +46,47 @@ export default async function PatientDetailPage({
 
   const patientName = link.patient.user.name;
   const ninetyDaysAgo = new Date(Date.now() - NINETY_DAYS_MS);
+  const thirtyDaysAgo = new Date(Date.now() - THIRTY_DAYS_MS);
 
-  const [glucoseRecords, meals, glucoseRecords90d, clinicalNotes] =
-    await Promise.all([
-      db.glucoseRecord.findMany({
-        where: { patientId },
-        orderBy: { measuredAt: "desc" },
-        take: 10,
-      }),
-      db.meal.findMany({
-        where: { patientId },
-        orderBy: { eatenAt: "desc" },
-        take: 10,
-      }),
-      db.glucoseRecord.findMany({
-        where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
-        select: { valueMgdl: true, measuredAt: true },
-        orderBy: { measuredAt: "asc" },
-      }),
-      db.clinicalNote.findMany({
-        where: { linkId: link.id },
-        orderBy: { createdAt: "desc" },
-      }),
-    ]);
+  const [
+    glucoseRecords,
+    meals,
+    glucoseRecords90d,
+    glucoseRecords30d,
+    meals30d,
+    clinicalNotes,
+  ] = await Promise.all([
+    db.glucoseRecord.findMany({
+      where: { patientId },
+      orderBy: { measuredAt: "desc" },
+      take: 10,
+    }),
+    db.meal.findMany({
+      where: { patientId },
+      orderBy: { eatenAt: "desc" },
+      take: 10,
+    }),
+    db.glucoseRecord.findMany({
+      where: { patientId, measuredAt: { gte: ninetyDaysAgo } },
+      select: { valueMgdl: true, measuredAt: true },
+      orderBy: { measuredAt: "asc" },
+    }),
+    db.glucoseRecord.findMany({
+      where: { patientId, measuredAt: { gte: thirtyDaysAgo } },
+      orderBy: { measuredAt: "desc" },
+    }),
+    db.meal.findMany({
+      where: { patientId, eatenAt: { gte: thirtyDaysAgo } },
+      orderBy: { eatenAt: "desc" },
+    }),
+    db.clinicalNote.findMany({
+      where: { linkId: link.id },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   const history = buildHistory(glucoseRecords, meals);
+  const reportHistories = buildReportHistories(glucoseRecords30d, meals30d);
   const dailySeries = buildDailyGlucoseSeries(glucoseRecords90d);
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
   const monthlySeries = buildMonthlyGlucoseSeries(glucoseRecords90d);
@@ -107,6 +125,12 @@ export default async function PatientDetailPage({
         </h2>
         <HistoricoList history={history} />
       </section>
+
+      <RelatorioPdfButton
+        patientName={patientName}
+        hba1c={hba1c}
+        histories={reportHistories}
+      />
 
       <section className="rounded-3xl bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">

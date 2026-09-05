@@ -19,6 +19,7 @@
 | Banco | PostgreSQL | integridade referencial, relacional, adequado a dados sensíveis |
 | Auth | NextAuth/OAuth | evita implementar autenticação própria (risco de segurança) |
 | Gráficos | Recharts (via shadcn/ui Charts) | ver seção dedicada abaixo |
+| Relatório PDF | jsPDF + jspdf-autotable | ver seção dedicada abaixo |
 | Hospedagem | Vercel | integração nativa com Next.js |
 
 ## Convenções de projeto
@@ -143,6 +144,28 @@ saudação (que vem de `session.user.name`) só atualiza depois de sair e
 entrar de novo. Não implementei correção (exigiria reconsultar o banco a
 cada request, ou adicionar `SessionProvider` + `update()` no client, que o
 app não usa hoje) — é uma limitação conhecida, não um bug a caçar.
+
+## Relatório em PDF (RF08) gerado 100% no navegador
+
+Decisão tomada com o Glauber em 2026-09-05. Opções cogitadas: Puppeteer/
+Playwright (renderiza HTML real em PDF via Chromium headless) e
+`@react-pdf/renderer` (componentes React com motor de layout próprio).
+
+Descartado Puppeteer: precisa de um binário Chromium rodando no servidor —
+em serverless (Vercel, hospedagem alvo do projeto) isso exige pacotes extras
+(`@sparticuz/chromium` ou similar), aumenta o tempo de cold start e o
+tamanho do deploy, pra um relatório que é só texto/tabela, sem necessidade
+de renderizar HTML/CSS complexo.
+
+Escolhido: **jsPDF** + **jspdf-autotable**. Motivos:
+- Gera o PDF inteiramente no navegador (`RelatorioPdfButton.tsx`, client
+  component) — nenhuma rota de servidor nova, nenhum custo de
+  servidor/Chromium.
+- `jspdf-autotable` é o plugin padrão de facto pra tabelas no jsPDF (cabeçalho,
+  paginação automática se a tabela for grande) — evita desenhar células à mão.
+- As duas bibliotecas são importadas via `import()` dinâmico dentro do
+  handler de clique, não no carregamento inicial da página — mantém o
+  bundle inicial leve (RNF01).
 
 ## Alteração de senha exige a senha atual
 
