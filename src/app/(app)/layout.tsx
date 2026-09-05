@@ -1,5 +1,5 @@
-import { Header } from "@/components/Header/index.js";
-import { Navbar } from "@/components/Navbar/index.js";
+import { Header } from "@/components/Header";
+import { Navbar } from "@/components/Navbar";
 
 export default function AppLayout({
   children,

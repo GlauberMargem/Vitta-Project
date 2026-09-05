@@ -138,11 +138,41 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
 - [ ] Exportação de relatório em PDF (RF08)
 - [ ] Feedbacks motivacionais (RF12)
 
+## 9. Refino de Header/Navbar e acessibilidade (backlog pós-homologação)
+- [x] Tamanho de toque dos botões — `src/components/ui/button.tsx`: tamanho
+      `default` de 36px (`h-9`) para 44px (`h-11`), `icon` de 36px (`size-9`)
+      para 44px (`size-11`), `lg`/`icon-lg` ajustados pra continuar maiores
+      que o `default` (48px). Segue a recomendação de toque mínimo do RNF05,
+      anotada como achado no Sprint 6. Tamanhos `sm`/`xs` não mudaram — são
+      controles secundários/compactos (ex.: seletor de período do gráfico),
+      não ações primárias.
+- [x] Header migrado pra `.tsx`, cores trocadas dos valores hardcoded
+      (`#6A97C6`, cinzas) pros tokens do design system (`bg-card`,
+      `border-border`). Lado direito ganhou um avatar circular com as
+      iniciais do nome, linkando pra `/userConfig` — reaproveita `session`
+      via `auth()` (Header virou Server Component `async`). **Desvio**: o
+      mockup pede também um sino de notificação ao lado do avatar; não
+      implementado porque não existe sistema de notificação no MVP
+      (`05-arquitetura.md` já registra push notification como fora do corte
+      inicial) — um ícone decorativo sem função por trás seria enganoso.
+      Logo também passou a linkar pra `/dashboard` em vez de `/` (a raiz é
+      só a página placeholder do bootstrap do create-next-app, nunca fazia
+      sentido como destino do cabeçalho da área logada).
+- [x] Navbar migrada pra `.tsx`, cores trocadas pros tokens do design
+      system, toque de 44px, estado ativo (`aria-current`) via `usePathname`.
+      **Desvio**: reduzida de 3 pra 2 ícones (Início, Perfil). O mockup tem
+      um terceiro ícone de "Gráficos", mas o app nunca teve uma rota
+      separada pra isso — o gráfico sempre viveu embutido no dashboard
+      (decisão do Sprint 3). O ícone de "Gráficos" antigo apontava pra
+      `/dashboard/`, a mesma rota do ícone "Início" (que por sua vez
+      apontava erroneamente pra `/`, fora da área logada) — mantê-lo
+      apontando pra um destino duplicado não agregava nada.
+
 ## 8. Não-funcionais transversais (revisar a cada bloco acima)
 - [x] Checklist LGPD (RNF03) — feito no Sprint 6, ver `09-sprints.md`
 - [x] Auditoria de acessibilidade (RNF05) nas telas novas — feito no
-      Sprint 6, achados registrados em `09-sprints.md` (nenhum bloqueante,
-      um item de tamanho de toque anotado como backlog)
+      Sprint 6, achados registrados em `09-sprints.md`. Item de tamanho de
+      toque corrigido pós-homologação (ver bloco 9)
 - [x] Índices de banco conforme `04-modelo-de-dados.md` (RNF06) — os 4
       índices listados já existiam desde a migração `20260902225148_init`
       (bloco 0); conferido no Sprint 6 que nenhum ficou pra trás

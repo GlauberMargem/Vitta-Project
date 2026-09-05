@@ -56,7 +56,8 @@ src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um
 src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
                                 dados clínicos (paciente) ou profissionais (médico)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
-src/components/                Navbar, Header, src/components/ui (shadcn), icons/
+src/components/                Navbar/Header (TS, tokens do design system, avatar/iniciais, toque de 44px),
+                                src/components/ui (shadcn), icons/
 src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts) +
                                 GlicemiaChartCard (seletor de período dia/semana/mês), VinculoMedicoCard,
                                 HbA1cCard, HistoricoList (reaproveitados no painel do médico)

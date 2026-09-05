@@ -66,10 +66,19 @@ marca/apresentação — confirmar se aparece dentro do produto ou só fora dele
 - Botão de finalização positiva: verde, texto branco (ex.: "Finalizar cadastro").
 - Navegação inferior fixa com 3 ícones: casa (Home), gráfico de linha (Gráficos),
   pessoa com engrenagem (Perfil).
+  ⚠️ **Desvio implementado** (pós-homologação, 2026-09-05): reduzida pra 2
+  ícones (Início, Perfil) — nunca existiu uma rota separada de "Gráficos", o
+  gráfico sempre esteve embutido no dashboard (Sprint 3), então o terceiro
+  ícone apontava pra um destino duplicado do de "Início". Ver `07-roadmap.md`,
+  bloco 9.
 - Modais sobrepõem a tela com fundo escurecido, card branco central, "X" no canto
   superior direito para fechar.
 - Cabeçalho do app logado: logo "vitta" à esquerda, sino de notificação + avatar
   circular à direita.
+  ⚠️ **Desvio implementado**: sino de notificação não incluído — não existe
+  sistema de notificação no MVP (ver `05-arquitetura.md`), um ícone decorativo
+  sem função seria enganoso. Avatar com iniciais do nome, linkando pra
+  `/userConfig`, foi implementado.
 
 O rodapé das telas de login/cadastro **não** deve usar "powered by Limen" (isso
 era só marca d'água da ferramenta de protótipo). No lugar, usar um texto de

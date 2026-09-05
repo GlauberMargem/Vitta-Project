@@ -299,10 +299,6 @@ paralelo se sobrar tempo:
 - RF08 — Exportação de relatório em PDF
 - RF12 — Feedbacks motivacionais
 - Login social via Google (falta Client ID/Secret)
-- Refino visual do Header/Navbar (hoje só os ícones foram trocados pra
-  lucide-react — o layout/cores ainda são os antigos, pré-specs)
-- Tamanho de toque dos botões (36px hoje, recomendação é 44px) — ver
-  checklist de acessibilidade do Sprint 6
 - Limites de hipo/hiperglicemia configuráveis por paciente (hoje são
   globais em `src/lib/patient/glucose.ts`)
 
@@ -314,6 +310,14 @@ registrado lá (estrutura estendida pro médico, que nunca teve mockup).
 período (Dia/Semana/Mês) em `GlicemiaChartCard.tsx`, reaproveitado no
 dashboard do paciente e na tela de histórico do médico. Ver `07-roadmap.md`,
 bloco 3.
+
+✅ **Refino de Header/Navbar e tamanho de toque** — feito em 2026-09-05.
+Botões de 36px para 44px de altura/toque (`button.tsx`), Header e Navbar
+migrados pra TS com os tokens do design system, avatar com iniciais no
+Header, estado ativo na Navbar. Dois desvios documentados em
+`08-design-system.md`: sem sino de notificação (não existe sistema de
+notificação no MVP) e Navbar reduzida de 3 pra 2 ícones (nunca existiu rota
+separada de "Gráficos"). Ver `07-roadmap.md`, bloco 9.
 
 ## Resumo
 
