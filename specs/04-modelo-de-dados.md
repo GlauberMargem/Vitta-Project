@@ -50,6 +50,7 @@ Registro de glicemia — RF02/RF03/RF04/RF05/RF11.
 | context | enum('jejum','pos_prandial','antes_de_dormir','outro') | |
 | measured_at | timestamptz | índice, usado nos gráficos e na média de 90 dias |
 | created_at | timestamptz | quando o registro foi salvo no sistema |
+| linked_meal_id | uuid FK → meals.id, nullable, `ON DELETE SET NULL` | vínculo manual opcional com uma refeição (ver "Vínculo manual glicose-refeição" abaixo) |
 
 ## Limites clínicos de hipo/hiperglicemia (RF05)
 
@@ -132,6 +133,25 @@ Registro de refeição — contexto para variações glicêmicas.
 | name | text | opcional, refeição "salva" reutilizável |
 | carbs_g | integer | quantidade de carboidratos |
 | eaten_at | timestamptz | |
+
+Uma refeição pode ter várias glicoses vinculadas a ela (relação inversa de
+`glucose_records.linked_meal_id`) — por exemplo, uma medição antes e outra
+depois da mesma refeição.
+
+## Vínculo manual glicose-refeição (pós-monografia, 2026-09-06)
+
+Funcionalidade adicionada depois da monografia, fora dos RF01–RF12
+originais — ver `02-requisitos-funcionais.md`. O paciente pode escolher
+manualmente vincular uma glicose a uma refeição (ou vice-versa) ao cadastrar
+qualquer um dos dois, via um select opcional no modal correspondente. É
+sempre uma ação explícita do paciente — o sistema nunca cria o vínculo
+sozinho, só sugere: depois de registrar uma glicose sem vínculo escolhido,
+se não houver nenhuma refeição registrada dentro de ±2h daquele horário, o
+app pergunta se o paciente quer registrar uma refeição também, já abrindo o
+modal de refeição com o vínculo pré-selecionado (o paciente ainda confirma
+ao salvar). Implementação: `src/lib/patient/actions.ts`
+(`createGlucoseRecord`/`createMeal`), `src/components/patient/AcoesRapidas.tsx`
+(coordena os dois modais e o prompt de sugestão).
 
 ### `patient_doctor_links`
 Vínculo opcional paciente↔médico — RF10.

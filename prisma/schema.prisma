@@ -92,14 +92,16 @@ model DoctorProfile {
 }
 
 model GlucoseRecord {
-  id         String         @id @default(uuid()) @db.Uuid
-  patientId  String         @map("patient_id") @db.Uuid
-  valueMgdl  Int            @map("value_mgdl")
-  context    GlucoseContext
-  measuredAt DateTime       @map("measured_at")
-  createdAt  DateTime       @default(now()) @map("created_at")
+  id           String         @id @default(uuid()) @db.Uuid
+  patientId    String         @map("patient_id") @db.Uuid
+  valueMgdl    Int            @map("value_mgdl")
+  context      GlucoseContext
+  measuredAt   DateTime       @map("measured_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  linkedMealId String?        @map("linked_meal_id") @db.Uuid
 
-  patient PatientProfile @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  patient    PatientProfile @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  linkedMeal Meal?          @relation("MealGlucoseLink", fields: [linkedMealId], references: [id], onDelete: SetNull)
 
   @@index([patientId, measuredAt])
   @@map("glucose_records")
@@ -112,7 +114,8 @@ model Meal {
   carbsG    Int      @map("carbs_g")
   eatenAt   DateTime @map("eaten_at")
 
-  patient PatientProfile @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  patient              PatientProfile  @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  linkedGlucoseRecords GlucoseRecord[] @relation("MealGlucoseLink")
 
   @@index([patientId, eatenAt])
   @@map("meals")

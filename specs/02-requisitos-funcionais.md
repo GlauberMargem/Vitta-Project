@@ -14,6 +14,8 @@
 | RF10 | Paciente vincula-se a um médico via código de convite | Paciente | Média | ✅ concluído (Sprint 4) |
 | RF11 | Cálculo/exibição de estimativa de HbA1c com base na média dos últimos 90 dias | Paciente | Média | ✅ concluído (Sprint 3) |
 | RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ✅ concluído (pós-homologação, 2026-09-05) |
+| RF13 | Alerta quando a glicose costuma ficar alta ou baixa num período do dia (madrugada/manhã/tarde/noite) | Paciente | Baixa | ✅ concluído (pós-monografia, 2026-09-06) — não é um dos RF originais da monografia, adicionado a pedido do Glauber |
+| RF14 | Vínculo manual entre um registro de glicose e uma refeição, com sugestão automática de registrar refeição após uma glicose sem refeição próxima | Paciente | Baixa | ✅ concluído (pós-monografia, 2026-09-06) — idem, fora da monografia original |
 
 Regras de negócio associadas (não repetir no código como comentário — só aplicar):
 
@@ -63,3 +65,19 @@ Regras de negócio associadas (não repetir no código como comentário — só 
   Paciente não tem acesso a essas notas em nenhuma tela.
 - RF10: vínculo é sempre iniciado pelo **paciente** informando um código gerado pelo
   médico (não o médico buscando/adicionando paciente livremente).
+- RF13: regra confirmada com o Glauber em 2026-09-06. Agrupa os registros dos
+  últimos 30 dias corridos em 4 períodos (madrugada 0-6h, manhã 6-12h, tarde
+  12-18h, noite 18-24h); um período só entra na comparação com pelo menos 3
+  medições; o alerta só aparece se o período mais desviante tiver uma média
+  pelo menos 20 mg/dL acima ou abaixo da média geral do paciente na janela —
+  mostra só o período mais desviante, nunca mais de um alerta por vez. Copy
+  usa o nome do período ("de manhã", "à tarde" etc.), não um horário
+  específico — ver `src/lib/patient/trend.ts`.
+- RF14: o vínculo é sempre uma escolha explícita do paciente (select opcional
+  nos modais de Nova Glicose/Nova Refeição) — o sistema nunca cria o vínculo
+  sozinho. A sugestão automática só dispara quando, depois de salvar uma
+  glicose sem vínculo escolhido, não existir nenhuma refeição registrada
+  dentro de ±2h daquele horário; mesmo assim, o paciente ainda precisa
+  confirmar salvando o modal de refeição sugerido — nunca é criado
+  automaticamente. Ver `src/lib/patient/actions.ts` e
+  `src/components/patient/AcoesRapidas.tsx`.

@@ -61,6 +61,7 @@ export default async function PatientDetailPage({
       where: { patientId },
       orderBy: { measuredAt: "desc" },
       take: 10,
+      include: { linkedMeal: { select: { name: true } } },
     }),
     db.meal.findMany({
       where: { patientId },
@@ -75,6 +76,7 @@ export default async function PatientDetailPage({
     db.glucoseRecord.findMany({
       where: { patientId, measuredAt: { gte: thirtyDaysAgo } },
       orderBy: { measuredAt: "desc" },
+      include: { linkedMeal: { select: { name: true } } },
     }),
     db.meal.findMany({
       where: { patientId, eatenAt: { gte: thirtyDaysAgo } },

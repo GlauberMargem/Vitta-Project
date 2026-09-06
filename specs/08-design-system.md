@@ -80,6 +80,16 @@ já produz um círculo de qualquer forma (não haveria diferença visual).
   nunca seria de fato renderizado (só serviria de fallback pra glifos que o
   Poppins não tem, o que não acontece em português), então mantê-la carregada
   seria peso morto contra o RNF01 (resposta rápida em conexão lenta).
+- **Área logada (dashboard, modais, perfil)**: campos de formulário e texto
+  de apoio usam Quicksand (pesos 400/500/600) em vez de Poppins — token
+  `--font-support` (classe `font-support`), adicionado em 2026-09-06 a
+  pedido do documento de especificação da área logada. Aplicado só como
+  `className` explícito nos `Input`/`Label`/`SelectTrigger` de
+  `NovaGlicoseDialog.tsx`, `NovaRefeicaoDialog.tsx` e dos formulários de
+  perfil/médico — **não** nos componentes `Input`/`Label` compartilhados,
+  porque esses também são usados em login/cadastro, que continuam só
+  Poppins (não fizeram parte desse documento e já tiveram tipografia
+  confirmada numa rodada anterior).
 
 ## Logo
 
@@ -166,13 +176,32 @@ crédito visível".
 "Não desanime, nossa meta é de Y%" · seção "Ações" com botão "+" (nova glicose) e
 ícone garfo/faca (nova refeição)
 
+Card de alerta de tendência (RF13, só aparece quando a regra é satisfeita —
+ver `02-requisitos-funcionais.md`), logo abaixo do card de motivação (RF12):
+- "Notamos que sua glicose costuma subir {período}. Fique de olho!"
+- "Notamos que sua glicose costuma cair {período}. Fique de olho!"
+onde `{período}` é "de madrugada", "de manhã", "à tarde" ou "à noite" — ver
+`src/lib/patient/trend.ts`.
+
 ### Modal — Nova Glicose
-"Nova Glicose" · "Digite o valor da sua glicose" · "Insira a hora da aferição da
-glicose" · botão "Inserir glicose"
+"Nova Glicose" · "Digite o valor da sua glicose" · rótulo do campo de horário
+"Que horas você mediu?" (trocado de "Insira a hora da aferição da glicose"
+em 2026-09-06, copy mais informal proposta no documento da área logada) ·
+"Vincular a uma refeição (opcional)" (RF14, só aparece se houver refeições
+recentes) · botão "Inserir glicose"
 
 ### Modal — Nova Refeição
 "Nova Refeição" · "Buscar refeição já registrada" (dropdown) · "Quantidade de
-carboidratos da refeição" · "Insira a hora da refeição" · botão "Inserir refeição"
+carboidratos da refeição" · "Insira a hora da refeição" · "Vincular a uma
+glicose (opcional)" (RF14, só aparece se houver glicoses recentes) · botão
+"Inserir refeição"
+
+### Prompt de sugestão de refeição (RF14)
+Aparece só depois de salvar uma glicose sem vínculo escolhido e sem refeição
+próxima (±2h): "Que tal registrar sua refeição?" / "Você comeu alguma coisa
+nas últimas 2 horas? Vamos registrar isso também!" · botões "Agora não" e
+"Sim, registrar" (abre o modal de Nova Refeição com o vínculo já
+pré-selecionado).
 
 ### Gráficos
 "Glicemia ao longo da semana" · gráfico de área, eixo Y em mg/dL (50 a 500), eixo

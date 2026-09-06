@@ -25,18 +25,29 @@ export function DadosPessoaisForm({
     <section className="rounded-lg bg-card p-5 shadow-sm">
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="name">Nome completo</Label>
-          <Input id="name" name="name" defaultValue={name} required />
+          <Label htmlFor="name" className="font-support">
+            Nome completo
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            defaultValue={name}
+            required
+            className="font-support"
+          />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="font-support">
+            Email
+          </Label>
           <Input
             id="email"
             name="email"
             type="email"
             defaultValue={email}
             required
+            className="font-support"
           />
         </div>
 
@@ -53,7 +64,7 @@ export function DadosPessoaisForm({
 
       <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
         <div className="flex items-center justify-between">
-          <Label>Senha</Label>
+          <Label className="font-support">Senha</Label>
           <Button
             type="button"
             variant="link"
@@ -73,6 +84,7 @@ export function DadosPessoaisForm({
               type="password"
               placeholder="Senha atual"
               required
+              className="font-support"
             />
             <Input
               name="newPassword"
@@ -80,6 +92,7 @@ export function DadosPessoaisForm({
               placeholder="Nova senha"
               minLength={8}
               required
+              className="font-support"
             />
             <Input
               name="confirmNewPassword"
@@ -87,6 +100,7 @@ export function DadosPessoaisForm({
               placeholder="Confirme a nova senha"
               minLength={8}
               required
+              className="font-support"
             />
             {passwordError ? (
               <p className="text-sm text-destructive" role="alert">

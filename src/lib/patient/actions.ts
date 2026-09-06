@@ -12,26 +12,32 @@ async function requirePatientId(): Promise<string> {
   return session.user.id;
 }
 
+export type CreateGlucoseRecordState = {
+  error: string | null;
+  recordId?: string;
+};
+
 export async function createGlucoseRecord(
-  _previousState: string | null,
+  _previousState: CreateGlucoseRecordState,
   formData: FormData
-): Promise<string | null> {
+): Promise<CreateGlucoseRecordState> {
   const patientId = await requirePatientId();
 
   const valueRaw = formData.get("value");
   const measuredAtRaw = formData.get("measuredAt");
   const context = formData.get("context");
+  const linkedMealIdRaw = formData.get("linkedMealId");
 
   const valueMgdl = Number(valueRaw);
   if (!Number.isFinite(valueMgdl) || valueMgdl <= 0) {
-    return "Informe um valor de glicose válido.";
+    return { error: "Informe um valor de glicose válido." };
   }
   if (typeof measuredAtRaw !== "string" || !measuredAtRaw) {
-    return "Informe o horário da aferição.";
+    return { error: "Informe o horário da aferição." };
   }
   const measuredAt = new Date(measuredAtRaw);
   if (Number.isNaN(measuredAt.getTime())) {
-    return "Horário inválido.";
+    return { error: "Horário inválido." };
   }
   if (
     context !== "JEJUM" &&
@@ -39,20 +45,33 @@ export async function createGlucoseRecord(
     context !== "ANTES_DE_DORMIR" &&
     context !== "OUTRO"
   ) {
-    return "Selecione o contexto da medição.";
+    return { error: "Selecione o contexto da medição." };
   }
 
-  await db.glucoseRecord.create({
+  let linkedMealId: string | null = null;
+  if (typeof linkedMealIdRaw === "string" && linkedMealIdRaw) {
+    const meal = await db.meal.findFirst({
+      where: { id: linkedMealIdRaw, patientId },
+      select: { id: true },
+    });
+    if (!meal) {
+      return { error: "Refeição selecionada para vincular não encontrada." };
+    }
+    linkedMealId = meal.id;
+  }
+
+  const record = await db.glucoseRecord.create({
     data: {
       patientId,
       valueMgdl: Math.round(valueMgdl),
       measuredAt,
       context,
+      linkedMealId,
     },
   });
 
   revalidatePath("/dashboard");
-  return null;
+  return { error: null, recordId: record.id };
 }
 
 export async function createMeal(
@@ -64,6 +83,7 @@ export async function createMeal(
   const carbsRaw = formData.get("carbs");
   const eatenAtRaw = formData.get("eatenAt");
   const name = formData.get("name");
+  const linkedGlucoseRecordIdRaw = formData.get("linkedGlucoseRecordId");
 
   const carbsG = Number(carbsRaw);
   if (!Number.isFinite(carbsG) || carbsG < 0) {
@@ -77,7 +97,22 @@ export async function createMeal(
     return "Horário inválido.";
   }
 
-  await db.meal.create({
+  let linkedGlucoseRecordId: string | null = null;
+  if (
+    typeof linkedGlucoseRecordIdRaw === "string" &&
+    linkedGlucoseRecordIdRaw
+  ) {
+    const record = await db.glucoseRecord.findFirst({
+      where: { id: linkedGlucoseRecordIdRaw, patientId },
+      select: { id: true },
+    });
+    if (!record) {
+      return "Glicose selecionada para vincular não encontrada.";
+    }
+    linkedGlucoseRecordId = record.id;
+  }
+
+  const meal = await db.meal.create({
     data: {
       patientId,
       carbsG: Math.round(carbsG),
@@ -85,6 +120,13 @@ export async function createMeal(
       name: typeof name === "string" && name.trim() ? name.trim() : null,
     },
   });
+
+  if (linkedGlucoseRecordId) {
+    await db.glucoseRecord.update({
+      where: { id: linkedGlucoseRecordId },
+      data: { linkedMealId: meal.id },
+    });
+  }
 
   revalidatePath("/dashboard");
   return null;

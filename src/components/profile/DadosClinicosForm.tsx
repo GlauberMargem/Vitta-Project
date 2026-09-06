@@ -31,23 +31,28 @@ export function DadosClinicosForm({
     <section className="rounded-lg bg-card p-5 shadow-sm">
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="birthDate">Data de nascimento</Label>
+          <Label htmlFor="birthDate" className="font-support">
+            Data de nascimento
+          </Label>
           <Input
             id="birthDate"
             name="birthDate"
             type="date"
             defaultValue={birthDate.toISOString().slice(0, 10)}
             required
+            className="font-support"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="diabetesType">Tipo de diabetes</Label>
+          <Label htmlFor="diabetesType" className="font-support">
+            Tipo de diabetes
+          </Label>
           <Select
             value={selectedType}
             onValueChange={(value) => setSelectedType(value as DiabetesType)}
           >
-            <SelectTrigger id="diabetesType" className="w-full">
+            <SelectTrigger id="diabetesType" className="w-full font-support">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

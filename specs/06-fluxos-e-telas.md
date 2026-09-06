@@ -19,9 +19,17 @@ parênteses quando já existem.
   precisa virar a home do paciente): saudação, estimativa de HbA1c em destaque
   com meta de referência, ações rápidas (registrar glicose `+`, registrar
   refeição 🍴), navegação inferior (Home / Gráficos / Perfil).
-- **Modal — Nova Glicose**: valor (mg/dL), horário da aferição.
+- **Modal — Nova Glicose**: valor (mg/dL), horário da aferição, vínculo
+  opcional com uma refeição recente (RF14).
 - **Modal — Nova Refeição**: buscar refeição já registrada OU carboidratos +
-  horário.
+  horário, vínculo opcional com uma glicose recente (RF14).
+- **Fluxo de sugestão de refeição (RF14, pós-monografia, 2026-09-06)**: depois
+  de salvar uma glicose sem vínculo escolhido, se não existir nenhuma
+  refeição registrada dentro de ±2h daquele horário, aparece um prompt
+  perguntando se o paciente comeu algo recentemente; ao confirmar, abre o
+  modal de Nova Refeição já com o vínculo pré-selecionado (o paciente ainda
+  precisa salvar pra confirmar — nada é criado automaticamente). Implementado
+  em `src/components/patient/AcoesRapidas.tsx`.
 - **Gráficos**: evolução glicêmica por período (semana por padrão no MVP; filtros
   mensal/trimestral podem vir depois), gráfico de área, eixo Y em mg/dL.
 - **Perfil** (`/userConfig`, já existe — precisa dividir em 2 sub-telas): dados

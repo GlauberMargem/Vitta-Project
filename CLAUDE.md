@@ -72,9 +72,11 @@ src/assets/illustrations/      ilustrações maiores (cenas, personagens) de ban
 src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta — consistente com o resto
                                 de `src/components/*`), tokens do design system, avatar/iniciais, toque
                                 de 44px; src/components/ui (shadcn), icons/
-src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts) +
-                                GlicemiaChartCard (seletor de período dia/semana/mês), RelatorioPdfButton
-                                (jsPDF, RF08), MotivacaoCard (RF12, só paciente), VinculoMedicoCard,
+src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
+                                sugestão de refeição, RF14), NovaGlicoseDialog, NovaRefeicaoDialog (shadcn
+                                Dialog), GlicemiaChart (Recharts) + GlicemiaChartCard (seletor de período
+                                dia/semana/mês), RelatorioPdfButton (jsPDF, RF08), MotivacaoCard (RF12, só
+                                paciente), AlertaTendenciaCard (RF13, só paciente), VinculoMedicoCard,
                                 HbA1cCard, HistoricoList (reaproveitados no painel do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
 src/components/profile/        ProfileView (paginação + botão Sair), DadosPessoaisForm (+ troca de senha),
@@ -85,7 +87,9 @@ src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
 src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app
 src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro), logout
-src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal, consumeInviteCode, revokeLink
+src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linkedMealId opcional, retorna
+                                {error, recordId} — RF14), createMeal (aceita linkedGlucoseRecordId
+                                opcional), consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
                                 2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
@@ -97,6 +101,9 @@ src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data 
                                 (RF08)
 src/lib/patient/motivation.ts  RF12: dias distintos com glicose nos últimos 7 dias corridos + as 5
                                 mensagens motivacionais (textos exatos, não parafrasear)
+src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por período do dia (janela de
+                                30 dias, mínimo 3 medições por período, desvio mínimo de 20 mg/dL da
+                                média geral) — regra confirmada com o Glauber em 2026-09-06
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),

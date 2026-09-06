@@ -22,6 +22,7 @@ type GlucoseRecordLike = {
   measuredAt: Date;
   valueMgdl: number;
   context: GlucoseContext;
+  linkedMeal?: { name: string | null } | null;
 };
 
 type MealLike = {
@@ -45,7 +46,11 @@ export function buildHistory(
       id: record.id,
       date: record.measuredAt,
       label: `${record.valueMgdl} mg/dL`,
-      detail: contextLabel(record.context),
+      detail: record.linkedMeal
+        ? `${contextLabel(record.context)} · Refeição vinculada: ${
+            record.linkedMeal.name ?? "Refeição"
+          }`
+        : contextLabel(record.context),
       alert: glucoseAlert(record.valueMgdl, record.context, thresholds),
     })),
     ...meals.map((meal) => ({

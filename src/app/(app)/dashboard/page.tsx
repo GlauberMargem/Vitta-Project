@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
-import { NovaGlicoseDialog } from "@/components/patient/NovaGlicoseDialog";
-import { NovaRefeicaoDialog } from "@/components/patient/NovaRefeicaoDialog";
+import { AcoesRapidas } from "@/components/patient/AcoesRapidas";
 import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { RelatorioPdfButton } from "@/components/patient/RelatorioPdfButton";
 import { MotivacaoCard } from "@/components/patient/MotivacaoCard";
+import { AlertaTendenciaCard } from "@/components/patient/AlertaTendenciaCard";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
 import { buildHistory, buildReportHistories } from "@/lib/patient/history";
 import {
@@ -26,6 +26,7 @@ import {
   countDaysWithGlucoseRecord,
   motivationalMessage,
 } from "@/lib/patient/motivation";
+import { detectGlucoseTrend, trendAlertLabel } from "@/lib/patient/trend";
 import { cn } from "@/lib/utils";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
@@ -75,6 +76,7 @@ export default async function DashboardPage() {
       where: { patientId },
       orderBy: { measuredAt: "desc" },
       take: 10,
+      include: { linkedMeal: { select: { name: true } } },
     }),
     db.meal.findMany({
       where: { patientId },
@@ -95,6 +97,7 @@ export default async function DashboardPage() {
     db.glucoseRecord.findMany({
       where: { patientId, measuredAt: { gte: thirtyDaysAgo } },
       orderBy: { measuredAt: "desc" },
+      include: { linkedMeal: { select: { name: true } } },
     }),
     db.meal.findMany({
       where: { patientId, eatenAt: { gte: thirtyDaysAgo } },
@@ -125,6 +128,7 @@ export default async function DashboardPage() {
   const motivationMessage = motivationalMessage(
     countDaysWithGlucoseRecord(glucoseRecords30d)
   );
+  const trendMessage = trendAlertLabel(detectGlucoseTrend(glucoseRecords30d));
 
   const mealNameSuggestions = mealNameRows
     .map((row) => row.name)
@@ -152,14 +156,17 @@ export default async function DashboardPage() {
 
       <MotivacaoCard message={motivationMessage} />
 
+      <AlertaTendenciaCard message={trendMessage} />
+
       <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Ações
         </h2>
-        <div className="flex gap-3">
-          <NovaGlicoseDialog />
-          <NovaRefeicaoDialog mealNameSuggestions={mealNameSuggestions} />
-        </div>
+        <AcoesRapidas
+          recentMeals={meals}
+          recentGlucoseRecords={glucoseRecords}
+          mealNameSuggestions={mealNameSuggestions}
+        />
       </section>
 
       <GlicemiaChartCard

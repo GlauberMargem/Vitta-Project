@@ -24,14 +24,16 @@ export function NovaAnotacaoForm({ linkId }: { linkId: string }) {
     <form ref={formRef} action={formAction} className="flex flex-col gap-3">
       <input type="hidden" name="linkId" value={linkId} />
       <div className="flex flex-col gap-2">
-        <Label htmlFor="note">Nova anotação</Label>
+        <Label htmlFor="note" className="font-support">
+          Nova anotação
+        </Label>
         <textarea
           id="note"
           name="note"
           rows={3}
           required
           placeholder="Observação clínica visível só para você"
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="w-full rounded-md border border-input bg-transparent px-3 py-2 font-support text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       </div>
       {error ? (

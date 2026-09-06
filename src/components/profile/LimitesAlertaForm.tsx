@@ -47,7 +47,7 @@ export function LimitesAlertaForm(props: Thresholds) {
       </p>
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="severeHypoThreshold">
+          <Label htmlFor="severeHypoThreshold" className="font-support">
             Hipoglicemia grave (abaixo de, mg/dL)
           </Label>
           <Input
@@ -59,11 +59,14 @@ export function LimitesAlertaForm(props: Thresholds) {
               updateField("severeHypoThreshold", event.target.value)
             }
             required
+            className="font-support"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="hypoThreshold">Hipoglicemia (abaixo de, mg/dL)</Label>
+          <Label htmlFor="hypoThreshold" className="font-support">
+            Hipoglicemia (abaixo de, mg/dL)
+          </Label>
           <Input
             id="hypoThreshold"
             name="hypoThreshold"
@@ -73,11 +76,12 @@ export function LimitesAlertaForm(props: Thresholds) {
               updateField("hypoThreshold", event.target.value)
             }
             required
+            className="font-support"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="hyperFastingThreshold">
+          <Label htmlFor="hyperFastingThreshold" className="font-support">
             Hiperglicemia em jejum/antes de dormir (acima de, mg/dL)
           </Label>
           <Input
@@ -89,11 +93,12 @@ export function LimitesAlertaForm(props: Thresholds) {
               updateField("hyperFastingThreshold", event.target.value)
             }
             required
+            className="font-support"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="hyperPostprandialThreshold">
+          <Label htmlFor="hyperPostprandialThreshold" className="font-support">
             Hiperglicemia pós-prandial (acima de, mg/dL)
           </Label>
           <Input
@@ -105,6 +110,7 @@ export function LimitesAlertaForm(props: Thresholds) {
               updateField("hyperPostprandialThreshold", event.target.value)
             }
             required
+            className="font-support"
           />
         </div>
 
