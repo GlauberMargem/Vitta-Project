@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { registerUser } from "@/lib/auth/actions";
 import doctorIllustration from "@/assets/illustrations/doctor-pana.svg";
+import patientIllustration from "@/assets/illustrations/medical-care-rafiki.svg";
 
 type Role = "PATIENT" | "DOCTOR" | "";
 type DiabetesType = "TIPO_1" | "TIPO_2" | "GESTACIONAL" | "OUTRO" | "";
@@ -167,6 +168,23 @@ export function CadastroForm() {
           </>
         ) : (
           <>
+            <div className="flex flex-col items-center gap-1">
+              <Image
+                src={patientIllustration}
+                alt=""
+                className="h-48 w-auto"
+                priority
+              />
+              <a
+                href="https://storyset.com/work"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-muted-foreground hover:underline"
+              >
+                Work illustrations by Storyset
+              </a>
+            </div>
+
             <div className="flex flex-col gap-2">
               <Label htmlFor="birthDate">Data de nascimento</Label>
               <Input

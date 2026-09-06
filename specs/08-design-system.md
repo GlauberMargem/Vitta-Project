@@ -150,6 +150,11 @@ aumentada (`h-32` → `h-48`) pra bater com a proporção maior vista no Figma.
 paciente" · campos: Data de nascimento, Tipo de diabetes (dropdown) · botão
 "Finalizar cadastro"
 
+Ilustração (`medical-care-rafiki.svg`, Storyset) adicionada acima dos campos em
+2026-09-06, mesmo padrão da etapa do médico: crédito exigido pela licença
+abaixo dela — ver `05-arquitetura.md`, seção "Ilustrações de terceiros exigem
+crédito visível".
+
 ### Home do paciente
 "Bom dia! [Nome]" + horário no canto · card "Sua hemoglobina glicada está em X%" /
 "Não desanime, nossa meta é de Y%" · seção "Ações" com botão "+" (nova glicose) e
