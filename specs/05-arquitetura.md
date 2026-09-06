@@ -262,3 +262,25 @@ link pequeno logo abaixo da ilustração. `src/assets/illustrations/CREDITS.md`
 mantém a lista de qual arquivo pede qual crédito, pra não se perder quando
 mais ilustrações forem adicionadas — mas o arquivo em si não substitui o
 crédito visível na tela.
+
+## "/" nunca é uma home pública — redireciona por sessão
+
+`src/app/page.tsx` era um placeholder ("HOMEPAGE") do bootstrap do
+create-next-app, nunca chegou a ser uma tela real do produto — não existe
+requisito nem tela de home pública nas specs. Trocado em 2026-09-06 por um
+Server Component que só chama `auth()` e redireciona: sem sessão vai pra
+`/login`, com sessão vai pra `/dashboard`. Mesmo padrão que `/login` e
+`/cadastro` já usavam (checar sessão e redirecionar), só que na direção
+oposta e sem UI própria — por isso "/" virou rota dinâmica (`ƒ`) no build,
+antes era estática (`○`).
+
+Isso resolve dois pontos pedidos pelo Glauber em 2026-09-06: (1) acessar a
+URL raiz sem estar logado cai direto em `/login`; (2) reforça que não há
+"área pública" no app — tudo além de `/login` e `/cadastro` exige sessão.
+A proteção de fato das rotas autenticadas (`/dashboard`, `/userConfig` e
+subrotas) já existia via `middleware.ts` (matcher cobre `/dashboard/:path*`
+e `/userConfig/:path*`, redireciona pra `/login?callbackUrl=...` sem
+sessão) — testado ponta a ponta em `next build && next start` (o bug de
+`next dev` não invocar o middleware já está documentado acima). Cada page
+autenticada também tem `if (!session) return null` como reforço, caso
+alguém acesse a página por algum caminho que o middleware não cubra.

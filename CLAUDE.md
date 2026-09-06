@@ -48,6 +48,8 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 
 ```
 middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig
+src/app/page.tsx               "/" não renderiza nada: redireciona por sessão (com sessão vai pra
+                                /dashboard, sem sessão vai pra /login) — nunca é a home de fato
 src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
 src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
