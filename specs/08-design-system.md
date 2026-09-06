@@ -36,20 +36,29 @@ Mantidos sem alteração da versão anterior deste documento.
 | `--foreground` | `#2D2D2D` | |
 | `--card` / `--popover` | `#FFFFFF` | |
 | `--primary` | `#6993C5` | botões de ação principal |
+| `--primary-foreground` | `#FFFFFF` | texto branco nos botões, confirmado com o Glauber em 2026-09-06 |
 | `--secondary` | `#B8E4C9` (verde-menta) | botão de finalização positiva (Finalizar cadastro) |
+| `--secondary-foreground` | `#FFFFFF` | idem, texto branco |
 | `--accent` | `#FFD6A5` (pêssego pastel) | destaques secundários |
 | `--muted-foreground` | `#9CA3AF` | texto secundário/placeholder |
 | `--border` / `--input` | `#D1D5DB` | bordas de input e divisores |
 | `--ring` | `#6993C5` | anel de foco reaproveitando a cor primária |
 | `--radius` | `0.5rem` (era `1rem`) | bate com o `rounded-lg` (8px) observado no Figma |
 
-⚠️ **Desvio deliberado mantido**: `--primary-foreground` e
-`--secondary-foreground` continuam `#2D2D2D` (texto escuro), não branco como
-a extração do Gemini sugere para o botão principal. Recalculado o contraste
-pra cor nova: branco sobre `#6993C5` dá ~3.2:1 — melhor que a cor pastel
-antiga, mas ainda abaixo do mínimo AA de 4.5:1 pra texto normal (WCAG),
-conflitando com RNF05. Se Glauber preferir o branco mesmo assim, é só
-avisar que eu reverto.
+⚠️ **Contraste abaixo do AA, aceito conscientemente**: texto branco sobre
+`#6993C5` dá ~3.2:1 — abaixo do mínimo AA de 4.5:1 pra texto normal (WCAG),
+o que em tese conflita com RNF05. Eu tinha optado por texto escuro por
+acessibilidade; o Glauber pediu branco de volta em 2026-09-06 ("com preto
+fica muito feio", como no protótipo) — decisão de identidade visual dele,
+mantida.
+
+## Cursor dos botões
+
+Todo botão (`src/components/ui/button.tsx`) usa `cursor-pointer` (e
+`disabled:cursor-not-allowed` quando desabilitado) — pedido do Glauber em
+2026-09-06. Como só existe um componente `Button` compartilhado no projeto
+(nenhum `<button>` nativo solto em nenhuma tela), a mudança nesse arquivo
+já cobre o app inteiro.
 
 ## Raio de borda
 
