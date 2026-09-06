@@ -45,7 +45,7 @@ export function CadastroForm() {
   return (
     <form action={formAction} className="flex w-full flex-col gap-4">
       <div className={step === 1 ? "flex flex-col gap-4" : "hidden"}>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Preencha os campos com seus dados pessoais.
         </p>
 
@@ -122,7 +122,7 @@ export function CadastroForm() {
       </div>
 
       <div className={step === 2 ? "flex flex-col gap-4" : "hidden"}>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {role === "DOCTOR"
             ? "Preencha os campos com seus documentos."
             : "Preencha os campos com suas especificidades."}
@@ -172,7 +172,7 @@ export function CadastroForm() {
               <Image
                 src={patientIllustration}
                 alt=""
-                className="h-48 w-auto"
+                className="h-64 w-auto"
                 priority
               />
               <a

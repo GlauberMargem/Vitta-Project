@@ -145,6 +145,12 @@ anterior deste documento (herdada da tela de login). Removida do card de
 cadastro em 2026-09-06, mantida apenas no login. Ilustração da médica também
 aumentada (`h-32` → `h-48`) pra bater com a proporção maior vista no Figma.
 
+Ajuste fino em 2026-09-06: título do cadastro (`text-lg` → `text-base`) e
+subtítulos de cada etapa (`text-sm` → `text-xs`) reduzidos, e a ilustração do
+paciente aumentada (`h-48` → `h-64`) — o SVG `medical-care-rafiki.svg` tem
+mais espaço vazio ao redor dos personagens que o `doctor-pana.svg`, então na
+mesma altura ela parecia bem menor. Ilustração do médico segue em `h-48`.
+
 ### Cadastro — etapa 2 (paciente)
 "Próxima etapa! Preencha os campos com suas especificidades." · rótulo "Perfil
 paciente" · campos: Data de nascimento, Tipo de diabetes (dropdown) · botão

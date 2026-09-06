@@ -18,7 +18,7 @@ export default async function CadastroPage() {
       />
 
       <div className="relative z-10 w-full max-w-sm rounded-lg bg-card p-8 shadow-lg">
-        <h1 className="mb-1 text-lg font-semibold text-foreground">
+        <h1 className="mb-1 text-base font-semibold text-foreground">
           Começando com o Vitta!
         </h1>
 
