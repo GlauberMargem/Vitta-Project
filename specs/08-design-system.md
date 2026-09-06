@@ -28,6 +28,13 @@ Cor do alerta de hipo/hiperglicemia (RF05, `#FFB5A7`), verde de finalização
 Gemini — ele só analisou Login/Cadastro, que têm só o botão azul principal.
 Mantidos sem alteração da versão anterior deste documento.
 
+**Fundo da área logada**: `#F2ECDE` (bege), não o `#F8F9FA` global — decisão
+do Glauber em 2026-09-06, pouco contraste entre `#F8F9FA` e os cards brancos
+no dashboard. Aplicado só em dashboard/perfil via `src/components/AppMain.tsx`
+(componente compartilhado que também reproduz a faixa diagonal azul clara
+`#C8E1FF` do login/cadastro atrás do conteúdo do topo). Login/cadastro
+continuam com `#F8F9FA` — fora do escopo dessa mudança.
+
 ### Implementado em `src/app/globals.css` (tokens shadcn)
 
 | Token shadcn | Cor da paleta | Observação |

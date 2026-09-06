@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AppMain } from "@/components/AppMain";
 import { Button } from "@/components/ui/button";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DadosClinicosForm } from "./DadosClinicosForm";
@@ -35,7 +36,7 @@ export function ProfileView(props: Props) {
     props.role === "PATIENT" ? "Dados clínicos" : "Dados profissionais";
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
+    <AppMain>
       <div>
         <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
         <p className="text-sm text-muted-foreground">
@@ -99,6 +100,6 @@ export function ProfileView(props: Props) {
           Sair
         </Button>
       </form>
-    </main>
+    </AppMain>
   );
 }

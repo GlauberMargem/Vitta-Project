@@ -71,7 +71,9 @@ src/assets/illustrations/      ilustrações maiores (cenas, personagens) de ban
                                 que usa o arquivo
 src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta — consistente com o resto
                                 de `src/components/*`), tokens do design system, avatar/iniciais, toque
-                                de 44px; src/components/ui (shadcn), icons/
+                                de 44px; src/components/ui (shadcn), icons/; AppMain.tsx (container padrão
+                                das telas da área logada — fundo bege #F2ECDE + faixa diagonal, ver
+                                08-design-system.md)
 src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
                                 sugestão de refeição, RF14), NovaGlicoseDialog, NovaRefeicaoDialog (shadcn
                                 Dialog), GlicemiaChart (Recharts) + GlicemiaChartCard (seletor de período

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
+import { AppMain } from "@/components/AppMain";
 import { AcoesRapidas } from "@/components/patient/AcoesRapidas";
 import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
@@ -50,11 +51,11 @@ export default async function DashboardPage() {
 
   if (session.user.role !== "PATIENT") {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col gap-4 px-4 pb-28 pt-6">
+      <AppMain className="gap-4">
         <p className="text-sm text-muted-foreground">
           Perfil não reconhecido.
         </p>
-      </main>
+      </AppMain>
     );
   }
 
@@ -144,7 +145,7 @@ export default async function DashboardPage() {
     : null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
+    <AppMain>
       <div>
         <p className="text-sm text-muted-foreground">Bom dia!</p>
         <h1 className="text-xl font-semibold text-foreground">
@@ -189,7 +190,7 @@ export default async function DashboardPage() {
       />
 
       <VinculoMedicoCard activeLink={activeLink} />
-    </main>
+    </AppMain>
   );
 }
 
@@ -257,7 +258,7 @@ async function DoctorDashboard({
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
+    <AppMain>
       <div>
         <p className="text-sm text-muted-foreground">Bom dia!</p>
         <h1 className="text-xl font-semibold text-foreground">{name}</h1>
@@ -322,6 +323,6 @@ async function DoctorDashboard({
           </ul>
         )}
       </section>
-    </main>
+    </AppMain>
   );
 }

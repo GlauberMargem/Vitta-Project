@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
+import { AppMain } from "@/components/AppMain";
 import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
@@ -101,7 +102,7 @@ export default async function PatientDetailPage({
   const hba1c = estimateHbA1c(glucoseRecords90d);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-4 pb-28 pt-6">
+    <AppMain>
       <div>
         <Link
           href="/dashboard"
@@ -166,6 +167,6 @@ export default async function PatientDetailPage({
           </ul>
         ) : null}
       </section>
-    </main>
+    </AppMain>
   );
 }
