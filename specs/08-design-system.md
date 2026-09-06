@@ -1,52 +1,76 @@
 # Design System — Template de Referência
 
-Extraído das imagens de protótipo enviadas pelo Glauber (telas de login/cadastro,
-dashboard, gráficos, perfil, modais, e a folha de estilo "Cores/logo/configurações").
-Estes valores são a fonte de verdade visual — implementar exatamente como descrito
-aqui, sem inventar variações.
+**Revisado em 2026-09-06**: extração refeita a partir do Figma real (telas de
+Login e Cadastro), gerada com apoio de outra IA (Gemini) e confirmada com o
+Glauber, substituindo a paleta/tipografia/raio de borda da versão anterior
+deste documento (baseada em capturas de tela do protótipo, menos precisa).
+Dashboard, gráficos, modais e perfil não foram re-extraídos do Figma — só
+receberam a paleta/tipografia/raio novos por serem tokens globais; a
+composição/estrutura desses telas (cards, seções, textos) continua a mesma
+da extração anterior, ainda válida.
 
 ## Cores
 
-| Papel | Nome | Hex | Uso |
-|---|---|---|---|
-| Fundo principal | Lavanda muito clara | `#F6F5FA` | base neutra, evita branco puro |
-| Primária | Verde-menta suave | `#B8E4C9` | vitalidade, saúde, calma |
-| Secundária | Azul serenity | `#A7C7E7` | clareza mental, confiança |
-| Tons de apoio | Pêssego pastel | `#FFD6A5` | calor humano, energia suave |
-| Atenção/ação | Coral leve | `#FFB5A7` | destaque para botões ou status |
-| Texto principal | Cinza grafite suave | `#3D3D3D` | contraste equilibrado |
-| Texto secundário | Cinza médio | `#6B6B6B` | descrições e legendas |
+| Papel | Hex | Uso |
+|---|---|---|
+| Fundo principal | `#F8F9FA` | base neutra, evita branco puro |
+| Primária | `#6993C5` | botões de ação principal (Login, Próxima etapa) |
+| Fundo diagonal (login/cadastro) | `#C8E1FF` | forma decorativa atrás do card |
+| Secundária | `#B8E4C9` (verde-menta) | botão de finalização positiva (Finalizar cadastro) — não coberta pela extração do Gemini (só viu telas com 1 botão), mantida da versão anterior |
+| Tons de apoio | `#FFD6A5` (pêssego pastel) | destaques secundários — idem, mantida da versão anterior |
+| Atenção/ação | `#FFB5A7` (coral leve) | destaque para botões ou status — idem, mantida da versão anterior |
+| Texto principal | `#2D2D2D` | contraste equilibrado |
+| Texto secundário | `#9CA3AF` | descrições, legendas, placeholders |
+| Bordas (inputs, divisores) | `#D1D5DB` | |
 
-✅ Cor do alerta de hipo/hiperglicemia (RF05) definida com o Glauber em
-2026-09-03: reaproveita `#FFB5A7` (Atenção/ação) — não introduz cor nova.
-Token `--alert`/`--alert-foreground` em `globals.css`.
+Cor do alerta de hipo/hiperglicemia (RF05, `#FFB5A7`), verde de finalização
+(`#B8E4C9`) e pêssego de destaque (`#FFD6A5`) não fazem parte da extração do
+Gemini — ele só analisou Login/Cadastro, que têm só o botão azul principal.
+Mantidos sem alteração da versão anterior deste documento.
 
 ### Implementado em `src/app/globals.css` (tokens shadcn)
 
 | Token shadcn | Cor da paleta | Observação |
 |---|---|---|
-| `--background` | `#F6F5FA` | |
-| `--foreground` | `#3D3D3D` | |
+| `--background` | `#F8F9FA` | |
+| `--foreground` | `#2D2D2D` | |
 | `--card` / `--popover` | `#FFFFFF` | |
-| `--primary` | `#A7C7E7` (azul serenity) | botões de ação principal (Login, Próxima etapa) |
+| `--primary` | `#6993C5` | botões de ação principal |
 | `--secondary` | `#B8E4C9` (verde-menta) | botão de finalização positiva (Finalizar cadastro) |
 | `--accent` | `#FFD6A5` (pêssego pastel) | destaques secundários |
-| `--muted-foreground` | `#6B6B6B` | texto secundário |
-| `--ring` | `#A7C7E7` | anel de foco reaproveitando a cor primária |
-| `--radius` | `1rem` (era `0.625rem`) | para bater com os cantos bem arredondados do protótipo |
+| `--muted-foreground` | `#9CA3AF` | texto secundário/placeholder |
+| `--border` / `--input` | `#D1D5DB` | bordas de input e divisores |
+| `--ring` | `#6993C5` | anel de foco reaproveitando a cor primária |
+| `--radius` | `0.5rem` (era `1rem`) | bate com o `rounded-lg` (8px) observado no Figma |
 
-⚠️ **Desvio deliberado do protótipo**: `--primary-foreground` e
-`--secondary-foreground` foram definidos como `#3D3D3D` (texto escuro), não
-branco como aparece nas imagens. Motivo: texto branco sobre `#A7C7E7` e
-`#B8E4C9` (cores pasteis, claras) não atinge contraste mínimo AA (WCAG), o que
-conflita com RNF05 (acessibilidade para idosos/baixo letramento digital). Se
-Glauber preferir manter o branco por identidade visual mesmo assim, é só
+⚠️ **Desvio deliberado mantido**: `--primary-foreground` e
+`--secondary-foreground` continuam `#2D2D2D` (texto escuro), não branco como
+a extração do Gemini sugere para o botão principal. Recalculado o contraste
+pra cor nova: branco sobre `#6993C5` dá ~3.2:1 — melhor que a cor pastel
+antiga, mas ainda abaixo do mínimo AA de 4.5:1 pra texto normal (WCAG),
+conflitando com RNF05. Se Glauber preferir o branco mesmo assim, é só
 avisar que eu reverto.
 
-## Tipografia (confirmado)
+## Raio de borda
 
-- **Logo / títulos**: Poppins (SemiBold para destaque).
-- **Texto / corpo**: Inter.
+Todo o app passou a usar `rounded-lg` (8px) em cards, botões, inputs,
+diálogos e badges — antes usava `rounded-3xl`/`rounded-2xl`/`rounded-full`
+(mais arredondado, baseado na leitura anterior do protótipo). Decisão do
+Glauber em 2026-09-06: aplicar o raio mais quadrado observado no Figma real
+em tudo, não só nas telas de login/cadastro que o Gemini analisou.
+**Exceção mantida**: os indicadores de página (dots de paginação em
+Cadastro e Perfil, `size-1.5`) continuam `rounded-full` — são indicadores de
+status/progresso, não cards ou botões, e num elemento de 6px o raio de 8px
+já produz um círculo de qualquer forma (não haveria diferença visual).
+
+## Tipografia (revisado)
+
+- **Todo o app (títulos e corpo)**: Poppins (pesos 400/500/600/700).
+  Decisão técnica: a fonte Inter (usada só no corpo antes) foi removida do
+  carregamento — como o `font-family` agora prioriza Poppins em tudo, Inter
+  nunca seria de fato renderizado (só serviria de fallback pra glifos que o
+  Poppins não tem, o que não acontece em português), então mantê-la carregada
+  seria peso morto contra o RNF01 (resposta rápida em conexão lenta).
 
 ## Logo
 

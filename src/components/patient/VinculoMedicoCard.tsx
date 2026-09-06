@@ -34,7 +34,7 @@ function ConsumeCodeForm() {
           {error}
         </p>
       ) : null}
-      <Button type="submit" disabled={isPending} className="rounded-full">
+      <Button type="submit" disabled={isPending} className="rounded-lg">
         {isPending ? "Vinculando..." : "Vincular"}
       </Button>
     </form>
@@ -61,7 +61,7 @@ function RevokeLinkForm({ link }: { link: ActiveLink }) {
           type="submit"
           variant="secondary"
           disabled={isPending}
-          className="rounded-full"
+          className="rounded-lg"
         >
           {isPending ? "Revogando..." : "Revogar vínculo"}
         </Button>
@@ -76,7 +76,7 @@ export function VinculoMedicoCard({
   activeLink: ActiveLink | null;
 }) {
   return (
-    <section className="rounded-3xl bg-card p-5 shadow-sm">
+    <section className="rounded-lg bg-card p-5 shadow-sm">
       <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
         Vínculo com médico
       </h2>

@@ -22,7 +22,7 @@ export function DadosPessoaisForm({
     useActionState(changePassword, null);
 
   return (
-    <section className="rounded-3xl bg-card p-5 shadow-sm">
+    <section className="rounded-lg bg-card p-5 shadow-sm">
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">Nome completo</Label>
@@ -46,7 +46,7 @@ export function DadosPessoaisForm({
           </p>
         ) : null}
 
-        <Button type="submit" disabled={isPending} className="rounded-full">
+        <Button type="submit" disabled={isPending} className="rounded-lg">
           {isPending ? "Salvando..." : "Salvar"}
         </Button>
       </form>
@@ -96,7 +96,7 @@ export function DadosPessoaisForm({
             <Button
               type="submit"
               disabled={isPasswordPending}
-              className="rounded-full"
+              className="rounded-lg"
             >
               {isPasswordPending ? "Alterando..." : "Alterar senha"}
             </Button>

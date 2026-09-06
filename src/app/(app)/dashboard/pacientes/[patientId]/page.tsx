@@ -125,7 +125,7 @@ export default async function PatientDetailPage({
         monthly={monthlySeries}
       />
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
+      <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Histórico recente
         </h2>
@@ -138,7 +138,7 @@ export default async function PatientDetailPage({
         histories={reportHistories}
       />
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
+      <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Anotações clínicas
         </h2>

@@ -112,7 +112,7 @@ export function CadastroForm() {
         <Button
           type="button"
           onClick={handleNext}
-          className="w-full rounded-full"
+          className="w-full rounded-lg"
         >
           Próxima etapa
         </Button>
@@ -195,14 +195,14 @@ export function CadastroForm() {
             type="button"
             variant="outline"
             onClick={() => setStep(1)}
-            className="rounded-full"
+            className="rounded-lg"
           >
             Voltar
           </Button>
           <Button
             type="submit"
             disabled={isPending}
-            className="flex-1 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            className="flex-1 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80"
           >
             {isPending ? "Enviando..." : "Finalizar cadastro"}
           </Button>

@@ -42,7 +42,7 @@ export function NovaAnotacaoForm({ linkId }: { linkId: string }) {
       <Button
         type="submit"
         disabled={isPending}
-        className="self-start rounded-full"
+        className="self-start rounded-lg"
       >
         {isPending ? "Salvando..." : "Salvar anotação"}
       </Button>

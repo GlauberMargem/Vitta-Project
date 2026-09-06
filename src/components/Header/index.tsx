@@ -30,7 +30,7 @@ export async function Header() {
         <Link
           href="/userConfig"
           aria-label="Perfil"
-          className="flex size-11 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-80"
+          className="flex size-11 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-80"
         >
           {initials(session.user.name)}
         </Link>

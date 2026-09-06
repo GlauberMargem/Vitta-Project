@@ -28,7 +28,7 @@ export function GlicemiaChartCard({
   const data = period === "daily" ? daily : period === "weekly" ? weekly : monthly;
 
   return (
-    <section className="rounded-3xl bg-card p-5 shadow-sm">
+    <section className="rounded-lg bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="font-heading text-base font-semibold text-foreground">
           {current.title}
@@ -41,7 +41,7 @@ export function GlicemiaChartCard({
               size="sm"
               variant="outline"
               className={cn(
-                "h-7 rounded-full px-3 text-xs",
+                "h-7 rounded-lg px-3 text-xs",
                 option.value === period
                   ? "bg-primary text-primary-foreground hover:bg-primary"
                   : undefined

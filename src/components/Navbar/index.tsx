@@ -14,7 +14,7 @@ export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card p-1.5 shadow-lg">
+    <nav className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-border bg-card p-1.5 shadow-lg">
       {ITEMS.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
@@ -24,7 +24,7 @@ export function Navbar() {
             aria-label={label}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex size-11 items-center justify-center rounded-full transition-colors",
+              "flex size-11 items-center justify-center rounded-lg transition-colors",
               active
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-muted"

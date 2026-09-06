@@ -69,7 +69,7 @@ export function ProfileView(props: Props) {
         <Button
           type="button"
           variant="outline"
-          className="rounded-full"
+          className="rounded-lg"
           onClick={() => setPage(0)}
           disabled={page === 0}
         >
@@ -86,7 +86,7 @@ export function ProfileView(props: Props) {
         <Button
           type="button"
           variant="outline"
-          className="rounded-full"
+          className="rounded-lg"
           onClick={() => setPage(1)}
           disabled={page === 1}
         >
@@ -95,7 +95,7 @@ export function ProfileView(props: Props) {
       </div>
 
       <form action={logout}>
-        <Button type="submit" variant="outline" className="w-full rounded-full">
+        <Button type="submit" variant="outline" className="w-full rounded-lg">
           Sair
         </Button>
       </form>

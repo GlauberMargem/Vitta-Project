@@ -47,7 +47,7 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isPending} className="w-full rounded-full">
+      <Button type="submit" disabled={isPending} className="w-full rounded-lg">
         {isPending ? "Entrando..." : "Login"}
       </Button>
     </form>

@@ -152,7 +152,7 @@ export default async function DashboardPage() {
 
       <MotivacaoCard message={motivationMessage} />
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
+      <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Ações
         </h2>
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
         monthly={monthlySeries}
       />
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
+      <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Histórico recente
         </h2>
@@ -259,7 +259,7 @@ async function DoctorDashboard({
       <GerarConviteCard />
 
       {pendingCodes.length > 0 ? (
-        <section className="rounded-3xl bg-card p-5 shadow-sm">
+        <section className="rounded-lg bg-card p-5 shadow-sm">
           <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
             Códigos pendentes
           </h2>
@@ -267,7 +267,7 @@ async function DoctorDashboard({
             {pendingCodes.map((link) => (
               <li
                 key={link.id}
-                className="rounded-2xl bg-muted px-4 py-2 text-center font-mono text-sm tracking-widest text-foreground"
+                className="rounded-lg bg-muted px-4 py-2 text-center font-mono text-sm tracking-widest text-foreground"
               >
                 {link.inviteCode}
               </li>
@@ -276,7 +276,7 @@ async function DoctorDashboard({
         </section>
       ) : null}
 
-      <section className="rounded-3xl bg-card p-5 shadow-sm">
+      <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Pacientes vinculados
         </h2>
@@ -296,7 +296,7 @@ async function DoctorDashboard({
                   <Link
                     href={`/dashboard/pacientes/${link.patientId}`}
                     className={cn(
-                      "flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-sm transition-colors hover:bg-muted",
+                      "flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted",
                       risk ? "bg-alert/20" : undefined
                     )}
                   >

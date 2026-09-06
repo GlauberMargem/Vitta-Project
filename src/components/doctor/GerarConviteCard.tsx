@@ -16,7 +16,7 @@ export function GerarConviteCard() {
   );
 
   return (
-    <section className="rounded-3xl bg-card p-5 shadow-sm">
+    <section className="rounded-lg bg-card p-5 shadow-sm">
       <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
         Vincular paciente
       </h2>
@@ -25,7 +25,7 @@ export function GerarConviteCard() {
         se vincular a você.
       </p>
       <form action={formAction}>
-        <Button type="submit" disabled={isPending} className="rounded-full">
+        <Button type="submit" disabled={isPending} className="rounded-lg">
           {isPending ? "Gerando..." : "Gerar código de convite"}
         </Button>
       </form>
@@ -35,7 +35,7 @@ export function GerarConviteCard() {
         </p>
       ) : null}
       {state.code ? (
-        <p className="mt-3 rounded-2xl bg-muted px-4 py-3 text-center font-mono text-lg tracking-widest text-foreground">
+        <p className="mt-3 rounded-lg bg-muted px-4 py-3 text-center font-mono text-lg tracking-widest text-foreground">
           {state.code}
         </p>
       ) : null}

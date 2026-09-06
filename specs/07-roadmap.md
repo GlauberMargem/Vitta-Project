@@ -17,7 +17,10 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       para quando houver Client ID/Secret
 - [x] Configurar tokens de cor/tipografia do Tailwind conforme
       `08-design-system.md` (Poppins + Inter confirmados; `globals.css`
-      atualizado; `layout.js` migrado para `layout.tsx`)
+      atualizado; `layout.js` migrado para `layout.tsx`). **Revisado em
+      2026-09-06**: paleta, raio de borda e tipografia (Poppins em tudo,
+      Inter removida) refeitos a partir de uma extração mais precisa do
+      Figma — ver `08-design-system.md`.
 - [x] Trocar Material Symbols (resquício pré-specs) por `lucide-react` em
       `Navbar`/`Header`, e remover o `<link>` manual de fonte do
       `layout.tsx` (violava boas práticas de Next — ver `05-arquitetura.md`)

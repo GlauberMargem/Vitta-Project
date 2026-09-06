@@ -16,7 +16,7 @@ export function HistoricoList({ history }: { history: HistoryItem[] }) {
         <li
           key={`${item.kind}-${item.id}`}
           className={cn(
-            "flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-sm",
+            "flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm",
             item.alert ? "bg-alert/20" : undefined
           )}
         >

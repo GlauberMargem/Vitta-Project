@@ -40,7 +40,7 @@ export function NovaRefeicaoDialog({
           type="button"
           size="icon-lg"
           variant="secondary"
-          className="rounded-2xl"
+          className="rounded-lg"
           aria-label="Nova refeição"
         >
           <Utensils />
@@ -94,7 +94,7 @@ export function NovaRefeicaoDialog({
             </p>
           ) : null}
 
-          <Button type="submit" disabled={isPending} className="w-full rounded-full">
+          <Button type="submit" disabled={isPending} className="w-full rounded-lg">
             {isPending ? "Salvando..." : "Inserir refeição"}
           </Button>
         </form>

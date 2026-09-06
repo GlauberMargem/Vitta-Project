@@ -14,7 +14,7 @@ export function HbA1cCard({
   }
 
   return (
-    <section className="rounded-3xl bg-card p-5 shadow-sm">
+    <section className="rounded-lg bg-card p-5 shadow-sm">
       {patientName ? (
         <p className="text-sm text-muted-foreground">
           Hemoglobina glicada estimada de {patientName}:{" "}

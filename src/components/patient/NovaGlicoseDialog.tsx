@@ -44,7 +44,7 @@ export function NovaGlicoseDialog() {
         <Button
           type="button"
           size="icon-lg"
-          className="rounded-2xl"
+          className="rounded-lg"
           aria-label="Nova glicose"
         >
           <Plus />
@@ -99,7 +99,7 @@ export function NovaGlicoseDialog() {
             </p>
           ) : null}
 
-          <Button type="submit" disabled={isPending} className="w-full rounded-full">
+          <Button type="submit" disabled={isPending} className="w-full rounded-lg">
             {isPending ? "Salvando..." : "Inserir glicose"}
           </Button>
         </form>

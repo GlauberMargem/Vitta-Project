@@ -35,7 +35,7 @@ export function LimitesAlertaForm(props: Thresholds) {
   }
 
   return (
-    <section className="rounded-3xl bg-card p-5 shadow-sm">
+    <section className="rounded-lg bg-card p-5 shadow-sm">
       <h2 className="mb-1 font-heading text-base font-semibold text-foreground">
         Limites de alerta
       </h2>
@@ -118,7 +118,7 @@ export function LimitesAlertaForm(props: Thresholds) {
           <Button
             type="button"
             variant="outline"
-            className="rounded-full"
+            className="rounded-lg"
             onClick={restoreDefaults}
           >
             Restaurar padrão
@@ -126,7 +126,7 @@ export function LimitesAlertaForm(props: Thresholds) {
           <Button
             type="submit"
             disabled={isPending}
-            className="flex-1 rounded-full"
+            className="flex-1 rounded-lg"
           >
             {isPending ? "Salvando..." : "Salvar"}
           </Button>
