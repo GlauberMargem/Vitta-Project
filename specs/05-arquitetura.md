@@ -247,3 +247,18 @@ em `src/`.
   `src/components/*` que usa arquivo plano. Achatados pra bater com a
   convenção — o caminho de import (`@/components/Header`) não mudou, só o
   arquivo por trás dele.
+
+## Ilustrações de terceiros exigem crédito visível (Storyset/Freepik)
+
+`src/assets/illustrations/` (separada de `images/`, que é só pra branding
+própria) guarda ilustrações maiores de bancos de terceiros — a primeira é
+`doctor-pana.svg`, usada na etapa 2 do cadastro quando o perfil escolhido é
+"Médico" (`CadastroForm.tsx`). A licença gratuita da Storyset (Freepik)
+exige um link de atribuição visível na tela onde a ilustração aparece —
+não é opcional nem pode ficar só num comentário no código ou num arquivo à
+parte. O texto exato exigido (não parafrasear) é "Work illustrations by
+Storyset", linkando para `https://storyset.com/work`; implementado como um
+link pequeno logo abaixo da ilustração. `src/assets/illustrations/CREDITS.md`
+mantém a lista de qual arquivo pede qual crédito, pra não se perder quando
+mais ilustrações forem adicionadas — mas o arquivo em si não substitui o
+crédito visível na tela.

@@ -62,6 +62,11 @@ src/assets/images/              assets importados diretamente no código (logos 
                                 "@/assets/images/arquivo.svg"` + `next/image`, dimensões inferidas
                                 automaticamente. `public/` é só pra arquivo que precisa de URL fixa
                                 (favicon já fica em `src/app/favicon.ico`, não em `public/`)
+src/assets/illustrations/      ilustrações maiores (cenas, personagens) de bancos de terceiros —
+                                mesmo padrão de `import` de `images/`, mas em pasta separada porque
+                                exigem crédito visível na tela (ver CREDITS.md na própria pasta e
+                                05-arquitetura.md). Não excluir o link de atribuição ao editar a tela
+                                que usa o arquivo
 src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta — consistente com o resto
                                 de `src/components/*`), tokens do design system, avatar/iniciais, toque
                                 de 44px; src/components/ui (shadcn), icons/

@@ -135,6 +135,10 @@ Nome completo, Email, Senha, Confirmar senha, seletor "Paciente/Médico" · bot�
 "Próxima etapa! Preencha os campos com seus documentos." · rótulo "Perfil médico"
 · campos: CRM, RQE (dropdown) · botão "Finalizar cadastro"
 
+Ilustração de uma médica (`doctor-pana.svg`, Storyset) adicionada acima dos
+campos em 2026-09-06, com o crédito exigido pela licença abaixo dela — ver
+`05-arquitetura.md`, seção "Ilustrações de terceiros exigem crédito visível".
+
 ### Cadastro — etapa 2 (paciente)
 "Próxima etapa! Preencha os campos com suas especificidades." · rótulo "Perfil
 paciente" · campos: Data de nascimento, Tipo de diabetes (dropdown) · botão

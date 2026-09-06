@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { registerUser } from "@/lib/auth/actions";
+import doctorIllustration from "@/assets/illustrations/doctor-pana.svg";
 
 type Role = "PATIENT" | "DOCTOR" | "";
 type DiabetesType = "TIPO_1" | "TIPO_2" | "GESTACIONAL" | "OUTRO" | "";
@@ -127,6 +129,23 @@ export function CadastroForm() {
 
         {role === "DOCTOR" ? (
           <>
+            <div className="flex flex-col items-center gap-1">
+              <Image
+                src={doctorIllustration}
+                alt=""
+                className="h-32 w-auto"
+                priority
+              />
+              <a
+                href="https://storyset.com/work"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-muted-foreground hover:underline"
+              >
+                Work illustrations by Storyset
+              </a>
+            </div>
+
             <div className="flex flex-col gap-2">
               <Label htmlFor="crm">CRM</Label>
               <Input
