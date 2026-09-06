@@ -49,6 +49,12 @@ atualizar o status correspondente em `02-requisitos-funcionais.md`.
       por `role` específico (paciente vs. médico) ainda não existe porque só
       existe uma área logada `(app)` até agora; farei a divisão quando o
       painel do médico existir (bloco 6).
+- [x] Logout — gap encontrado em 2026-09-05 (nunca tinha sido implementado,
+      apesar de `signOut` já estar exportado da config do Auth.js desde o
+      início). Botão "Sair" em `/userConfig` (`ProfileView.tsx`), chama
+      `logout` (`src/lib/auth/actions.ts`). Testado ponta a ponta: sessão
+      invalidada (cookie limpo) e acesso a `/dashboard` depois do logout
+      redireciona pro login via middleware.
 
 ## 2. Registro de dados do paciente (RF02, RF03)
 - [x] Migrations `glucose_records`, `meals` — já existem desde a migração

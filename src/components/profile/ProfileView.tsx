@@ -6,6 +6,7 @@ import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DadosClinicosForm } from "./DadosClinicosForm";
 import { DadosProfissionaisForm } from "./DadosProfissionaisForm";
 import { LimitesAlertaForm } from "./LimitesAlertaForm";
+import { logout } from "@/lib/auth/actions";
 import type { DiabetesType } from "@/generated/prisma/client";
 
 type Props =
@@ -92,6 +93,12 @@ export function ProfileView(props: Props) {
           {secondPageLabel}
         </Button>
       </div>
+
+      <form action={logout}>
+        <Button type="submit" variant="outline" className="w-full rounded-full">
+          Sair
+        </Button>
+      </form>
     </main>
   );
 }

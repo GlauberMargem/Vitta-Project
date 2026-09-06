@@ -65,14 +65,14 @@ src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dia
                                 (jsPDF, RF08), MotivacaoCard (RF12, só paciente), VinculoMedicoCard,
                                 HbA1cCard, HistoricoList (reaproveitados no painel do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
-src/components/profile/        ProfileView (paginação), DadosPessoaisForm (+ troca de senha),
+src/components/profile/        ProfileView (paginação + botão Sair), DadosPessoaisForm (+ troca de senha),
                                 DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
                                 (limites de hipo/hiperglicemia configuráveis, RF05)
 src/lib/utils.js               helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
 src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app
-src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro)
+src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro), logout
 src/lib/patient/actions.ts     server actions: createGlucoseRecord, createMeal, consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde

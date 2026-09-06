@@ -17,6 +17,12 @@
 
 Regras de negócio associadas (não repetir no código como comentário — só aplicar):
 
+- RF01: logout — nunca esteve em nenhum mockup/spec, mas é parte básica de
+  qualquer fluxo de autenticação (não era uma decisão de negócio a
+  confirmar, só um gap de implementação). Botão "Sair" na tela de perfil
+  (`/userConfig`), chama `signOut` do Auth.js (`logout` em
+  `src/lib/auth/actions.ts`), invalida a sessão e redireciona pra `/login`.
+  Adicionado em 2026-09-05.
 - RF02/RF03: registro é sempre de propriedade exclusiva do paciente; nenhum outro
   ator pode criar/editar essas linhas (nem o médico vinculado).
 - RF06/RF07: o médico só enxerga pacientes com vínculo ativo (ver RF10); nunca lista

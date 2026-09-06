@@ -2,9 +2,13 @@
 
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
-import { signIn } from "@/lib/auth/config";
+import { signIn, signOut } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
 import type { DiabetesType } from "@/generated/prisma/client";
+
+export async function logout(): Promise<void> {
+  await signOut({ redirectTo: "/login" });
+}
 
 export async function authenticate(
   _previousState: string | undefined,
