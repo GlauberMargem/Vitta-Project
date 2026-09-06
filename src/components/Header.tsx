@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth/config";
+import wordmark from "@/assets/images/tittle.svg";
 
 function initials(name: string | null | undefined): string {
   if (!name) return "?";
@@ -17,10 +18,8 @@ export async function Header() {
     <header className="flex h-14 w-full shrink-0 items-center justify-between border-b border-border bg-card px-4">
       <Link href="/dashboard" className="flex items-center">
         <Image
-          src="/tittle.svg"
+          src={wordmark}
           alt="Vitta"
-          width={100}
-          height={32}
           priority
           className="h-6 w-auto object-contain"
         />

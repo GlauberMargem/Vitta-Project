@@ -220,9 +220,30 @@ for retomar):
   `accounts.google.com` e de volta. Testar exige um navegador de verdade e
   uma conta Google real.
 
-## Migração de JS → TS
+## Migração de JS → TS — concluída
 
-O bootstrap atual (`src/app/*.js`, `src/components/**/*.jsx`) não é TypeScript.
-Diretriz: todo arquivo novo já nasce `.ts`/`.tsx`; arquivos existentes migram
-quando forem tocados por uma tarefa do roadmap (não é necessário um "big bang" de
-migração antes de começar a implementar features).
+O bootstrap do create-next-app tinha alguns arquivos em `.js`/`.jsx`.
+Diretriz seguida: todo arquivo novo já nasceu `.ts`/`.tsx`; os últimos dois
+remanescentes (`src/app/page.js`, `src/lib/utils.js`) foram convertidos em
+2026-09-06 durante uma reorganização de pastas — não sobra nenhum `.js`/`.jsx`
+em `src/`.
+
+## Reorganização de pastas e assets (2026-09-06)
+
+- **`src/assets/images/`** (novo): assets pensados pra serem importados
+  direto no código (`import logo from "@/assets/images/arquivo.svg"`),
+  usados com `next/image` — dimensão inferida automaticamente do arquivo,
+  em vez de w/h fixos "no chute". Os dois logos existentes (`logo-vitta.svg`,
+  `tittle.svg`) foram movidos de `public/` pra cá e as referências
+  atualizadas de string (`src="/logo-vitta.svg"`) pra `import`.
+- **`public/`**: limpo dos 5 SVGs de placeholder do bootstrap do
+  create-next-app (`file.svg`, `globe.svg`, `next.svg`, `vercel.svg`,
+  `window.svg`) — nunca foram referenciados em lugar nenhum do código.
+  `public/` continua existindo como destino pra qualquer arquivo que
+  precise mesmo de uma URL fixa (o favicon não conta, já fica em
+  `src/app/favicon.ico` por convenção do App Router).
+- **`src/components/Header.tsx`/`Navbar.tsx`**: eram `Header/index.tsx` e
+  `Navbar/index.tsx` (padrão de pasta), inconsistente com todo o resto de
+  `src/components/*` que usa arquivo plano. Achatados pra bater com a
+  convenção — o caminho de import (`@/components/Header`) não mudou, só o
+  arquivo por trás dele.

@@ -18,10 +18,10 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 
 - **Next.js** (App Router) — frontend + backend unificados (API Routes), SSR.
 - **React** para componentização de UI.
-- **TypeScript** em toda a base de código nova — tipagem estática obrigatória.
-  `tsconfig.json` já configurado (`strict: true`). As páginas/componentes antigos
-  em `.js`/`.jsx` (bootstrap do create-next-app) ainda não foram migrados; migrar
-  para `.tsx` ao tocar nesses arquivos, não manter o padrão antigo em código novo.
+- **TypeScript** em toda a base de código — tipagem estática obrigatória.
+  `tsconfig.json` já configurado (`strict: true`). Migração de `.js`/`.jsx`
+  (bootstrap do create-next-app) pra `.tsx`/`.ts` concluída em 2026-09-06 —
+  não sobrou nenhum arquivo `.js`/`.jsx` em `src/`.
   ⚠️ Versão do TypeScript **fixada em `5.9.3`** (`--save-exact`). A versão
   `latest` do npm hoje é a `7.x` (reescrita nativa do compilador), que não tem
   mais o arquivo `typescript/lib/typescript.js` — o Next.js 16.1.1 depende
@@ -58,8 +58,13 @@ src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um
 src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
                                 dados clínicos (paciente) ou profissionais (médico)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
-src/components/                Navbar/Header (TS, tokens do design system, avatar/iniciais, toque de 44px),
-                                src/components/ui (shadcn), icons/
+src/assets/images/              assets importados diretamente no código (logos etc.) — `import logo from
+                                "@/assets/images/arquivo.svg"` + `next/image`, dimensões inferidas
+                                automaticamente. `public/` é só pra arquivo que precisa de URL fixa
+                                (favicon já fica em `src/app/favicon.ico`, não em `public/`)
+src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta — consistente com o resto
+                                de `src/components/*`), tokens do design system, avatar/iniciais, toque
+                                de 44px; src/components/ui (shadcn), icons/
 src/components/patient/        NovaGlicoseDialog, NovaRefeicaoDialog (shadcn Dialog), GlicemiaChart (Recharts) +
                                 GlicemiaChartCard (seletor de período dia/semana/mês), RelatorioPdfButton
                                 (jsPDF, RF08), MotivacaoCard (RF12, só paciente), VinculoMedicoCard,
@@ -68,7 +73,7 @@ src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação cl
 src/components/profile/        ProfileView (paginação + botão Sair), DadosPessoaisForm (+ troca de senha),
                                 DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
                                 (limites de hipo/hiperglicemia configuráveis, RF05)
-src/lib/utils.js               helpers (cn, etc.)
+src/lib/utils.ts                helpers (cn, etc.)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
 src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app
