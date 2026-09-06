@@ -118,7 +118,7 @@ export function NovaGlicoseDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="JEJUM">Jejum</SelectItem>
-                <SelectItem value="POS_PRANDIAL">Pós-prandial</SelectItem>
+                <SelectItem value="POS_PRANDIAL">Depois de comer</SelectItem>
                 <SelectItem value="ANTES_DE_DORMIR">Antes de dormir</SelectItem>
                 <SelectItem value="OUTRO">Outro</SelectItem>
               </SelectContent>

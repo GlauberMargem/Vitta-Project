@@ -5,7 +5,7 @@ export function contextLabel(context: GlucoseContext): string {
     case "JEJUM":
       return "Jejum";
     case "POS_PRANDIAL":
-      return "Pós-prandial";
+      return "Depois de comer";
     case "ANTES_DE_DORMIR":
       return "Antes de dormir";
     default:

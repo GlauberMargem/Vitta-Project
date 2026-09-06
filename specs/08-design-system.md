@@ -190,6 +190,13 @@ em 2026-09-06, copy mais informal proposta no documento da área logada) ·
 "Vincular a uma refeição (opcional)" (RF14, só aparece se houver refeições
 recentes) · botão "Inserir glicose"
 
+Opções do dropdown "Contexto": "Jejum" · "Depois de comer" (trocado de
+"Pós-prandial" em 2026-09-06 — termo clínico difícil pra público com baixo
+letramento digital/idosos, RNF05) · "Antes de dormir" · "Outro". O valor
+salvo no banco continua `POS_PRANDIAL` (nome interno, não muda) — só o texto
+exibido mudou, em `contextLabel()` (`src/lib/patient/format.ts`), usado
+também no histórico e no relatório em PDF.
+
 ### Modal — Nova Refeição
 "Nova Refeição" · "Buscar refeição já registrada" (dropdown) · "Quantidade de
 carboidratos da refeição" · "Insira a hora da refeição" · "Vincular a uma
