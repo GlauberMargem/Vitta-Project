@@ -1,8 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/config";
-import logoIcon from "@/assets/images/logo-vitta.svg";
 import { CadastroForm } from "./CadastroForm";
 
 export default async function CadastroPage() {
@@ -20,13 +18,6 @@ export default async function CadastroPage() {
       />
 
       <div className="relative z-10 w-full max-w-sm rounded-lg bg-card p-8 shadow-lg">
-        <div className="mb-6 flex flex-col items-center gap-1">
-          <Image src={logoIcon} alt="" width={40} height={37} priority />
-          <span className="font-heading text-2xl font-semibold text-foreground">
-            vitta
-          </span>
-        </div>
-
         <h1 className="mb-1 text-lg font-semibold text-foreground">
           Começando com o Vitta!
         </h1>

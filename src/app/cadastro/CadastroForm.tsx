@@ -133,7 +133,7 @@ export function CadastroForm() {
               <Image
                 src={doctorIllustration}
                 alt=""
-                className="h-32 w-auto"
+                className="h-48 w-auto"
                 priority
               />
               <a

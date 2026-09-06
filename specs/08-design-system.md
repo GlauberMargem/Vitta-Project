@@ -139,6 +139,12 @@ Ilustração de uma médica (`doctor-pana.svg`, Storyset) adicionada acima dos
 campos em 2026-09-06, com o crédito exigido pela licença abaixo dela — ver
 `05-arquitetura.md`, seção "Ilustrações de terceiros exigem crédito visível".
 
+⚠️ **Desvio implementado**: as telas reais de cadastro (Figma) não repetem a
+logo/wordmark "vitta" dentro do card — só a etapa 1 tinha isso na versão
+anterior deste documento (herdada da tela de login). Removida do card de
+cadastro em 2026-09-06, mantida apenas no login. Ilustração da médica também
+aumentada (`h-32` → `h-48`) pra bater com a proporção maior vista no Figma.
+
 ### Cadastro — etapa 2 (paciente)
 "Próxima etapa! Preencha os campos com suas especificidades." · rótulo "Perfil
 paciente" · campos: Data de nascimento, Tipo de diabetes (dropdown) · botão
