@@ -1,4 +1,4 @@
-import { HBA1C_TARGET_PERCENT } from "@/lib/patient/glucose";
+import { HBA1C_TARGET_PERCENT, hba1cColor } from "@/lib/patient/glucose";
 
 /** `patientName` presente = visão do médico sobre um paciente (texto neutro,
  * sem a mensagem motivacional que só faz sentido endereçada ao paciente). */
@@ -29,7 +29,10 @@ export function HbA1cCard({
             Sua <span className="text-[#4CAF50]">hemoglobina glicada</span>{" "}
             está em
           </p>
-          <p className="text-4xl font-extrabold text-[#4CAF50]">
+          <p
+            className="text-4xl font-extrabold"
+            style={{ color: hba1cColor(hba1c) }}
+          >
             {hba1c.toFixed(1)}%
           </p>
           <p className="mt-1 text-xs text-muted-foreground">

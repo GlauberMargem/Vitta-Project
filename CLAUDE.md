@@ -95,7 +95,8 @@ src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linke
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
                                 2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
-                                HbA1c (fórmula ADAG), agregação diária/semanal/mensal, getPeriodRange
+                                HbA1c (fórmula ADAG), hba1cColor (degradê verde→laranja pastel do card de
+                                HbA1c, meta 7% a pior 10%), agregação diária/semanal/mensal, getPeriodRange
                                 (janelas dia/semana/mês, usada pelo gráfico e pelo PDF), risco mais grave
                                 — fontes em specs/04-modelo-de-dados.md
 src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a

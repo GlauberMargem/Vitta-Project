@@ -186,13 +186,22 @@ gap conhecido) · card "Sua hemoglobina glicada está em X%" /
 
 Hierarquia visual do card de HbA1c (ajustado em 2026-09-06 pra bater com a
 referência): "Sua" e "está em" em preto (`text-foreground`), "hemoglobina
-glicada" em verde (`#4CAF50`), tudo em negrito (`text-xl font-bold`); o
-percentual em si (`X%`) em destaque bem maior, verde, `text-4xl
-font-extrabold`, linha própria. Abaixo, a frase da meta em texto pequeno e
-neutro (`text-muted-foreground`), só o percentual da meta em verde e
-semi-negrito. `#4CAF50` é uma cor nova, escolhida por aproximação visual da
-referência mandada pelo Glauber — não fazia parte da paleta documentada
-antes; confirmar/ajustar o tom exato depois de ver renderizado.
+glicada" em verde fixo (`#4CAF50`), tudo em negrito (`text-xl font-bold`); o
+percentual em si (`X%`) em destaque bem maior, `text-4xl font-extrabold`,
+linha própria. Abaixo, a frase da meta em texto pequeno e neutro
+(`text-muted-foreground`), só o percentual da meta em verde fixo e
+semi-negrito. `#4CAF50` (verde) e `#FFD6A5` (pêssego pastel, já existente na
+paleta) são cores escolhidas por aproximação visual da referência mandada
+pelo Glauber — confirmar/ajustar o tom exato depois de ver renderizado.
+
+**Degradê de cor do percentual** (RF11, pedido do Glauber em 2026-09-06):
+diferente do resto do card, a cor do número (`X%`) não é fixa — interpola
+de verde (`#4CAF50`, na meta de 7% ou melhor) até laranja pastel (`#FFD6A5`,
+a partir de 10%, referência de alto risco da ADA com margem de transição),
+linear entre os dois extremos. Implementado em `hba1cColor()`
+(`src/lib/patient/glucose.ts`), usado só no `HbA1cCard.tsx` do próprio
+paciente — a view do médico sobre um paciente continua neutra (texto
+`text-foreground` fixo), fora do pedido original.
 
 Card de alerta de tendência (RF13, só aparece quando a regra é satisfeita —
 ver `02-requisitos-funcionais.md`), logo abaixo do card de motivação (RF12):

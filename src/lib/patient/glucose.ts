@@ -111,6 +111,37 @@ export function estimateHbA1c(records: { valueMgdl: number }[]): number | null {
 
 export const HBA1C_TARGET_PERCENT = 7;
 
+/** Valor a partir do qual a cor do card de HbA1c fica 100% laranja — decisão
+ * do Glauber em 2026-09-06, usando a referência de alto risco da ADA
+ * (>= 9%) com uma margem de transição até 10%. Abaixo da meta (7%), sempre
+ * verde puro. */
+const HBA1C_WORST_PERCENT = 10;
+const HBA1C_GOOD_COLOR = { r: 0x4c, g: 0xaf, b: 0x50 }; // #4CAF50
+const HBA1C_BAD_COLOR = { r: 0xff, g: 0xd6, b: 0xa5 }; // #FFD6A5 (pêssego pastel)
+
+/** Interpola do verde (na meta ou melhor) ao laranja pastel (HBA1C_WORST_PERCENT
+ * ou pior) — degradê pedido pelo Glauber em 2026-09-06 pro card de HbA1c. */
+export function hba1cColor(value: number): string {
+  const ratio = Math.min(
+    1,
+    Math.max(
+      0,
+      (value - HBA1C_TARGET_PERCENT) /
+        (HBA1C_WORST_PERCENT - HBA1C_TARGET_PERCENT)
+    )
+  );
+  const r = Math.round(
+    HBA1C_GOOD_COLOR.r + (HBA1C_BAD_COLOR.r - HBA1C_GOOD_COLOR.r) * ratio
+  );
+  const g = Math.round(
+    HBA1C_GOOD_COLOR.g + (HBA1C_BAD_COLOR.g - HBA1C_GOOD_COLOR.g) * ratio
+  );
+  const b = Math.round(
+    HBA1C_GOOD_COLOR.b + (HBA1C_BAD_COLOR.b - HBA1C_GOOD_COLOR.b) * ratio
+  );
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 const WEEKDAY_LABELS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const MONTHLY_WINDOW_DAYS = 30;
 
