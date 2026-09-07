@@ -25,15 +25,19 @@ export function HbA1cCard({
         </p>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            Sua hemoglobina glicada está em{" "}
-            <span className="font-semibold text-foreground">
-              {hba1c.toFixed(1)}%
-            </span>
+          <p className="text-xl font-bold text-foreground">
+            Sua <span className="text-[#4CAF50]">hemoglobina glicada</span>{" "}
+            está em
           </p>
-          <p className="text-xs text-muted-foreground">
-            Não desanime, nossa meta é de até {HBA1C_TARGET_PERCENT}%.
-            Estimativa calculada a partir dos seus registros dos últimos 90
+          <p className="text-4xl font-extrabold text-[#4CAF50]">
+            {hba1c.toFixed(1)}%
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Não desanime, nossa meta é de até{" "}
+            <span className="font-semibold text-[#4CAF50]">
+              {HBA1C_TARGET_PERCENT}%
+            </span>
+            . Estimativa calculada a partir dos seus registros dos últimos 90
             dias, não substitui o exame laboratorial.
           </p>
         </>

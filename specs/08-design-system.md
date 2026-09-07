@@ -179,9 +179,20 @@ abaixo dela — ver `05-arquitetura.md`, seção "Ilustrações de terceiros exi
 crédito visível".
 
 ### Home do paciente
-"Bom dia! [Nome]" + horário no canto · card "Sua hemoglobina glicada está em X%" /
+"Bom dia! [Nome]" + horário no canto (horário ainda não implementado — ver
+gap conhecido) · card "Sua hemoglobina glicada está em X%" /
 "Não desanime, nossa meta é de Y%" · seção "Ações" com botão "+" (nova glicose) e
 ícone garfo/faca (nova refeição)
+
+Hierarquia visual do card de HbA1c (ajustado em 2026-09-06 pra bater com a
+referência): "Sua" e "está em" em preto (`text-foreground`), "hemoglobina
+glicada" em verde (`#4CAF50`), tudo em negrito (`text-xl font-bold`); o
+percentual em si (`X%`) em destaque bem maior, verde, `text-4xl
+font-extrabold`, linha própria. Abaixo, a frase da meta em texto pequeno e
+neutro (`text-muted-foreground`), só o percentual da meta em verde e
+semi-negrito. `#4CAF50` é uma cor nova, escolhida por aproximação visual da
+referência mandada pelo Glauber — não fazia parte da paleta documentada
+antes; confirmar/ajustar o tom exato depois de ver renderizado.
 
 Card de alerta de tendência (RF13, só aparece quando a regra é satisfeita —
 ver `02-requisitos-funcionais.md`), logo abaixo do card de motivação (RF12):
