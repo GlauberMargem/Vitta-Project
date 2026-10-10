@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
 import { AppMain } from "@/components/AppMain";
+import { GreetingHeader } from "@/components/GreetingHeader";
 import { AcoesRapidas } from "@/components/patient/AcoesRapidas";
 import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
@@ -146,12 +147,7 @@ export default async function DashboardPage() {
 
   return (
     <AppMain>
-      <div>
-        <p className="text-sm text-muted-foreground">Bom dia!</p>
-        <h1 className="text-xl font-semibold text-foreground">
-          {session.user.name}
-        </h1>
-      </div>
+      <GreetingHeader name={session.user.name ?? "Paciente"} />
 
       <HbA1cCard hba1c={hba1c} />
 
@@ -259,10 +255,7 @@ async function DoctorDashboard({
 
   return (
     <AppMain>
-      <div>
-        <p className="text-sm text-muted-foreground">Bom dia!</p>
-        <h1 className="text-xl font-semibold text-foreground">{name}</h1>
-      </div>
+      <GreetingHeader name={name} />
 
       <GerarConviteCard />
 

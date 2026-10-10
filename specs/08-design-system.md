@@ -179,8 +179,7 @@ abaixo dela — ver `05-arquitetura.md`, seção "Ilustrações de terceiros exi
 crédito visível".
 
 ### Home do paciente
-"Bom dia! [Nome]" + horário no canto (horário ainda não implementado — ver
-gap conhecido) · card "Sua hemoglobina glicada está em X%" /
+"Bom dia! [Nome]" + horário no canto · card "Sua hemoglobina glicada está em X%" /
 "Não desanime, nossa meta é de Y%" · seção "Ações" com botão "+" (nova glicose) e
 ícone garfo/faca (nova refeição)
 
@@ -209,6 +208,14 @@ ver `02-requisitos-funcionais.md`), logo abaixo do card de motivação (RF12):
 - "Notamos que sua glicose costuma cair {período}. Fique de olho!"
 onde `{período}` é "de madrugada", "de manhã", "à tarde" ou "à noite" — ver
 `src/lib/patient/trend.ts`.
+
+**Saudação + horário** (implementado em 2026-10-10): "Bom dia!"/"Boa
+tarde!"/"Boa noite!" varia de acordo com a hora atual (antes era sempre
+"Bom dia!" fixo) + horário no canto direito, atualizado a cada 30s. Hora
+calculada no cliente (`src/components/GreetingHeader.tsx`, `useEffect`),
+não no servidor — pra bater com o relógio local do usuário, não o fuso de
+onde o servidor roda. Usado tanto no dashboard do paciente quanto no do
+médico.
 
 ### Modal — Nova Glicose
 "Nova Glicose" · "Digite o valor da sua glicose" · rótulo do campo de horário

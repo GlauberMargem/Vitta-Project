@@ -73,7 +73,8 @@ src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta 
                                 de `src/components/*`), tokens do design system, avatar/iniciais, toque
                                 de 44px; src/components/ui (shadcn), icons/; AppMain.tsx (container padrão
                                 das telas da área logada — fundo bege #F2ECDE + faixa diagonal, ver
-                                08-design-system.md)
+                                08-design-system.md); GreetingHeader.tsx (saudação por horário + relógio,
+                                calculado no cliente — dashboard paciente e médico)
 src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
                                 sugestão de refeição, RF14), NovaGlicoseDialog, NovaRefeicaoDialog (shadcn
                                 Dialog), GlicemiaChart (Recharts) + GlicemiaChartCard (seletor de período
