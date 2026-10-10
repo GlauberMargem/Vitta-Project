@@ -284,3 +284,34 @@ sessão) — testado ponta a ponta em `next build && next start` (o bug de
 `next dev` não invocar o middleware já está documentado acima). Cada page
 autenticada também tem `if (!session) return null` como reforço, caso
 alguém acesse a página por algum caminho que o middleware não cubra.
+
+## Testes automatizados: Vitest (2026-10-10)
+
+Até aqui, verificação era só manual (typecheck + build + teste ponta a
+ponta com conta real, documentado em cada seção de specs). O Glauber trouxe
+um documento de referência técnica sobre classificação glicêmica e pediu
+testes de verdade pras regras de negócio — decidido junto com ele adicionar
+um test runner em vez de só documentar a matriz de casos.
+
+- **Vitest** (`devDependency`, não pinado com versão exata como o
+  TypeScript — não tem o mesmo tipo de breaking change documentado).
+  Escolhido por ser leve, rodar TS nativamente sem configuração de
+  transpilação própria, e não exigir Babel/ts-jest.
+- `vitest.config.mts` — resolve o alias `@/*` igual o `tsconfig.json`;
+  `environment: "node"` (sem jsdom, já que por enquanto só funções puras de
+  `src/lib/**` são testadas, nenhum componente React); `.mts` (não `.ts`)
+  pra evitar aviso de ESM/CommonJS do Vite.
+- `npm test` roda `vitest run` (uma vez, não "watch") — inclui só
+  `src/**/*.test.ts`, arquivo colocado ao lado do módulo que testa (ex.:
+  `src/lib/patient/limits.test.ts` ao lado de `limits.ts`).
+- Cobertura inicial: `src/lib/patient/limits.test.ts` (limites de inserção
+  de dado, ver `04-modelo-de-dados.md`) e `src/lib/patient/glucose.test.ts`
+  (matriz de valor-limite do motor de alertas `glucoseAlert`, fórmula do
+  `estimateHbA1c`, degradê de cor do `hba1cColor`) — análise de valor-limite
+  (BVA), mesmo espírito do documento de referência que o Glauber trouxe,
+  mas usando os limiares/faixas já implementados no Vitta.
+- Não testado ainda (próximos candidatos naturais, não feito agora por não
+  ser o foco do pedido): `trend.ts` (RF13) e `motivation.ts` (RF12) — mesmo
+  padrão de função pura, dá pra seguir o mesmo modelo depois.
+- Não roda em CI (não existe pipeline de CI configurado neste projeto) —
+  só local, via `npm test`, antes de commit.

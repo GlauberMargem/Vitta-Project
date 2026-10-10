@@ -43,10 +43,14 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 - Componentes de UI seguem o padrão shadcn/ui (`components.json`, `src/components/ui`,
   `class-variance-authority`, `tailwind-merge`, `lucide-react` para ícones).
 - Hospedagem alvo: Vercel.
+- **Vitest** para testes automatizados (`npm test`) — só funções puras de
+  `src/lib/**` por enquanto (regras de negócio), sem teste de componente
+  React. Ver `specs/05-arquitetura.md`, "Testes automatizados".
 
 ## Estrutura atual do projeto
 
 ```
+vitest.config.mts              config do Vitest (alias @/*, environment node) — ver 05-arquitetura.md
 middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig
 src/app/page.tsx               "/" não renderiza nada: redireciona por sessão (com sessão vai pra
                                 /dashboard, sem sessão vai pra /login) — nunca é a home de fato
@@ -97,6 +101,8 @@ src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTi
 src/lib/patient/limits.ts      limites de sanidade de dado de entrada (glicose 10-600 mg/dL, carboidratos
                                 0-999g) — diferente dos limites de alerta do RF05, não são valor clínico
                                 ajustável; ver 04-modelo-de-dados.md, "Limites de inserção de dados"
+src/lib/patient/*.test.ts      testes Vitest colocados ao lado do módulo testado (ex.: limits.test.ts,
+                                glucose.test.ts) — `npm test`, ver 05-arquitetura.md
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
                                 2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
                                 HbA1c (fórmula ADAG), hba1cColor (degradê verde→laranja pastel do card de
