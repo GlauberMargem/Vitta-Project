@@ -297,10 +297,13 @@ tamanho de toque dos botões (ver checklist de acessibilidade acima).
 Não bloqueiam o início dos testes de usabilidade — fazer depois, ou em
 paralelo se sobrar tempo:
 
-- Login social via Google — investigado em 2026-09-05, não é só uma questão
-  de credenciais: falta definir o fluxo de onboarding pós-login (escolher
-  paciente/médico + completar dados específicos, que o Google não fornece).
-  Detalhes e passo a passo técnico documentados em `05-arquitetura.md`.
+✅ **Login social via Google** — investigado em 2026-09-05 (não era só
+  questão de credenciais, faltava definir o fluxo de onboarding
+  pós-login), implementado em 2026-10-10 depois de confirmar com o
+  Glauber: perfil + dados específicos pedidos na mesma etapa 2 do cadastro
+  normal, vínculo automático se o email já tiver conta por senha. Falta
+  só credenciais reais do Google Cloud Console (`.env`) pra testar de
+  ponta a ponta. Detalhes técnicos em `05-arquitetura.md`.
 
 ✅ **Tela de perfil completa** — feita em 2026-09-03, depois do Sprint 6 (fora
 do plano original de sprints). Ver `07-roadmap.md`, bloco 4, e o desvio

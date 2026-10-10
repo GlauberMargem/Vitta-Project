@@ -6,7 +6,7 @@ import { CadastroForm } from "./CadastroForm";
 export default async function CadastroPage() {
   const session = await auth();
   if (session) {
-    redirect("/dashboard");
+    redirect(session.user.role ? "/dashboard" : "/cadastro/completar");
   }
 
   return (
@@ -36,7 +36,7 @@ export default async function CadastroPage() {
       </div>
 
       <p className="relative z-10 mt-10 text-center text-xs text-muted-foreground">
-        Projeto de Glauber Margem — TCC UniRios
+        Projeto de Glauber Margem, TCC UniRios
       </p>
     </main>
   );

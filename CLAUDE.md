@@ -35,10 +35,11 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
   já configurado com o driver adapter `@prisma/adapter-pg` (ver
   `specs/05-arquitetura.md`).
 - **NextAuth/OAuth** para autenticação. Configurado com **Auth.js v5**
-  (`next-auth@5.0.0-beta.32`, config em `src/lib/auth/config.ts`) — por ora só
-  provider de credenciais (email/senha com bcrypt), sessão JWT. Login social
-  Google ainda não habilitado — não é só falta de credenciais, falta definir
-  o fluxo de onboarding pós-login (ver `specs/05-arquitetura.md`, seção
+  (`next-auth@5.0.0-beta.32`, config em `src/lib/auth/config.ts`) — provider
+  de credenciais (email/senha com bcrypt) e Google, sessão JWT. Login
+  social Google implementado em 2026-10-10 (precisa de
+  `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` reais no `.env` pra funcionar de
+  verdade — ver `.env.example` e `specs/05-arquitetura.md`, seção
   "Login social Google").
 - Componentes de UI seguem o padrão shadcn/ui (`components.json`, `src/components/ui`,
   `class-variance-authority`, `tailwind-merge`, `lucide-react` para ícones).
@@ -57,6 +58,8 @@ src/app/page.tsx               "/" não renderiza nada: redireciona por sessão 
 src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
 src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
+src/app/cadastro/completar/    completa o cadastro depois de login via Google (role ainda null) — perfil +
+                                dados específicos, mesmo formulário da etapa 2 do cadastro normal
 src/app/(app)/                 route group com Header/Navbar: /dashboard, /userConfig
 src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico) OU painel do
                                 médico (gerar convite, pacientes vinculados com indicador de risco), por role
@@ -91,9 +94,13 @@ src/components/profile/        ProfileView (paginação + botão Sair), DadosPes
                                 (limites de hipo/hiperglicemia configuráveis, RF05)
 src/lib/utils.ts                helpers (cn, initials — iniciais do avatar, Header e tela de Perfil)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
-src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
-src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app
-src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro), logout
+src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts;
+                                authorized redireciona pra /cadastro/completar se role for null
+src/lib/auth/config.ts         config Auth.js completa (providers credenciais + Google) — usada no resto
+                                do app; jwt faz find-or-create por email no login Google (vínculo
+                                automático ou cadastro pendente, role null)
+src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro),
+                                completeGoogleSignup (completa perfil pendente de login Google), logout
 src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linkedMealId opcional, retorna
                                 {error, recordId} — RF14), createMeal (aceita linkedGlucoseRecordId
                                 opcional), consumeInviteCode, revokeLink
@@ -122,7 +129,8 @@ src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
                                 updatePatientClinicalData, updateDoctorProfessionalData,
                                 updateGlucoseThresholds (RF05)
-src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role)
+src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role — role é Role | null,
+                                null = cadastro via Google pendente)
 src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
 prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
 ```
@@ -140,9 +148,10 @@ há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
 
 **MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
-`specs/09-sprints.md`). Ainda não existe: login social Google — não é só
-falta de credenciais, falta definir o fluxo de onboarding pós-login (ver
-`specs/05-arquitetura.md`, seção "Login social Google").
+`specs/09-sprints.md`). Login social Google implementado em 2026-10-10 —
+falta só o Glauber gerar credenciais reais do Google Cloud Console pra
+testar de ponta a ponta (ver `.env.example` e `specs/05-arquitetura.md`,
+seção "Login social Google").
 
 ## Dois perfis de usuário — regras de negócio
 

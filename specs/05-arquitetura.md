@@ -175,50 +175,99 @@ autenticada. Decisão de segurança: sem essa checagem, qualquer sessão
 comprometida (ex.: dispositivo destravado) poderia trocar a senha e travar o
 dono da conta fora.
 
-## Login social Google — não implementado, gap de design identificado
+## Login social Google — implementado (2026-10-10)
 
-`CLAUDE.md` e o mockup de login (`08-design-system.md`) preveem um botão de
-login com Google, hoje renderizado desabilitado. Investigado em 2026-09-05:
-não é só uma questão de configurar credenciais — falta resolver um problema
-de fluxo antes de implementar. Decisão do Glauber: documentar o que falta,
-não implementar agora.
+Era um gap de design documentado desde 2026-09-05 (botão desabilitado): o
+Google só devolve nome e email, mas o cadastro exige escolher perfil
+(paciente/médico) + dados específicos antes de criar a conta, e nunca
+existiu uma tela pra completar isso depois do login social. Decisões
+confirmadas com o Glauber antes de implementar:
+- O Google só traz nome/email; o resto (perfil + dados específicos) é o
+  mesmo formulário da etapa 2 do cadastro manual.
+- Se o email do Google já tiver conta por senha, **vincula
+  automaticamente** (a mesma conta passa a aceitar login pelos dois meios).
 
-**O gap**: o cadastro atual (`CadastroForm.tsx`) exige escolher o perfil
-(paciente/médico) e preencher dados específicos de cada um (data de
-nascimento + tipo de diabetes, ou CRM + especialidade) antes de criar a
-conta — `PatientProfile`/`DoctorProfile` são obrigatórios e 1:1 com `User`.
-O provider do Google só devolve nome e email; não há como saber o `role`
-nem os dados do perfil a partir disso. Uma conta criada via Google precisa
-de uma tela de onboarding pós-login pra completar esses dados — essa tela
-nunca foi desenhada em nenhum mockup ou spec, e inventar esse fluxo sem
-confirmar com o Glauber violaria a diretriz de não inventar comportamento
-não especificado.
+### Por que não foi só adicionar o provider
 
-**O que falta definir antes de implementar** (perguntar ao Glauber quando
-for retomar):
-- Como fica a tela de "complete seu cadastro" depois do primeiro login via
-  Google (campos, textos, layout).
-- O que acontece se o email do Google já existir como conta de
-  email/senha — vincula automaticamente, ou bloqueia com um aviso?
+O projeto não usa Adapter do Prisma com o NextAuth — sessão é só JWT, e o
+`Credentials` provider faz o lookup manual no banco dentro de
+`authorize()`. Login Google não tem um "authorize" equivalente; o único
+callback com acesso ao perfil do Google E ao banco ao mesmo tempo é o
+`jwt`, em `src/lib/auth/config.ts` (não em `config.base.ts`, que é
+Edge-safe e não importa `db`).
 
-**O que já se sabe tecnicamente** (não é o bloqueio):
-- Auth.js v5 detecta credenciais automaticamente via variáveis de ambiente
-  `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — bastaria adicionar
-  `Google()` (import de `next-auth/providers/google`) à lista de
-  `providers` em `src/lib/auth/config.ts` (nunca em `config.base.ts`, que é
-  Edge-safe e não deve ganhar peso extra).
-- Client ID/Secret são gerados no
-  [Google Cloud Console](https://console.cloud.google.com/), em "APIs e
+`User.role` era obrigatório no schema, mas um login Google novo não tem
+perfil ainda — solução: `role` virou opcional (`Role?`, migration
+`20261010203648_make_user_role_optional`), e `role: null` significa
+"cadastro pendente". Na primeira vez que alguém entra com Google, já cria
+um `User` (nome/email do Google, sem senha, `role: null`) — e só marca o
+`role` quando a pessoa completa a etapa que falta. Essa escolha evita
+mexer no tipo de `session.user.id` (que seria um blast radius bem maior —
+toda ação de paciente/médico assume que `id` é sempre uma string válida);
+só `session.user.role`/`JWT.role` viraram `Role | null`.
+
+⚠️ **Pegadinha de tipos encontrada na implementação**: a interface
+`User` do módulo `next-auth` (usada no retorno de `authorize()`) é
+intersectada DENTRO de `Session.user` via `DefaultSession["user"]`. Se
+`User.role` ficasse `Role` (não-nulo) enquanto `Session.user.role` fosse
+declarado como `Role | null`, a interseção colapsava `role` de volta pra
+não-nulo (`Role & (Role | null)` = `Role`), e o erro de tipo aparecia num
+lugar sem relação nenhuma com a causa real. Correção:
+`interface User { role: Role | null }` também — ver comentário em
+`src/types/next-auth.d.ts`.
+
+### Fluxo implementado
+
+- `src/lib/auth/config.ts`: provider `Google` adicionado; novo callback
+  `signIn` rejeita (`return false`) se `profile.email_verified !== true`
+  (não aceita email que o Google não confirmou — proteção contra alguém
+  reivindicar um email que não é dele); callback `jwt` estendido —
+  pra login Google, busca `User` pelo email (vínculo automático ou
+  retomada de cadastro pendente) ou cria um `User` novo com `role: null`.
+- `src/lib/auth/config.base.ts` (Edge-safe, usado pelo `middleware.ts`):
+  callback `authorized` agora redireciona pra `/cadastro/completar`
+  (via `NextResponse.redirect`, que o tipo de retorno do `authorized` do
+  Auth.js v5 aceita diretamente) quando `auth.user.role` é `null`, nas
+  rotas protegidas.
+- `src/app/cadastro/completar/` (nova tela, fora do grupo `(app)`, mesmo
+  estilo visual de login/cadastro): mostra nome/email do Google (só
+  leitura) + o mesmo formulário da etapa 2 do cadastro (seletor
+  Paciente/Médico + campos específicos, sem senha). Server action
+  `completeGoogleSignup` (`src/lib/auth/actions.ts`) atualiza o `User`
+  pendente com o `role`/perfil escolhidos, depois chama
+  `signIn("google", { redirectTo: "/dashboard" })` de novo — o Google já
+  tem o consentimento, então é só um redirecionamento rápido de ida e
+  volta (sem tela de novo), necessário pra sessão pegar o `role` recém
+  salvo (o JWT antigo em cache ainda tinha `role: null`). Evita precisar
+  adicionar `SessionProvider`/`useSession().update()` num app que hoje é
+  100% server-driven, sem hook de sessão em lugar nenhum.
+- `parseProfileInput()` extraído de dentro de `registerUser` em
+  `src/lib/auth/actions.ts` — validação dos campos específicos de
+  paciente/médico, reaproveitada por `registerUser` (cadastro normal) e
+  `completeGoogleSignup`.
+- `.env.example` documenta `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — gerados
+  no [Google Cloud Console](https://console.cloud.google.com/), "APIs e
   Serviços" → "Credenciais" → "Criar credenciais" → "ID do cliente OAuth",
-  tipo "Aplicativo da Web", com a URI de redirecionamento
-  `<URL_DO_APP>/api/auth/callback/google` (em produção na Vercel, a URL
-  real do deploy; em desenvolvimento local,
-  `http://localhost:3000/api/auth/callback/google`).
-- Mesmo com credenciais reais, esse fluxo não é testável por
-  curl/simulação de formulário (o padrão usado em todo o resto do projeto)
-  — o OAuth do Google exige um redirecionamento de navegador real pra
-  `accounts.google.com` e de volta. Testar exige um navegador de verdade e
-  uma conta Google real.
+  tipo "Aplicativo da Web", URI de redirecionamento
+  `<URL_DO_APP>/api/auth/callback/google` (em dev,
+  `http://localhost:3000/api/auth/callback/google`). Sem essas variáveis
+  no `.env` local, o app builda e roda normal, só o clique em "Google"
+  falha ao tentar entrar de verdade.
+
+### Testado
+
+Com build limpo e um usuário real por credenciais (não afetado pela
+mudança): login por senha continua funcionando ponta a ponta, e as rotas
+protegidas continuam redirecionando pra `/login` sem sessão nenhuma —
+confirma que a migração de `role` pra opcional não quebrou nenhum dos ~8
+lugares que já liam `session.user.role`.
+
+**Não testado** (precisa de navegador real + conta Google real, igual já
+era esperado desde a investigação original): o fluxo OAuth completo —
+login Google novo caindo em `/cadastro/completar`, vínculo automático com
+conta por senha existente, e a sequência inteira até `/dashboard`. Só dá
+pra validar isso de fato depois que o Glauber gerar as credenciais reais
+no Google Cloud Console e testar manualmente.
 
 ## Migração de JS → TS — concluída
 

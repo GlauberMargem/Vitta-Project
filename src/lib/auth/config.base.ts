@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import type { NextAuthConfig } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
@@ -10,8 +11,17 @@ export const authConfig: NextAuthConfig = {
   },
   providers: [],
   callbacks: {
-    authorized({ auth }) {
-      return !!auth;
+    authorized({ auth, request }) {
+      if (!auth) return false;
+      // Cadastro via Google ainda sem perfil completo — manda terminar
+      // antes de liberar qualquer rota protegida. Ver
+      // src/app/cadastro/completar/.
+      if (!auth.user.role) {
+        return NextResponse.redirect(
+          new URL("/cadastro/completar", request.url)
+        );
+      }
+      return true;
     },
     jwt({ token, user }): JWT {
       if (user?.id) {

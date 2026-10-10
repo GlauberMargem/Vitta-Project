@@ -8,7 +8,7 @@ import type { DiabetesType, Role } from "@/generated/prisma/client";
 
 async function requireUser(): Promise<{ id: string; role: Role }> {
   const session = await auth();
-  if (!session) {
+  if (!session || !session.user.role) {
     throw new Error("Não autorizado.");
   }
   return { id: session.user.id, role: session.user.role };

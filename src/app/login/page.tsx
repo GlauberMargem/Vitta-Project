@@ -3,14 +3,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
-import { auth } from "@/lib/auth/config";
+import { auth, signIn } from "@/lib/auth/config";
 import logoIcon from "@/assets/images/logo-vitta.svg";
 import { LoginForm } from "./LoginForm";
 
 export default async function LoginPage() {
   const session = await auth();
   if (session) {
-    redirect("/dashboard");
+    redirect(session.user.role ? "/dashboard" : "/cadastro/completar");
   }
 
   return (
@@ -37,16 +37,21 @@ export default async function LoginPage() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          disabled
-          title="Login com Google ainda não disponível"
-          className="w-full rounded-lg"
+        <form
+          action={async () => {
+            "use server";
+            await signIn("google", { redirectTo: "/dashboard" });
+          }}
         >
-          <GoogleIcon className="size-4" />
-          Google
-        </Button>
+          <Button
+            type="submit"
+            variant="outline"
+            className="w-full rounded-lg"
+          >
+            <GoogleIcon className="size-4" />
+            Google
+          </Button>
+        </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Não possui uma conta?{" "}
@@ -60,7 +65,7 @@ export default async function LoginPage() {
       </div>
 
       <p className="relative z-10 mt-10 text-center text-xs text-muted-foreground">
-        Projeto de Glauber Margem — TCC UniRios
+        Projeto de Glauber Margem, TCC UniRios
       </p>
     </main>
   );
