@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AppMain } from "@/components/AppMain";
 import { Button } from "@/components/ui/button";
+import { initials } from "@/lib/utils";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DadosClinicosForm } from "./DadosClinicosForm";
 import { DadosProfissionaisForm } from "./DadosProfissionaisForm";
@@ -37,11 +38,19 @@ export function ProfileView(props: Props) {
 
   return (
     <AppMain>
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
-        <p className="text-sm text-muted-foreground">
-          {page === 0 ? "Dados pessoais" : secondPageLabel}
-        </p>
+      <div className="flex flex-col items-center gap-2">
+        <div
+          aria-hidden
+          className="flex size-20 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground"
+        >
+          {initials(props.name)}
+        </div>
+        <div className="text-center">
+          <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
+          <p className="text-sm text-muted-foreground">
+            {page === 0 ? "Dados pessoais" : secondPageLabel}
+          </p>
+        </div>
       </div>
 
       {page === 0 ? (

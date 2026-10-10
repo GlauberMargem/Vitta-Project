@@ -85,7 +85,7 @@ src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação cl
 src/components/profile/        ProfileView (paginação + botão Sair), DadosPessoaisForm (+ troca de senha),
                                 DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
                                 (limites de hipo/hiperglicemia configuráveis, RF05)
-src/lib/utils.ts                helpers (cn, etc.)
+src/lib/utils.ts                helpers (cn, initials — iniciais do avatar, Header e tela de Perfil)
 src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts
 src/lib/auth/config.ts         config Auth.js completa (provider de credenciais) — usada no resto do app

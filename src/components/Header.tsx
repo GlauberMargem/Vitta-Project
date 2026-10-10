@@ -1,15 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth/config";
+import { initials } from "@/lib/utils";
 import wordmark from "@/assets/images/tittle.svg";
-
-function initials(name: string | null | undefined): string {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
-}
 
 export async function Header() {
   const session = await auth();

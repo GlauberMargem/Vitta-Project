@@ -260,3 +260,11 @@ em branco, Data de nascimento, Tipo de diabetes — os campos repetidos/em branc
 são placeholder do mockup, não representam campos reais adicionais. Seguir a
 separação "dados pessoais" vs "dados clínicos" já definida em
 `06-fluxos-e-telas.md` como estrutura real das duas sub-telas.
+
+**Avatar** (implementado em 2026-10-10): círculo grande (`size-20`) com as
+iniciais do nome, centralizado acima do título "Perfil", mesmo padrão de cor
+do avatar pequeno do Header (`bg-primary`/`text-primary-foreground`). Decisão
+do Glauber: ilustração genérica a partir das iniciais, sem upload de foto
+real — upload exigiria armazenamento de arquivo e campo novo no banco, fora
+do escopo definido. Helper `initials()` extraído de `Header.tsx` pra
+`src/lib/utils.ts`, reaproveitado nos dois lugares.
