@@ -21,10 +21,22 @@ import {
 } from "@/components/ui/dialog";
 import { createGlucoseRecord } from "@/lib/patient/actions";
 import { formatDateTime } from "@/lib/patient/format";
+import {
+  GLUCOSE_VALUE_MAX_MGDL,
+  GLUCOSE_VALUE_MIN_MGDL,
+} from "@/lib/patient/limits";
 
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 type RecentMeal = { id: string; name: string | null; eatenAt: Date };
+
+function toDateTimeLocalValue(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+}
 
 export function NovaGlicoseDialog({
   recentMeals = [],
@@ -36,7 +48,9 @@ export function NovaGlicoseDialog({
   const [open, setOpen] = useState(false);
   const [context, setContext] = useState("");
   const [linkedMealId, setLinkedMealId] = useState("");
+  const [timeMode, setTimeMode] = useState<"now" | "past">("now");
   const [measuredAt, setMeasuredAt] = useState("");
+  const submittedAtRef = useRef<Date | null>(null);
   const [state, formAction, isPending] = useActionState(createGlucoseRecord, {
     error: null,
   });
@@ -44,7 +58,7 @@ export function NovaGlicoseDialog({
 
   useEffect(() => {
     if (wasPending.current && !isPending && !state.error && state.recordId) {
-      const submittedAt = new Date(measuredAt);
+      const submittedAt = submittedAtRef.current ?? new Date(NaN);
       const hasNearbyMeal = recentMeals.some(
         (meal) =>
           Math.abs(meal.eatenAt.getTime() - submittedAt.getTime()) <=
@@ -56,10 +70,11 @@ export function NovaGlicoseDialog({
       setOpen(false);
       setContext("");
       setLinkedMealId("");
+      setTimeMode("now");
       setMeasuredAt("");
     }
     wasPending.current = isPending;
-  }, [isPending, state, recentMeals, linkedMealId, measuredAt, onSuggestMealLink]);
+  }, [isPending, state, recentMeals, linkedMealId, onSuggestMealLink]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -77,7 +92,22 @@ export function NovaGlicoseDialog({
         <DialogHeader>
           <DialogTitle>Nova Glicose</DialogTitle>
         </DialogHeader>
-        <form action={formAction} className="flex flex-col gap-4">
+        <form
+          action={formAction}
+          onSubmit={(event) => {
+            const input = event.currentTarget.elements.namedItem(
+              "measuredAt"
+            ) as HTMLInputElement;
+            if (timeMode === "now") {
+              const now = new Date();
+              input.value = toDateTimeLocalValue(now);
+              submittedAtRef.current = now;
+            } else {
+              submittedAtRef.current = new Date(measuredAt);
+            }
+          }}
+          className="flex flex-col gap-4"
+        >
           <div className="flex flex-col gap-2">
             <Label htmlFor="value" className="font-support">
               Valor (mg/dL)
@@ -86,7 +116,8 @@ export function NovaGlicoseDialog({
               id="value"
               name="value"
               type="number"
-              min={1}
+              min={GLUCOSE_VALUE_MIN_MGDL}
+              max={GLUCOSE_VALUE_MAX_MGDL}
               placeholder="Digite o valor da sua glicose"
               required
               className="font-support"
@@ -94,18 +125,45 @@ export function NovaGlicoseDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="measuredAt" className="font-support">
-              Que horas você mediu?
-            </Label>
-            <Input
-              id="measuredAt"
-              name="measuredAt"
-              type="datetime-local"
-              value={measuredAt}
-              onChange={(event) => setMeasuredAt(event.target.value)}
-              required
-              className="font-support"
-            />
+            <Label className="font-support">Que horas você mediu?</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant={timeMode === "now" ? "default" : "outline"}
+                aria-pressed={timeMode === "now"}
+                onClick={() => setTimeMode("now")}
+                className="h-11 rounded-lg font-support"
+              >
+                Agora
+              </Button>
+              <Button
+                type="button"
+                variant={timeMode === "past" ? "default" : "outline"}
+                aria-pressed={timeMode === "past"}
+                onClick={() => {
+                  setTimeMode("past");
+                  if (!measuredAt) setMeasuredAt(toDateTimeLocalValue(new Date()));
+                }}
+                className="h-11 rounded-lg font-support"
+              >
+                Outro horário
+              </Button>
+            </div>
+            {timeMode === "past" ? (
+              <Input
+                id="measuredAt"
+                name="measuredAt"
+                type="datetime-local"
+                aria-label="Data e horário da medição"
+                value={measuredAt}
+                max={toDateTimeLocalValue(new Date())}
+                onChange={(event) => setMeasuredAt(event.target.value)}
+                required
+                className="font-support"
+              />
+            ) : (
+              <input type="hidden" name="measuredAt" />
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -139,7 +197,7 @@ export function NovaGlicoseDialog({
                   {recentMeals.map((meal) => (
                     <SelectItem key={meal.id} value={meal.id}>
                       {(meal.name ?? "Refeição") +
-                        " — " +
+                        ", " +
                         formatDateTime(meal.eatenAt)}
                     </SelectItem>
                   ))}

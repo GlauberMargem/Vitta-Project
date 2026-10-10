@@ -46,11 +46,44 @@ Registro de glicemia — RF02/RF03/RF04/RF05/RF11.
 |---|---|---|
 | id | uuid PK | |
 | patient_id | uuid FK → patient_profiles.user_id | índice |
-| value_mgdl | integer | valor em mg/dL |
+| value_mgdl | integer | valor em mg/dL — validado entre 10 e 600 (ver "Limites de inserção de dados" abaixo) |
 | context | enum('jejum','pos_prandial','antes_de_dormir','outro') | |
 | measured_at | timestamptz | índice, usado nos gráficos e na média de 90 dias |
 | created_at | timestamptz | quando o registro foi salvo no sistema |
 | linked_meal_id | uuid FK → meals.id, nullable, `ON DELETE SET NULL` | vínculo manual opcional com uma refeição (ver "Vínculo manual glicose-refeição" abaixo) |
+
+## Limites de inserção de dados (2026-10-10)
+
+Diferente dos limites de alerta de hipo/hiperglicemia (RF05, abaixo —
+configuráveis por paciente, representam "o que é saudável"), estes são
+limites de **sanidade de dado de entrada**: rejeitam valor claramente
+digitado errado, antes mesmo de avaliar se é saudável ou não. Vêm de um
+documento de referência técnica que o Glauber trouxe (arquitetura de
+requisitos clínicos para apps de diabetes).
+
+| Campo | Faixa aceita | Fonte/justificativa |
+|---|---|---|
+| Valor de glicose (`value_mgdl`) | 10 a 600 mg/dL | Faixa física de leitura de glicosímetros comerciais (ISO 15197) — fora disso o aparelho mostraria "LO"/"HI" em vez de um número. O Vitta não integra com glicosímetro (entrada é sempre manual), então não implementa os tokens "LO"/"HI" em si, só usa a mesma faixa numérica como teto de sanidade pra digitação manual. |
+| Carboidratos da refeição (`carbs_g`) | 0 a 999 g | Não é valor clínico — o documento de referência só cobre glicemia. Teto de sanidade definido pelo time (acima disso é praticamente certo erro de digitação). |
+
+Implementado em `src/lib/patient/limits.ts` (constantes +
+`isGlucoseValueInRange`/`isMealCarbsInRange`, funções puras reaproveitadas
+pela validação real em `src/lib/patient/actions.ts` e pelos testes) —
+validado no servidor (fonte da verdade) e espelhado nos atributos
+`min`/`max` dos `<Input type="number">` nos modais (feedback imediato no
+navegador, não substitui a validação do servidor).
+
+### Fora do escopo do Vitta (presentes no documento de referência, não aplicáveis aqui)
+
+O documento trazido cobre uma arquitetura bem mais ampla que a deste
+projeto — registrado aqui pra não se perder a razão de cada coisa ter
+ficado de fora:
+- **Monitorização contínua (CGM)** e métricas de Tempo na Meta/TBR/TAR/CV — o Vitta é só registro manual pontual (SMBG), nunca recebe fluxo contínuo de um sensor.
+- **Integração Bluetooth com glicosímetro** e os tokens de hardware "LO"/"HI" — toda entrada no Vitta é digitação manual do paciente, não há leitura de aparelho.
+- **"Regra dos 15 minutos" com reteste agendado em background** — exigiria um worker nativo em segundo plano (app mobile), o Vitta é uma aplicação web sem esse tipo de agendamento.
+- **Alerta de emergência via SMS/GPS pra contatos cadastrados** — fora do escopo de dados sensíveis definido nas specs (ver `CLAUDE.md`, "Segurança e privacidade"); exigiria consentimento e modelagem de contatos de emergência nunca discutidos.
+- **Metas diferenciadas por perfil fisiológico** (criança, idoso frágil, TTGO) — hoje os limites de alerta (RF05) são uniformes e configuráveis manualmente por qualquer paciente, independente do `diabetes_type`; o documento sugere defaults automáticos por perfil, o que é uma mudança de regra de negócio, não decidida ainda.
+- **Operação offline-first com resolução de conflito** — o Vitta já depende de conexão (Server Actions síncronas com o Postgres), mudar isso é uma reformulação de arquitetura, não uma melhoria pontual.
 
 ## Limites clínicos de hipo/hiperglicemia (RF05)
 

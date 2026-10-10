@@ -3,6 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
+import {
+  GLUCOSE_VALUE_MAX_MGDL,
+  GLUCOSE_VALUE_MIN_MGDL,
+  MEAL_CARBS_MAX_G,
+  isGlucoseValueInRange,
+  isMealCarbsInRange,
+} from "@/lib/patient/limits";
 
 async function requirePatientId(): Promise<string> {
   const session = await auth();
@@ -29,8 +36,10 @@ export async function createGlucoseRecord(
   const linkedMealIdRaw = formData.get("linkedMealId");
 
   const valueMgdl = Number(valueRaw);
-  if (!Number.isFinite(valueMgdl) || valueMgdl <= 0) {
-    return { error: "Informe um valor de glicose válido." };
+  if (!isGlucoseValueInRange(valueMgdl)) {
+    return {
+      error: `Informe um valor de glicose entre ${GLUCOSE_VALUE_MIN_MGDL} e ${GLUCOSE_VALUE_MAX_MGDL} mg/dL.`,
+    };
   }
   if (typeof measuredAtRaw !== "string" || !measuredAtRaw) {
     return { error: "Informe o horário da aferição." };
@@ -86,8 +95,8 @@ export async function createMeal(
   const linkedGlucoseRecordIdRaw = formData.get("linkedGlucoseRecordId");
 
   const carbsG = Number(carbsRaw);
-  if (!Number.isFinite(carbsG) || carbsG < 0) {
-    return "Informe a quantidade de carboidratos.";
+  if (!isMealCarbsInRange(carbsG)) {
+    return `Informe uma quantidade de carboidratos entre 0 e ${MEAL_CARBS_MAX_G} g.`;
   }
   if (typeof eatenAtRaw !== "string" || !eatenAtRaw) {
     return "Informe o horário da refeição.";

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { createMeal } from "@/lib/patient/actions";
 import { formatDateTime } from "@/lib/patient/format";
+import { MEAL_CARBS_MAX_G } from "@/lib/patient/limits";
 
 type RecentGlucoseRecord = { id: string; valueMgdl: number; measuredAt: Date };
 
@@ -106,6 +107,7 @@ export function NovaRefeicaoDialog({
               name="carbs"
               type="number"
               min={0}
+              max={MEAL_CARBS_MAX_G}
               placeholder="Quantidade de carboidratos da refeição"
               required
               className="font-support"
@@ -143,7 +145,7 @@ export function NovaRefeicaoDialog({
                 <SelectContent>
                   {recentGlucoseRecords.map((record) => (
                     <SelectItem key={record.id} value={record.id}>
-                      {`${record.valueMgdl} mg/dL — ${formatDateTime(record.measuredAt)}`}
+                      {`${record.valueMgdl} mg/dL, ${formatDateTime(record.measuredAt)}`}
                     </SelectItem>
                   ))}
                 </SelectContent>

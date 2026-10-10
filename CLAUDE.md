@@ -94,6 +94,9 @@ src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linke
                                 {error, recordId} — RF14), createMeal (aceita linkedGlucoseRecordId
                                 opcional), consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
+src/lib/patient/limits.ts      limites de sanidade de dado de entrada (glicose 10-600 mg/dL, carboidratos
+                                0-999g) — diferente dos limites de alerta do RF05, não são valor clínico
+                                ajustável; ver 04-modelo-de-dados.md, "Limites de inserção de dados"
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
                                 2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
                                 HbA1c (fórmula ADAG), hba1cColor (degradê verde→laranja pastel do card de
