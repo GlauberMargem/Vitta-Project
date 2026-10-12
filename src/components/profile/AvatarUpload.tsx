@@ -33,19 +33,21 @@ export function AvatarUpload({
           onClick={() => inputRef.current?.click()}
           disabled={isPending}
           aria-label="Trocar foto de perfil"
-          className="relative flex size-20 items-center justify-center overflow-hidden rounded-full bg-primary text-2xl font-semibold text-primary-foreground disabled:opacity-60"
+          className="relative flex size-20 disabled:opacity-60"
         >
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt=""
-              fill
-              sizes="80px"
-              className="object-cover"
-            />
-          ) : (
-            initials(name)
-          )}
+          <span className="relative flex size-20 items-center justify-center overflow-hidden rounded-full bg-primary text-2xl font-semibold text-primary-foreground">
+            {avatarUrl ? (
+              <Image
+                src={avatarUrl}
+                alt=""
+                fill
+                sizes="80px"
+                className="object-cover"
+              />
+            ) : (
+              initials(name)
+            )}
+          </span>
           <span className="absolute bottom-0 right-0 flex size-6 items-center justify-center rounded-full border-2 border-card bg-foreground text-card">
             <Camera className="size-3.5" aria-hidden />
           </span>
