@@ -144,7 +144,8 @@ src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configurá
                                 — fontes em specs/04-modelo-de-dados.md
 src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a
                                 mesma); buildReportHistories: idem, sem limite de linhas, por período
-                                (RF08)
+                                (RF08); groupHistoryByDay: agrupa por dia corrido, usado no PDF do
+                                relatório (com teste em history.test.ts)
 src/lib/patient/motivation.ts  RF12: dias distintos com glicose nos últimos 7 dias corridos + as 5
                                 mensagens motivacionais (textos exatos, não parafrasear)
 src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por período do dia (janela de

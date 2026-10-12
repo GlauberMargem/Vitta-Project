@@ -66,6 +66,30 @@ export function buildHistory(
     .slice(0, limit);
 }
 
+export type HistoryDayGroup = { date: Date; items: HistoryItem[] };
+
+/** Agrupa um histórico já ordenado (mais recente primeiro, como
+ * `buildHistory`/`buildReportHistories` devolvem) por dia corrido,
+ * preservando a ordem. Usado no relatório em PDF (RF08) pra separar os
+ * registros por dia. */
+export function groupHistoryByDay(history: HistoryItem[]): HistoryDayGroup[] {
+  const groups: HistoryDayGroup[] = [];
+  for (const item of history) {
+    const last = groups[groups.length - 1];
+    const sameDay =
+      last !== undefined &&
+      last.date.getFullYear() === item.date.getFullYear() &&
+      last.date.getMonth() === item.date.getMonth() &&
+      last.date.getDate() === item.date.getDate();
+    if (sameDay) {
+      last.items.push(item);
+    } else {
+      groups.push({ date: item.date, items: [item] });
+    }
+  }
+  return groups;
+}
+
 const REPORT_PERIODS: ReportPeriod[] = ["daily", "weekly", "monthly"];
 
 /** Histórico completo (sem limite) de cada período — usado no relatório em PDF

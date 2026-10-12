@@ -243,6 +243,20 @@ histórico), sem abas. A tela do médico sobre um paciente
 de relatório dentro da própria tela, já que lá é sobre UM paciente
 específico, não uma rota de navegação geral.
 
+**Layout do PDF agrupado por dia** (2026-10-12, pedido do Glauber —
+"agrupe por dia o relatório e ajuste o cabeçalho"): antes era uma tabela
+única com todos os registros do período, cada linha com data e hora.
+Agora (`RelatorioPdfButton.tsx`) os registros são agrupados por dia
+corrido (`groupHistoryByDay`, `src/lib/patient/history.ts`, com teste em
+`history.test.ts`) — cada dia vira uma faixa de cabeçalho (ex.:
+"Segunda-feira, 12/10/2026") seguida de uma tabela só daquele dia (colunas
+Hora/Tipo/Detalhe/Alerta, sem repetir a data). Cabeçalho do documento
+ganhou uma faixa azul (`--primary`) com "Vitta" + "Relatório glicêmico",
+e as informações (Paciente/Período/Gerado em/HbA1c) em duas colunas abaixo
+dela. Linhas com alerta de hipo/hiperglicemia saem destacadas com um tom
+claro da cor de alerta (`--alert`), igual ao padrão já usado em
+`HistoricoList.tsx` na tela.
+
 **Confirmação antes de desvincular** (2026-10-12, pedido do Glauber):
 clicar em "Revogar vínculo" não envia mais a ação direto — abre um
 `Dialog` de confirmação ("Desvincular do médico? Você vai deixar de estar
