@@ -9,8 +9,6 @@ import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { RelatorioPdfButton } from "@/components/patient/RelatorioPdfButton";
-import { MotivacaoCard } from "@/components/patient/MotivacaoCard";
-import { AlertaTendenciaCard } from "@/components/patient/AlertaTendenciaCard";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
 import { buildHistory, buildReportHistories } from "@/lib/patient/history";
 import {
@@ -24,11 +22,6 @@ import {
   mostSevereAlert,
   toGlucoseThresholds,
 } from "@/lib/patient/glucose";
-import {
-  countDaysWithGlucoseRecord,
-  motivationalMessage,
-} from "@/lib/patient/motivation";
-import { detectGlucoseTrend, trendAlertLabel } from "@/lib/patient/trend";
 import { cn } from "@/lib/utils";
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
@@ -127,10 +120,6 @@ export default async function DashboardPage() {
     meals30d,
     thresholds
   );
-  const motivationMessage = motivationalMessage(
-    countDaysWithGlucoseRecord(glucoseRecords30d)
-  );
-  const trendMessage = trendAlertLabel(detectGlucoseTrend(glucoseRecords30d));
 
   const mealNameSuggestions = mealNameRows
     .map((row) => row.name)
@@ -150,10 +139,6 @@ export default async function DashboardPage() {
       <GreetingHeader name={session.user.name ?? "Paciente"} />
 
       <HbA1cCard hba1c={hba1c} />
-
-      <MotivacaoCard message={motivationMessage} />
-
-      <AlertaTendenciaCard message={trendMessage} />
 
       <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">

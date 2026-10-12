@@ -6,6 +6,13 @@ export type DayPeriod = "MADRUGADA" | "MANHA" | "TARDE" | "NOITE";
 export type TrendAlert = {
   period: DayPeriod;
   direction: "ALTA" | "BAIXA";
+  /** Média do período apontado e média geral da janela — a base numérica
+   * da análise, pra poder mostrar "como o sistema chegou nisso". */
+  periodAverage: number;
+  overallAverage: number;
+  /** As medições que entraram na conta do período apontado, mais recente
+   * primeiro — pra poder listar "em quais dias". */
+  readings: { valueMgdl: number; measuredAt: Date }[];
 } | null;
 
 function periodForHour(hour: number): DayPeriod {
@@ -39,13 +46,14 @@ export function detectGlucoseTrend(
     sumsByPeriod.set(period, bucket);
   }
 
-  let best: { period: DayPeriod; deviation: number } | null = null;
+  let best: { period: DayPeriod; deviation: number; periodAvg: number } | null =
+    null;
   for (const [period, { sum, count }] of sumsByPeriod) {
     if (count < MIN_READINGS_PER_PERIOD) continue;
     const periodAvg = sum / count;
     const deviation = periodAvg - overallAvg;
     if (!best || Math.abs(deviation) > Math.abs(best.deviation)) {
-      best = { period, deviation };
+      best = { period, deviation, periodAvg };
     }
   }
 
@@ -53,9 +61,16 @@ export function detectGlucoseTrend(
     return null;
   }
 
+  const readings = records
+    .filter((record) => periodForHour(record.measuredAt.getHours()) === best.period)
+    .sort((a, b) => b.measuredAt.getTime() - a.measuredAt.getTime());
+
   return {
     period: best.period,
     direction: best.deviation > 0 ? "ALTA" : "BAIXA",
+    periodAverage: best.periodAvg,
+    overallAverage: overallAvg,
+    readings,
   };
 }
 
@@ -72,4 +87,17 @@ export function trendAlertLabel(alert: TrendAlert): string | null {
   return alert.direction === "ALTA"
     ? `Notamos que sua glicose costuma subir ${periodLabel}. Fique de olho!`
     : `Notamos que sua glicose costuma cair ${periodLabel}. Fique de olho!`;
+}
+
+/** Explica a base numérica da análise — responde "como o sistema chegou
+ * nisso": quantas medições, média do período apontado vs. média geral,
+ * na janela dos últimos 30 dias. */
+export function trendAlertDetail(alert: TrendAlert): string | null {
+  if (!alert) return null;
+  const periodLabel = PERIOD_LABEL[alert.period];
+  return (
+    `Nos últimos 30 dias, ${alert.readings.length} medições ${periodLabel} ` +
+    `tiveram média de ${Math.round(alert.periodAverage)} mg/dL, contra uma ` +
+    `média geral de ${Math.round(alert.overallAverage)} mg/dL nos seus registros.`
+  );
 }

@@ -317,10 +317,12 @@ bloco 3.
 ✅ **Refino de Header/Navbar e tamanho de toque** — feito em 2026-09-05.
 Botões de 36px para 44px de altura/toque (`button.tsx`), Header e Navbar
 migrados pra TS com os tokens do design system, avatar com iniciais no
-Header, estado ativo na Navbar. Dois desvios documentados em
-`08-design-system.md`: sem sino de notificação (não existe sistema de
-notificação no MVP) e Navbar reduzida de 3 pra 2 ícones (nunca existiu rota
-separada de "Gráficos"). Ver `07-roadmap.md`, bloco 9.
+Header, estado ativo na Navbar. Desvio documentado em `08-design-system.md`:
+Navbar reduzida de 3 pra 2 ícones (nunca existiu rota separada de
+"Gráficos"). Ver `07-roadmap.md`, bloco 9. Sino de notificação — adiado
+nessa época por não existir conteúdo pra notificar — implementado depois,
+em 2026-10-12, quando os cards de motivação/tendência viraram notificações
+(ver `08-design-system.md`, "Sistema de notificações").
 
 ✅ **RF08 — Relatório glicêmico em PDF** — feito em 2026-09-05. Antes de
 implementar, três decisões foram confirmadas com o Glauber (não são coisa

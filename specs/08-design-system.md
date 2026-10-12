@@ -124,11 +124,37 @@ marca/apresentação — confirmar se aparece dentro do produto ou só fora dele
 - Modais sobrepõem a tela com fundo escurecido, card branco central, "X" no canto
   superior direito para fechar.
 - Cabeçalho do app logado: logo "vitta" à esquerda, sino de notificação + avatar
-  circular à direita.
-  ⚠️ **Desvio implementado**: sino de notificação não incluído — não existe
-  sistema de notificação no MVP (ver `05-arquitetura.md`), um ícone decorativo
-  sem função seria enganoso. Avatar com iniciais do nome, linkando pra
-  `/userConfig`, foi implementado.
+  circular à direita. Avatar com iniciais do nome, linkando pra `/userConfig` —
+  implementado desde o início. Sino de notificação implementado em
+  2026-10-12 (ver seção "Sistema de notificações" abaixo) — até então ficava
+  de fora por não existir conteúdo nenhum pra notificar; passou a existir
+  quando o card de motivação (RF12) e o de tendência (RF13) viraram
+  notificações em vez de cards fixos no dashboard.
+
+### Sistema de notificações (2026-10-12)
+
+Pedido do Glauber: os cards de motivação (RF12) e de tendência de glicose
+(RF13), que antes ficavam sempre visíveis no topo do dashboard, viraram
+notificações acessadas pelo sino no `Header` — abrem numa sobreposição
+(`Dialog` do shadcn, mesmo padrão visual dos modais de Nova
+Glicose/Refeição: fundo escurecido, painel central) em vez de ocupar espaço
+fixo na tela. Um ponto vermelho no sino (`bg-destructive`) indica quando há
+alerta de tendência ativo — a mensagem motivacional sempre existe (RF12
+nunca retorna vazio) então não teria sentido ela sozinha acionar o ponto.
+
+Calculado no `Header.tsx` (não mais em `dashboard/page.tsx`), porque o
+Header aparece em toda a área logada — não só no dashboard — e as duas
+mensagens existem só pro paciente. `MotivacaoCard.tsx`/
+`AlertaTendenciaCard.tsx` foram removidos (não sobrou nenhum lugar que
+ainda os use).
+
+**Transparência do alerta de tendência** (RF13, pedido do Glauber): antes a
+notificação só dizia "sua glicose costuma subir de manhã", sem nenhuma
+base. Agora `detectGlucoseTrend` (`src/lib/patient/trend.ts`) também
+devolve a média do período apontado, a média geral da janela, e a lista das
+medições que entraram nessa conta — a notificação mostra a explicação
+numérica (`trendAlertDetail`) e até 6 medições específicas (data + horário
++ valor), com "e mais N medições" se passar disso.
 
 O rodapé das telas de login/cadastro **não** deve usar "powered by Limen" (isso
 era só marca d'água da ferramenta de protótipo). No lugar, usar um texto de
@@ -202,11 +228,10 @@ linear entre os dois extremos. Implementado em `hba1cColor()`
 paciente — a view do médico sobre um paciente continua neutra (texto
 `text-foreground` fixo), fora do pedido original.
 
-Card de alerta de tendência (RF13, só aparece quando a regra é satisfeita —
-ver `02-requisitos-funcionais.md`), logo abaixo do card de motivação (RF12):
-- "Notamos que sua glicose costuma subir {período}. Fique de olho!"
-- "Notamos que sua glicose costuma cair {período}. Fique de olho!"
-onde `{período}` é "de madrugada", "de manhã", "à tarde" ou "à noite" — ver
+O alerta de tendência (RF13, só existe quando a regra é satisfeita — ver
+`02-requisitos-funcionais.md`) e a mensagem de motivação (RF12) **não** são
+mais cards fixos do dashboard — viraram notificações no sino do `Header`
+desde 2026-10-12. Ver "Sistema de notificações", acima, e
 `src/lib/patient/trend.ts`.
 
 **Saudação + horário** (implementado em 2026-10-10): "Bom dia!"/"Boa
@@ -215,7 +240,10 @@ tarde!"/"Boa noite!" varia de acordo com a hora atual (antes era sempre
 calculada no cliente (`src/components/GreetingHeader.tsx`, `useEffect`),
 não no servidor — pra bater com o relógio local do usuário, não o fuso de
 onde o servidor roda. Usado tanto no dashboard do paciente quanto no do
-médico.
+médico. Texto em `text-foreground/70` (não `text-muted-foreground`) —
+ajustado em 2026-10-12, contraste insuficiente contra a faixa diagonal azul
+clara do `AppMain` (o token `text-muted-foreground` foi calibrado pra cima
+de fundo branco/bege, não do azul da faixa).
 
 ### Modal — Nova Glicose
 "Nova Glicose" · "Digite o valor da sua glicose" · rótulo do campo de horário

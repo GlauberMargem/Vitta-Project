@@ -81,12 +81,13 @@ src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta 
                                 de 44px; src/components/ui (shadcn), icons/; AppMain.tsx (container padrão
                                 das telas da área logada — fundo bege #F2ECDE + faixa diagonal, ver
                                 08-design-system.md); GreetingHeader.tsx (saudação por horário + relógio,
-                                calculado no cliente — dashboard paciente e médico)
+                                calculado no cliente — dashboard paciente e médico); NotificationBell.tsx
+                                (sino do Header — notificações de motivação RF12 + tendência RF13, só
+                                paciente, ver 08-design-system.md "Sistema de notificações")
 src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
                                 sugestão de refeição, RF14), NovaGlicoseDialog, NovaRefeicaoDialog (shadcn
                                 Dialog), GlicemiaChart (Recharts) + GlicemiaChartCard (seletor de período
-                                dia/semana/mês), RelatorioPdfButton (jsPDF, RF08), MotivacaoCard (RF12, só
-                                paciente), AlertaTendenciaCard (RF13, só paciente), VinculoMedicoCard,
+                                dia/semana/mês), RelatorioPdfButton (jsPDF, RF08), VinculoMedicoCard,
                                 HbA1cCard, HistoricoList (reaproveitados no painel do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
 src/components/profile/        ProfileView (paginação + botão Sair), DadosPessoaisForm (+ troca de senha),
@@ -123,7 +124,9 @@ src/lib/patient/motivation.ts  RF12: dias distintos com glicose nos últimos 7 d
                                 mensagens motivacionais (textos exatos, não parafrasear)
 src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por período do dia (janela de
                                 30 dias, mínimo 3 medições por período, desvio mínimo de 20 mg/dL da
-                                média geral) — regra confirmada com o Glauber em 2026-09-06
+                                média geral) — regra confirmada com o Glauber em 2026-09-06.
+                                trendAlertDetail + TrendAlert.readings expõem a base numérica da análise
+                                (médias + medições específicas), consumido pelo NotificationBell
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),

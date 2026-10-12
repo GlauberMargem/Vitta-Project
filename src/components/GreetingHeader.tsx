@@ -33,12 +33,12 @@ export function GreetingHeader({ name }: { name: string }) {
   return (
     <div className="flex items-start justify-between">
       <div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm font-medium text-foreground/70">
           {now ? greetingForHour(now.getHours()) : "Bom dia!"}
         </p>
         <h1 className="text-xl font-semibold text-foreground">{name}</h1>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm font-medium text-foreground/70">
         {now ? formatTime(now) : ""}
       </p>
     </div>
