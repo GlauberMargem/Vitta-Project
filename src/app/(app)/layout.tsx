@@ -1,14 +1,17 @@
+import { auth } from "@/lib/auth/config";
 import { Header } from "@/components/Header";
 import { Navbar } from "@/components/Navbar";
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
+
   return (
     <>
       <Header></Header>
       {children}
-      <Navbar></Navbar>
+      <Navbar role={session?.user.role ?? null}></Navbar>
     </>
   );
 }

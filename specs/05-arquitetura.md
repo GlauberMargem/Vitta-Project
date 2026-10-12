@@ -89,6 +89,13 @@ Solução: a config foi dividida em duas.
 
 ## ⚠️ `next dev` (Turbopack e Webpack) não executa `middleware.ts` nesta versão
 
+> Atualização 2026-10-12: Next subiu pra `16.4.0` (falhas de segurança do
+> `npm audit`, incluindo execução remota de código e CSRF em Server
+> Actions). Em `build && start` o middleware continua bloqueando
+> `/dashboard`, `/userConfig` e `/dashboard/pacientes/*` sem sessão
+> (redirect 307 pra `/login`). O comportamento no `next dev` ainda não foi
+> retestado nessa versão.
+
 Bug/limitação confirmada em `next@16.1.1`: o middleware é compilado e
 aparece corretamente no manifest (`.next/dev/server/middleware-manifest.json`,
 matchers certos), mas **não é invocado em nenhuma requisição** durante
@@ -104,6 +111,31 @@ perfeitamente — testado ponta a ponta (bloqueia sem sessão, redireciona pra
 (guard de rota), rodar `npm run build && npm run start` em vez de `npm run
 dev`. Isso deve ser revisto quando o Next.js for atualizado — pode ser que
 uma versão mais nova corrija esse bug do dev server.
+
+### Suspeita de bug parecido com `import()` dinâmico (RF08, não confirmado)
+
+O Glauber relatou em 2026-10-12 que o botão "Baixar relatório" trava em
+"Gerando..." pra sempre (nunca baixa, nenhum erro visível) — ele estava
+testando com `npm run dev`. Investiguei bastante tentando reproduzir:
+
+- Rodei a mesma chamada de `jsPDF`/`jspdf-autotable` do componente
+  isoladamente em Node — gera o PDF sem erro.
+- Comparei o código compilado (`.next/static/chunks`) com o código-fonte —
+  bate exatamente.
+- Confirmei que todos os chunks dinâmicos (`import("jspdf")`,
+  `import("jspdf-autotable")`) respondem HTTP 200 depois de
+  `npm run build && npm run start`.
+- Não achei header de CSP nem nada bloqueando `blob:`/download.
+
+Ou seja: com build de produção, não consegui reproduzir nenhum problema —
+só não dá pra confirmar o clique de verdade sem navegador (ver limitação
+de teste no topo deste documento). A suspeita forte é que seja **outra
+limitação do `next dev`/Turbopack nesta versão**, no mesmo espírito do bug
+do middleware acima — `import()` dinâmico de uma biblioteca grande
+(jsPDF + autotable) compilando sob demanda no dev server, talvez nunca
+resolvendo a Promise. **Ainda não confirmado com o Glauber testando via
+`npm run build && npm run start`** — atualizar esta nota depois que ele
+testar.
 
 ## Ícones: lucide-react, não Material Symbols
 
@@ -184,8 +216,34 @@ existiu uma tela pra completar isso depois do login social. Decisões
 confirmadas com o Glauber antes de implementar:
 - O Google só traz nome/email; o resto (perfil + dados específicos) é o
   mesmo formulário da etapa 2 do cadastro manual.
-- Se o email do Google já tiver conta por senha, **vincula
-  automaticamente** (a mesma conta passa a aceitar login pelos dois meios).
+- ~~Se o email do Google já tiver conta por senha, vincula
+  automaticamente.~~ **Revogado em 2026-10-12** (auditoria de segurança,
+  confirmado com o Glauber): ver "Sem vínculo automático com conta por
+  senha" abaixo.
+
+### Sem vínculo automático com conta por senha (2026-10-12)
+
+O cadastro por senha não confirma o email. Com o vínculo automático, um
+atacante podia criar uma conta com o email de outra pessoa (ou trocar o
+email da própria conta para o dela) e esperar: quando a vítima entrasse
+com o Google, cairia dentro da conta do atacante, que continua sabendo a
+senha e lê os dados de saúde dela (pré-sequestro de conta).
+
+Correção:
+- Callback `signIn` (`src/lib/auth/config.ts`): se já existe `User` com
+  esse email **e com `passwordHash`**, recusa o login Google e redireciona
+  pra `/login?erro=conta-com-senha`, que mostra "Já existe uma conta com
+  esse email criada com senha. Entre com seu email e senha."
+- `updateBasicInfo` (`src/lib/profile/actions.ts`): conta sem senha
+  (criada pelo Google) não pode trocar o email, porque o email dela é o
+  que o Google confirmou. Na tela de Perfil o campo fica somente leitura
+  com uma explicação. Sem isso, um atacante com conta Google podia trocar
+  o email para o da vítima e a sessão JWT antiga dele continuaria valendo
+  na conta onde a vítima passaria a entrar.
+
+Vincular os dois meios de login numa mesma conta, se um dia for preciso,
+exige confirmar o email no cadastro por senha antes (funcionalidade nova,
+fora do escopo atual).
 
 ### Por que não foi só adicionar o provider
 
@@ -222,8 +280,9 @@ lugar sem relação nenhuma com a causa real. Correção:
   `signIn` rejeita (`return false`) se `profile.email_verified !== true`
   (não aceita email que o Google não confirmou — proteção contra alguém
   reivindicar um email que não é dele); callback `jwt` estendido —
-  pra login Google, busca `User` pelo email (vínculo automático ou
-  retomada de cadastro pendente) ou cria um `User` novo com `role: null`.
+  pra login Google, busca `User` pelo email (conta Google já existente ou
+  retomada de cadastro pendente; conta com senha já foi barrada no
+  `signIn`) ou cria um `User` novo com `role: null`.
 - `src/lib/auth/config.base.ts` (Edge-safe, usado pelo `middleware.ts`):
   callback `authorized` agora redireciona pra `/cadastro/completar`
   (via `NextResponse.redirect`, que o tipo de retorno do `authorized` do

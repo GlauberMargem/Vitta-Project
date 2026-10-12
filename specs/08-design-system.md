@@ -128,7 +128,9 @@ marca/apresentação — confirmar se aparece dentro do produto ou só fora dele
   ícones (Início, Perfil) — nunca existiu uma rota separada de "Gráficos", o
   gráfico sempre esteve embutido no dashboard (Sprint 3), então o terceiro
   ícone apontava pra um destino duplicado do de "Início". Ver `07-roadmap.md`,
-  bloco 9.
+  bloco 9. Voltou a ter um terceiro ícone em 2026-10-12, mas "Relatórios"
+  (`/relatorios`, RF08), não "Gráficos" — e só pro paciente, o médico
+  continua com 2. Ver "Relatório e vínculo saem do dashboard" mais abaixo.
 - Modais sobrepõem a tela com fundo escurecido, card branco central, "X" no canto
   superior direito para fechar.
 - Cabeçalho do app logado: logo "vitta" à esquerda, sino de notificação + avatar
@@ -217,6 +219,50 @@ crédito visível".
 "Não desanime, nossa meta é de Y%" · seção "Ações" com botão "+" (nova glicose) e
 ícone garfo/faca (nova refeição)
 
+**Relatório e vínculo saem do dashboard, viram navegação de verdade**
+(2026-10-12, pedido do Glauber): primeira tentativa foi um sistema de abas
+dentro do dashboard (`DashboardTabs.tsx`, "Início"/"Mais") — revisado no
+mesmo dia a pedido dele por uma solução mais alinhada ao padrão de
+navegação do app:
+- **Relatório em PDF** virou uma rota própria, `/relatorios`
+  (`src/app/(app)/relatorios/page.tsx`), acessível por um terceiro ícone na
+  `Navbar` ("Relatórios", `FileText` do lucide) — só aparece pro paciente;
+  o médico já baixa relatório de cada paciente na tela de histórico
+  individual, não precisa de rota própria. `Navbar` passou a receber
+  `role` como prop (vindo de `src/app/(app)/layout.tsx`, que virou `async`
+  e chama `auth()`) pra decidir se mostra esse terceiro ícone.
+- **Vínculo com médico** (`VinculoMedicoCard`) foi pra dentro da tela de
+  Perfil (`ProfileView.tsx`) — fica sempre visível ali, abaixo da
+  paginação Dados pessoais/Dados clínicos, antes do botão "Sair", pros
+  dois perfis de conteúdo da página (não é um 3º sub-item paginado, é uma
+  seção fixa da tela, só renderizada quando `role === "PATIENT"`).
+
+Dashboard do paciente voltou a ser uma lista só (HbA1c, Ações, gráfico,
+histórico), sem abas. A tela do médico sobre um paciente
+(`dashboard/pacientes/[patientId]/`) não foi mexida — continua com o botão
+de relatório dentro da própria tela, já que lá é sobre UM paciente
+específico, não uma rota de navegação geral.
+
+**Confirmação antes de desvincular** (2026-10-12, pedido do Glauber):
+clicar em "Revogar vínculo" não envia mais a ação direto — abre um
+`Dialog` de confirmação ("Desvincular do médico? Você vai deixar de estar
+vinculado... Pra se vincular de novo, vai precisar de um novo código de
+convite.") com "Cancelar"/"Sim, desvincular". Evita revogar sem querer um
+vínculo que não é trivial de desfazer (precisa de um novo código do
+médico). Implementado em `VinculoMedicoCard.tsx` com um botão fora do
+`<form>` ligado por `form="revoke-link-form"` (atributo HTML, não precisa
+de JS pra disparar o submit certo).
+
+**Confirmação antes de desvincular** (2026-10-12, pedido do Glauber):
+clicar em "Revogar vínculo" não envia mais a ação direto — abre um
+`Dialog` de confirmação ("Desvincular do médico? Você vai deixar de estar
+vinculado... Pra se vincular de novo, vai precisar de um novo código de
+convite.") com "Cancelar"/"Sim, desvincular". Evita revogar sem querer um
+vínculo que não é trivial de desfazer (precisa de um novo código do
+médico). Implementado em `VinculoMedicoCard.tsx` com um botão fora do
+`<form>` ligado por `form="revoke-link-form"` (atributo HTML, não precisa
+de JS pra disparar o submit certo).
+
 Hierarquia visual do card de HbA1c (ajustado em 2026-09-06 pra bater com a
 referência): "Sua" e "está em" em preto (`text-foreground`), "hemoglobina
 glicada" em verde fixo (`#4CAF50`), tudo em negrito (`text-xl font-bold`); o
@@ -288,6 +334,16 @@ X com dias da semana abreviados (Seg, Ter, Qua, Qui, Sex)
 só os 5 listados acima. O mockup provavelmente só tinha espaço visível para 5
 rótulos na captura de tela — glicemia de fim de semana é tão relevante quanto
 a de dia útil, não faz sentido omitir do gráfico.
+
+**Período "3 meses" adicionado** (2026-10-12, pedido do Glauber: "visualizar
+dados de um período maior que mês"): quarto botão de período no
+`GlicemiaChartCard`, ao lado de Dia/Semana/Mês. Reaproveita a mesma janela
+de 90 dias já buscada pro HbA1c (`glucoseRecords90d`) — sem query nova —
+mas agrupada por **semana** (`buildQuarterlyGlucoseSeries`,
+`src/lib/patient/glucose.ts`), não por dia como o mensal: 90 pontos diários
+não caberiam de forma legível num gráfico mobile. Se precisar de período
+maior que 90 dias (6 meses, ano), precisa de uma query nova — a 90 dias é o
+teto do que já é buscado hoje.
 
 ### Perfil (2 sub-telas)
 Sub-tela 1 (dados pessoais): avatar, Nome completo, Senha (mascarada), Data de

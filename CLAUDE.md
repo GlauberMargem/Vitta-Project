@@ -60,12 +60,19 @@ src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
 src/app/cadastro/completar/    completa o cadastro depois de login via Google (role ainda null) — perfil +
                                 dados específicos, mesmo formulário da etapa 2 do cadastro normal
-src/app/(app)/                 route group com Header/Navbar: /dashboard, /userConfig
-src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico) OU painel do
+src/app/(app)/                 route group com Header/Navbar: /dashboard, /relatorios, /userConfig. Layout é
+                                `async` (chama `auth()`) só pra saber o `role` e decidir se a Navbar mostra o
+                                ícone de Relatórios
+src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico — sem
+                                relatório/vínculo, que viraram rota/tela própria em 2026-10-12) OU painel do
                                 médico (gerar convite, pacientes vinculados com indicador de risco), por role
-src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um paciente vinculado, pro médico
+src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um paciente vinculado, pro
+                                médico — continua com o botão de relatório dentro da própria tela (é sobre
+                                UM paciente, não é rota de navegação geral)
+src/app/(app)/relatorios/      RF08, só paciente — relatório em PDF, antes vivia dentro do dashboard
 src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
-                                dados clínicos (paciente) ou profissionais (médico)
+                                dados clínicos (paciente) ou profissionais (médico); card de vínculo com
+                                médico sempre visível abaixo da paginação (só paciente, desde 2026-10-12)
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/assets/images/              assets importados diretamente no código (logos etc.) — `import logo from
                                 "@/assets/images/arquivo.svg"` + `next/image`, dimensões inferidas
@@ -76,21 +83,27 @@ src/assets/illustrations/      ilustrações maiores (cenas, personagens) de ban
                                 exigem crédito visível na tela (ver CREDITS.md na própria pasta e
                                 05-arquitetura.md). Não excluir o link de atribuição ao editar a tela
                                 que usa o arquivo
-src/components/                Navbar.tsx/Header.tsx (arquivo plano, não pasta — consistente com o resto
-                                de `src/components/*`), tokens do design system, avatar/iniciais, toque
-                                de 44px; src/components/ui (shadcn), icons/; AppMain.tsx (container padrão
-                                das telas da área logada — fundo bege #F2ECDE + faixa diagonal, ver
-                                08-design-system.md); GreetingHeader.tsx (saudação por horário + relógio,
-                                calculado no cliente — dashboard paciente e médico); NotificationBell.tsx
-                                (sino do Header — notificações de motivação RF12 + tendência RF13, só
-                                paciente, ver 08-design-system.md "Sistema de notificações")
+src/components/                Navbar.tsx (recebe `role` via prop de `(app)/layout.tsx` — ícone de
+                                Relatórios só pro paciente) /Header.tsx (arquivo plano, não pasta —
+                                consistente com o resto de `src/components/*`), tokens do design system,
+                                avatar/iniciais, toque de 44px; src/components/ui (shadcn), icons/;
+                                AppMain.tsx (container padrão das telas da área logada — fundo bege
+                                #F2ECDE + faixa diagonal, ver 08-design-system.md); GreetingHeader.tsx
+                                (saudação por horário + relógio, calculado no cliente — dashboard paciente
+                                e médico); NotificationBell.tsx (sino do Header — notificações de
+                                motivação RF12 + tendência RF13, só paciente, ver 08-design-system.md
+                                "Sistema de notificações")
 src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
                                 sugestão de refeição, RF14), NovaGlicoseDialog, NovaRefeicaoDialog (shadcn
                                 Dialog), GlicemiaChart (Recharts) + GlicemiaChartCard (seletor de período
-                                dia/semana/mês), RelatorioPdfButton (jsPDF, RF08), VinculoMedicoCard,
-                                HbA1cCard, HistoricoList (reaproveitados no painel do médico)
+                                dia/semana/mês/3 meses), RelatorioPdfButton (jsPDF, RF08, usado em
+                                `/relatorios` e na tela do médico sobre um paciente), VinculoMedicoCard
+                                (confirmação em Dialog antes de revogar vínculo — usado em `ProfileView`,
+                                não mais no dashboard), HbA1cCard, HistoricoList (reaproveitados no painel
+                                do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
-src/components/profile/        ProfileView (paginação + botão Sair), DadosPessoaisForm (+ troca de senha),
+src/components/profile/        ProfileView (paginação + botão Sair + card de vínculo com médico fixo
+                                abaixo da paginação, só paciente), DadosPessoaisForm (+ troca de senha),
                                 DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
                                 (limites de hipo/hiperglicemia configuráveis, RF05)
 src/lib/utils.ts                helpers (cn, initials — iniciais do avatar, Header e tela de Perfil)
@@ -98,8 +111,9 @@ src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
 src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts;
                                 authorized redireciona pra /cadastro/completar se role for null
 src/lib/auth/config.ts         config Auth.js completa (providers credenciais + Google) — usada no resto
-                                do app; jwt faz find-or-create por email no login Google (vínculo
-                                automático ou cadastro pendente, role null)
+                                do app; signIn recusa Google se o email já tem conta por
+                                senha (sem vínculo automático, ver 05-arquitetura.md); jwt faz
+                                find-or-create por email (cadastro pendente, role null)
 src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro),
                                 completeGoogleSignup (completa perfil pendente de login Google), logout
 src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linkedMealId opcional, retorna
@@ -114,7 +128,8 @@ src/lib/patient/*.test.ts      testes Vitest colocados ao lado do módulo testad
 src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
                                 2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
                                 HbA1c (fórmula ADAG), hba1cColor (degradê verde→laranja pastel do card de
-                                HbA1c, meta 7% a pior 10%), agregação diária/semanal/mensal, getPeriodRange
+                                HbA1c, meta 7% a pior 10%), agregação diária/semanal/mensal/trimestral
+                                (buildQuarterlyGlucoseSeries, média semanal dos últimos 90 dias), getPeriodRange
                                 (janelas dia/semana/mês, usada pelo gráfico e pelo PDF), risco mais grave
                                 — fontes em specs/04-modelo-de-dados.md
 src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a
@@ -149,6 +164,9 @@ acesso externo/webhook).
 ⚠️ `middleware.ts` só funciona testado em `npm run build && npm run start` —
 há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
 middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
+Next atualizado pra `16.4.0` em 2026-10-12 (falhas de segurança apontadas
+pelo `npm audit`): middleware reconfirmado em `build && start`; o bug do
+`next dev` ainda não foi retestado nessa versão.
 
 **MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
 `specs/09-sprints.md`). Login social Google implementado em 2026-10-10 —

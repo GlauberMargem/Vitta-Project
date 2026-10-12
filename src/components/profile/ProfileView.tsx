@@ -8,6 +8,7 @@ import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DadosClinicosForm } from "./DadosClinicosForm";
 import { DadosProfissionaisForm } from "./DadosProfissionaisForm";
 import { LimitesAlertaForm } from "./LimitesAlertaForm";
+import { VinculoMedicoCard } from "@/components/patient/VinculoMedicoCard";
 import { logout } from "@/lib/auth/actions";
 import type { DiabetesType } from "@/generated/prisma/client";
 
@@ -16,17 +17,20 @@ type Props =
       role: "PATIENT";
       name: string;
       email: string;
+      hasPassword: boolean;
       birthDate: Date;
       diabetesType: DiabetesType;
       hypoThreshold: number;
       severeHypoThreshold: number;
       hyperFastingThreshold: number;
       hyperPostprandialThreshold: number;
+      activeLink: { id: string; doctorName: string } | null;
     }
   | {
       role: "DOCTOR";
       name: string;
       email: string;
+      hasPassword: boolean;
       crm: string;
       specialty: string;
     };
@@ -54,7 +58,11 @@ export function ProfileView(props: Props) {
       </div>
 
       {page === 0 ? (
-        <DadosPessoaisForm name={props.name} email={props.email} />
+        <DadosPessoaisForm
+          name={props.name}
+          email={props.email}
+          hasPassword={props.hasPassword}
+        />
       ) : props.role === "PATIENT" ? (
         <>
           <DadosClinicosForm
@@ -103,6 +111,10 @@ export function ProfileView(props: Props) {
           {secondPageLabel}
         </Button>
       </div>
+
+      {props.role === "PATIENT" ? (
+        <VinculoMedicoCard activeLink={props.activeLink} />
+      ) : null}
 
       <form action={logout}>
         <Button type="submit" variant="outline" className="w-full rounded-lg">

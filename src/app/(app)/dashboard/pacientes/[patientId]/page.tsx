@@ -14,6 +14,7 @@ import { formatDateTime } from "@/lib/patient/format";
 import {
   buildDailyGlucoseSeries,
   buildMonthlyGlucoseSeries,
+  buildQuarterlyGlucoseSeries,
   buildWeeklyGlucoseSeries,
   estimateHbA1c,
   toGlucoseThresholds,
@@ -99,6 +100,7 @@ export default async function PatientDetailPage({
   const dailySeries = buildDailyGlucoseSeries(glucoseRecords90d);
   const weeklySeries = buildWeeklyGlucoseSeries(glucoseRecords90d);
   const monthlySeries = buildMonthlyGlucoseSeries(glucoseRecords90d);
+  const quarterlySeries = buildQuarterlyGlucoseSeries(glucoseRecords90d);
   const hba1c = estimateHbA1c(glucoseRecords90d);
 
   return (
@@ -115,7 +117,7 @@ export default async function PatientDetailPage({
           {patientName}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Histórico somente leitura — você não pode criar ou alterar
+          Histórico somente leitura. Você não pode criar ou alterar
           registros deste paciente.
         </p>
       </div>
@@ -126,6 +128,7 @@ export default async function PatientDetailPage({
         daily={dailySeries}
         weekly={weeklySeries}
         monthly={monthlySeries}
+        quarterly={quarterlySeries}
       />
 
       <section className="rounded-lg bg-card p-5 shadow-sm">
@@ -146,7 +149,7 @@ export default async function PatientDetailPage({
           Anotações clínicas
         </h2>
         <p className="mb-3 text-xs text-muted-foreground">
-          Visíveis só para você — o paciente não tem acesso a essas notas.
+          Visíveis só para você. O paciente não tem acesso a essas notas.
         </p>
         <NovaAnotacaoForm linkId={link.id} />
         {clinicalNotes.length > 0 ? (

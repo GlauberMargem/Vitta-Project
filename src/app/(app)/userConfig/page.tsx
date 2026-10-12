@@ -9,30 +9,44 @@ export default async function UserConfigPage() {
   }
 
   if (session.user.role === "PATIENT") {
-    const profile = await db.patientProfile.findUniqueOrThrow({
-      where: { userId: session.user.id },
-      select: {
-        birthDate: true,
-        diabetesType: true,
-        hypoThreshold: true,
-        severeHypoThreshold: true,
-        hyperFastingThreshold: true,
-        hyperPostprandialThreshold: true,
-        user: { select: { name: true, email: true } },
-      },
-    });
+    const [profile, activeLinkRow] = await Promise.all([
+      db.patientProfile.findUniqueOrThrow({
+        where: { userId: session.user.id },
+        select: {
+          birthDate: true,
+          diabetesType: true,
+          hypoThreshold: true,
+          severeHypoThreshold: true,
+          hyperFastingThreshold: true,
+          hyperPostprandialThreshold: true,
+          user: { select: { name: true, email: true, passwordHash: true } },
+        },
+      }),
+      db.patientDoctorLink.findFirst({
+        where: { patientId: session.user.id, status: "ACTIVE" },
+        include: {
+          doctor: { include: { user: { select: { name: true } } } },
+        },
+      }),
+    ]);
+
+    const activeLink = activeLinkRow
+      ? { id: activeLinkRow.id, doctorName: activeLinkRow.doctor.user.name }
+      : null;
 
     return (
       <ProfileView
         role="PATIENT"
         name={profile.user.name}
         email={profile.user.email}
+        hasPassword={profile.user.passwordHash !== null}
         birthDate={profile.birthDate}
         diabetesType={profile.diabetesType}
         hypoThreshold={profile.hypoThreshold}
         severeHypoThreshold={profile.severeHypoThreshold}
         hyperFastingThreshold={profile.hyperFastingThreshold}
         hyperPostprandialThreshold={profile.hyperPostprandialThreshold}
+        activeLink={activeLink}
       />
     );
   }
@@ -43,7 +57,7 @@ export default async function UserConfigPage() {
       select: {
         crm: true,
         specialty: true,
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, passwordHash: true } },
       },
     });
 
@@ -52,6 +66,7 @@ export default async function UserConfigPage() {
         role="DOCTOR"
         name={profile.user.name}
         email={profile.user.email}
+        hasPassword={profile.user.passwordHash !== null}
         crm={profile.crm}
         specialty={profile.specialty}
       />

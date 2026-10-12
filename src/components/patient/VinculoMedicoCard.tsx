@@ -1,9 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { consumeInviteCode, revokeLink } from "@/lib/patient/actions";
 
 type ActiveLink = {
@@ -43,6 +52,7 @@ function ConsumeCodeForm() {
 
 function RevokeLinkForm({ link }: { link: ActiveLink }) {
   const [error, formAction, isPending] = useActionState(revokeLink, null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-3">
@@ -50,22 +60,57 @@ function RevokeLinkForm({ link }: { link: ActiveLink }) {
         Vinculado a{" "}
         <span className="font-semibold">Dr(a). {link.doctorName}</span>
       </p>
-      <form action={formAction}>
+
+      <form id="revoke-link-form" action={formAction}>
         <input type="hidden" name="linkId" value={link.id} />
-        {error ? (
-          <p className="mb-2 text-sm text-destructive" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <Button
-          type="submit"
-          variant="secondary"
-          disabled={isPending}
-          className="rounded-lg"
-        >
-          {isPending ? "Revogando..." : "Revogar vínculo"}
-        </Button>
       </form>
+
+      {error ? (
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogTrigger asChild>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isPending}
+            className="rounded-lg"
+          >
+            {isPending ? "Revogando..." : "Revogar vínculo"}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Desvincular do médico?</DialogTitle>
+            <DialogDescription>
+              Você vai deixar de estar vinculado a Dr(a). {link.doctorName}.
+              Pra se vincular de novo, vai precisar de um novo código de
+              convite.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-lg"
+              onClick={() => setConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              form="revoke-link-form"
+              className="rounded-lg"
+              onClick={() => setConfirmOpen(false)}
+            >
+              Sim, desvincular
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

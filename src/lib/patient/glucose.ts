@@ -267,3 +267,49 @@ export function buildMonthlyGlucoseSeries(
     };
   });
 }
+
+const QUARTERLY_WINDOW_DAYS = 90;
+const QUARTERLY_BUCKET_DAYS = 7;
+
+/** Últimos 90 dias, média semanal — pedido do Glauber em 2026-10-12 pra
+ * conseguir ver período maior que "mês" no gráfico. Reaproveita a mesma
+ * janela de 90 dias já buscada pro HbA1c (`glucoseRecords90d`), sem query
+ * nova. Bucket semanal (não diário, como o mensal) porque 90 pontos
+ * diários não caberiam de forma legível num gráfico mobile. */
+export function buildQuarterlyGlucoseSeries(
+  records: { valueMgdl: number; measuredAt: Date }[],
+  referenceDate: Date = new Date()
+): GlucosePoint[] {
+  const start = new Date(referenceDate);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (QUARTERLY_WINDOW_DAYS - 1));
+
+  const bucketCount = Math.ceil(QUARTERLY_WINDOW_DAYS / QUARTERLY_BUCKET_DAYS);
+  const buckets: number[][] = Array.from({ length: bucketCount }, () => []);
+
+  for (const record of records) {
+    const diffDays = Math.floor(
+      (record.measuredAt.getTime() - start.getTime()) / 86_400_000
+    );
+    if (diffDays < 0 || diffDays >= QUARTERLY_WINDOW_DAYS) continue;
+    buckets[Math.floor(diffDays / QUARTERLY_BUCKET_DAYS)].push(
+      record.valueMgdl
+    );
+  }
+
+  return buckets.map((values, index) => {
+    const date = new Date(start);
+    date.setDate(date.getDate() + index * QUARTERLY_BUCKET_DAYS);
+    return {
+      label: date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+      value: values.length
+        ? Math.round(
+            values.reduce((sum, value) => sum + value, 0) / values.length
+          )
+        : null,
+    };
+  });
+}
