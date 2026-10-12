@@ -16,7 +16,7 @@ da extração anterior, ainda válida.
 | Fundo principal | `#F8F9FA` | base neutra, evita branco puro |
 | Primária | `#6993C5` | botões de ação principal (Login, Próxima etapa) |
 | Fundo diagonal (login/cadastro) | `#C8E1FF` | forma decorativa atrás do card |
-| Secundária | `#B8E4C9` (verde-menta) | botão de finalização positiva (Finalizar cadastro) — não coberta pela extração do Gemini (só viu telas com 1 botão), mantida da versão anterior |
+| Secundária | `#318150` (verde, era `#B8E4C9` verde-menta) | botão de finalização positiva (Finalizar cadastro) — não coberta pela extração do Gemini (só viu telas com 1 botão), mantida da versão anterior. Escurecida em 2026-10-12 por contraste real (ver callout mais abaixo) |
 | Tons de apoio | `#FFD6A5` (pêssego pastel) | destaques secundários — idem, mantida da versão anterior |
 | Atenção/ação | `#FFB5A7` (coral leve) | destaque para botões ou status — idem, mantida da versão anterior |
 | Texto principal | `#2D2D2D` | contraste equilibrado |
@@ -44,7 +44,7 @@ continuam com `#F8F9FA` — fora do escopo dessa mudança.
 | `--card` / `--popover` | `#FFFFFF` | |
 | `--primary` | `#6993C5` | botões de ação principal |
 | `--primary-foreground` | `#FFFFFF` | texto branco nos botões, confirmado com o Glauber em 2026-09-06 |
-| `--secondary` | `#B8E4C9` (verde-menta) | botão de finalização positiva (Finalizar cadastro) |
+| `--secondary` | `#318150` (verde mais escuro, mesmo tom da paleta) | botão de finalização positiva (Finalizar cadastro, Nova Refeição, Revogar vínculo) |
 | `--secondary-foreground` | `#FFFFFF` | idem, texto branco |
 | `--accent` | `#FFD6A5` (pêssego pastel) | destaques secundários |
 | `--muted-foreground` | `#9CA3AF` | texto secundário/placeholder |
@@ -58,6 +58,14 @@ o que em tese conflita com RNF05. Eu tinha optado por texto escuro por
 acessibilidade; o Glauber pediu branco de volta em 2026-09-06 ("com preto
 fica muito feio", como no protótipo) — decisão de identidade visual dele,
 mantida.
+
+**`--secondary` escurecido por contraste real, não só "aceito"** (2026-10-12):
+o verde-menta original (`#B8E4C9`) com texto branco dava ~1,4:1 — não dava
+pra ler o texto/ícone de verdade (achado pelo Glauber em "Nova Refeição" e
+"Revogar vínculo"), bem diferente do caso do `--primary` acima (que é só
+"abaixo do ideal", não "ilegível"). Mantido o mesmo matiz de verde (mesmo
+tom de 143° no HSL), só escurecido — `#318150`, ~4,8:1 com branco, dentro
+do AA pra texto normal.
 
 ## Cursor dos botões
 
