@@ -423,3 +423,38 @@ um test runner em vez de só documentar a matriz de casos.
   padrão de função pura, dá pra seguir o mesmo modelo depois.
 - Não roda em CI (não existe pipeline de CI configurado neste projeto) —
   só local, via `npm test`, antes de commit.
+
+## 404 e rota inexistente dentro da área logada (2026-10-13)
+
+Pedido do Glauber: uma página de 404 de verdade (antes era a genérica do
+Next.js) e, pra rota privada ou inexistente, mandar pro login em vez de só
+dar erro.
+
+- `src/app/not-found.tsx` — 404 global, mesmo estilo visual de
+  login/cadastro (faixa diagonal), link "Voltar para o login". É o
+  fallback padrão do Next.js pra qualquer rota sem página correspondente
+  e sem lugar mais específico pra cair.
+- `src/app/(app)/not-found.tsx` — 404 dentro da área logada, renderiza
+  com Header/Navbar (herdados do layout), link "Voltar para o início".
+- `src/app/(app)/[...slug]/page.tsx` — catch-all: sem sessão, redireciona
+  pra `/login`; com sessão, chama `notFound()` (cai no 404 de cima). ⚠️
+  **Importante**: route group (`(app)`) não adiciona segmento na URL, então
+  esse catch-all captura **qualquer** caminho não mapeado em todo o app,
+  não só dentro de alguma URL com prefixo "/app" — confirmado testando
+  `/rota-que-nao-existe` (nível raiz) e caiu nele igual. Na prática isso
+  cobre o pedido "rota privada ou não existente → login" pra praticamente
+  qualquer URL inválida, sem precisar de lógica extra. Rotas reais
+  (`/dashboard`, `/userConfig`, `/relatorios`, `/login`, `/cadastro`, `/api/*`
+  etc.) sempre têm prioridade sobre o catch-all — o Next.js só cai nele
+  quando nada mais bate.
+- `middleware.ts`: matcher ganhou `/relatorios/:path*` — tinha ficado de
+  fora quando essa rota foi criada em 2026-10-12, então sem sessão ela não
+  redirecionava pra lugar nenhum (só retornava `null` da própria página).
+  Agora redireciona igual `/dashboard`/`/userConfig`.
+
+Testado com `npm run build && npm run start` (o bug do `next dev` não
+invocar middleware já documentado acima também vale aqui): rota de 1º
+nível sem sessão → 307 pro login; `/dashboard/pagina-fantasma` sem sessão
+→ 307 pro login com `callbackUrl`; `/relatorios` sem sessão → 307 pro
+login (confirma o fix do matcher); rota inexistente **com** sessão válida
+→ 404 de verdade (status HTTP 404, não redirect), com Header/Navbar.

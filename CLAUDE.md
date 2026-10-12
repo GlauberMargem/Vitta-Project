@@ -52,7 +52,8 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 
 ```
 vitest.config.mts              config do Vitest (alias @/*, environment node) — ver 05-arquitetura.md
-middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig
+middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig, /relatorios
+src/app/not-found.tsx          404 global (fora da área logada, mesmo estilo visual de login/cadastro)
 src/app/page.tsx               "/" não renderiza nada: redireciona por sessão (com sessão vai pra
                                 /dashboard, sem sessão vai pra /login) — nunca é a home de fato
 src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
@@ -73,6 +74,11 @@ src/app/(app)/relatorios/      RF08, só paciente — relatório em PDF, antes v
 src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
                                 dados clínicos (paciente) ou profissionais (médico); card de vínculo com
                                 médico sempre visível abaixo da paginação (só paciente, desde 2026-10-12)
+src/app/(app)/not-found.tsx    404 dentro da área logada (com Header/Navbar) — ver [...slug]/ abaixo
+src/app/(app)/[...slug]/       catch-all: sem sessão redireciona pra /login, com sessão chama notFound().
+                                Route group não adiciona prefixo na URL — esse catch-all pega qualquer
+                                caminho não mapeado do app inteiro, não só "dentro" de /dashboard etc. Ver
+                                05-arquitetura.md, "404 e rota inexistente dentro da área logada"
 src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
 src/assets/images/              assets importados diretamente no código (logos etc.) — `import logo from
                                 "@/assets/images/arquivo.svg"` + `next/image`, dimensões inferidas
