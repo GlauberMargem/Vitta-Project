@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { put, del } from "@vercel/blob";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
 import type { DiabetesType, Role } from "@/generated/prisma/client";
@@ -31,6 +32,17 @@ export async function updateBasicInfo(
   }
   const trimmedEmail = email.trim();
 
+  // Conta criada pelo Google não tem senha e o email é o que o Google
+  // confirmou. Deixar trocar abriria espaço pra assumir o email de outra
+  // pessoa e receber o login Google dela nesta conta.
+  const user = await db.user.findUnique({
+    where: { id },
+    select: { email: true, passwordHash: true },
+  });
+  if (!user?.passwordHash && user?.email !== trimmedEmail) {
+    return "Contas criadas com o Google usam o email do Google e não podem trocá-lo.";
+  }
+
   const existing = await db.user.findUnique({ where: { email: trimmedEmail } });
   if (existing && existing.id !== id) {
     return "Já existe uma conta com esse email.";
@@ -42,6 +54,48 @@ export async function updateBasicInfo(
   });
 
   revalidatePath("/userConfig");
+  return null;
+}
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
+export async function updateAvatar(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const { id } = await requireUser();
+
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size === 0) {
+    return "Selecione uma imagem.";
+  }
+  if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+    return "Envie uma imagem PNG, JPEG ou WEBP.";
+  }
+  if (file.size > MAX_AVATAR_BYTES) {
+    return "A imagem precisa ter no máximo 5MB.";
+  }
+
+  const previous = await db.user.findUnique({
+    where: { id },
+    select: { avatarUrl: true },
+  });
+
+  const extension = file.type.split("/")[1];
+  const blob = await put(`avatars/${id}-${Date.now()}.${extension}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+
+  await db.user.update({ where: { id }, data: { avatarUrl: blob.url } });
+
+  if (previous?.avatarUrl) {
+    await del(previous.avatarUrl).catch(() => {});
+  }
+
+  revalidatePath("/userConfig");
+  revalidatePath("/dashboard");
   return null;
 }
 

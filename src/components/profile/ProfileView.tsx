@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AppMain } from "@/components/AppMain";
 import { Button } from "@/components/ui/button";
-import { initials } from "@/lib/utils";
+import { AvatarUpload } from "./AvatarUpload";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DadosClinicosForm } from "./DadosClinicosForm";
 import { DadosProfissionaisForm } from "./DadosProfissionaisForm";
@@ -18,6 +18,7 @@ type Props =
       name: string;
       email: string;
       hasPassword: boolean;
+      avatarUrl: string | null;
       birthDate: Date;
       diabetesType: DiabetesType;
       hypoThreshold: number;
@@ -31,6 +32,7 @@ type Props =
       name: string;
       email: string;
       hasPassword: boolean;
+      avatarUrl: string | null;
       crm: string;
       specialty: string;
     };
@@ -43,12 +45,7 @@ export function ProfileView(props: Props) {
   return (
     <AppMain>
       <div className="flex flex-col items-center gap-2">
-        <div
-          aria-hidden
-          className="flex size-20 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground"
-        >
-          {initials(props.name)}
-        </div>
+        <AvatarUpload name={props.name} avatarUrl={props.avatarUrl} />
         <div className="text-center">
           <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
           <p className="text-sm text-muted-foreground">

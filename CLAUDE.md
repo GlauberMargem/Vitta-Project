@@ -43,7 +43,9 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
   "Login social Google").
 - Componentes de UI seguem o padrão shadcn/ui (`components.json`, `src/components/ui`,
   `class-variance-authority`, `tailwind-merge`, `lucide-react` para ícones).
-- Hospedagem alvo: Vercel.
+- Hospedagem alvo: Vercel. Armazenamento de arquivo (foto de perfil): **Vercel
+  Blob** (`@vercel/blob`), token em `BLOB_READ_WRITE_TOKEN` (ver `.env.example`
+  e `specs/08-design-system.md`, "Upload de foto de verdade").
 - **Vitest** para testes automatizados (`npm test`) — só funções puras de
   `src/lib/**` por enquanto (regras de negócio), sem teste de componente
   React. Ver `specs/05-arquitetura.md`, "Testes automatizados".
@@ -109,7 +111,9 @@ src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRe
                                 do médico)
 src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
 src/components/profile/        ProfileView (paginação + botão Sair + card de vínculo com médico fixo
-                                abaixo da paginação, só paciente), DadosPessoaisForm (+ troca de senha),
+                                abaixo da paginação, só paciente), AvatarUpload (foto de perfil via
+                                Vercel Blob, com fallback de iniciais — ver 08-design-system.md,
+                                "Upload de foto de verdade"), DadosPessoaisForm (+ troca de senha),
                                 DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
                                 (limites de hipo/hiperglicemia configuráveis, RF05)
 src/lib/utils.ts                helpers (cn, initials — iniciais do avatar, Header e tela de Perfil)
@@ -151,6 +155,8 @@ src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por p
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
+                                updateAvatar (foto de perfil, sobe pro Vercel Blob e salva a URL em
+                                User.avatarUrl — apaga o blob antigo depois de trocar), 
                                 updatePatientClinicalData, updateDoctorProfessionalData,
                                 updateGlucoseThresholds (RF05)
 src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role — role é Role | null,

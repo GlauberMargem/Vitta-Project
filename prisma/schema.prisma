@@ -53,6 +53,9 @@ model User {
   // null = cadastro via Google pendente de completar (escolher perfil +
   // dados específicos) — ver specs/05-arquitetura.md, "Login social Google"
   role         Role?
+  // URL pública do arquivo no Vercel Blob — ver specs/08-design-system.md,
+  // "Avatar" e src/lib/profile/actions.ts (updateAvatar)
+  avatarUrl    String?  @map("avatar_url")
   createdAt    DateTime @default(now()) @map("created_at")
 
   patientProfile PatientProfile?

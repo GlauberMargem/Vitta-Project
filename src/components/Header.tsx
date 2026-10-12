@@ -13,6 +13,15 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 export async function Header() {
   const session = await auth();
 
+  const avatarUrl = session
+    ? (
+        await db.user.findUnique({
+          where: { id: session.user.id },
+          select: { avatarUrl: true },
+        })
+      )?.avatarUrl ?? null
+    : null;
+
   const notifications =
     session?.user.role === "PATIENT"
       ? await (async () => {
@@ -54,9 +63,13 @@ export async function Header() {
           <Link
             href="/userConfig"
             aria-label="Perfil"
-            className="flex size-11 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-80"
+            className="relative flex size-11 items-center justify-center overflow-hidden rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-80"
           >
-            {initials(session.user.name)}
+            {avatarUrl ? (
+              <Image src={avatarUrl} alt="" fill sizes="44px" className="object-cover" />
+            ) : (
+              initials(session.user.name)
+            )}
           </Link>
         </div>
       ) : null}

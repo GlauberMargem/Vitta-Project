@@ -355,8 +355,19 @@ separação "dados pessoais" vs "dados clínicos" já definida em
 
 **Avatar** (implementado em 2026-10-10): círculo grande (`size-20`) com as
 iniciais do nome, centralizado acima do título "Perfil", mesmo padrão de cor
-do avatar pequeno do Header (`bg-primary`/`text-primary-foreground`). Decisão
-do Glauber: ilustração genérica a partir das iniciais, sem upload de foto
-real — upload exigiria armazenamento de arquivo e campo novo no banco, fora
-do escopo definido. Helper `initials()` extraído de `Header.tsx` pra
-`src/lib/utils.ts`, reaproveitado nos dois lugares.
+do avatar pequeno do Header (`bg-primary`/`text-primary-foreground`). Helper
+`initials()` extraído de `Header.tsx` pra `src/lib/utils.ts`, reaproveitado
+nos dois lugares.
+
+**Upload de foto de verdade** (decisão revertida em 2026-10-12, a pedido do
+Glauber — originalmente ficou fora do escopo por exigir armazenamento de
+arquivo e campo novo no banco): o círculo do avatar em `/userConfig` agora é
+clicável (`AvatarUpload.tsx`, com um badge de câmera sempre visível no canto,
+sem depender de hover, pra funcionar em touch) e abre o seletor de arquivo do
+sistema; ao escolher uma imagem (PNG/JPEG/WEBP, até 5MB), envia na hora via
+server action (`updateAvatar`, `src/lib/profile/actions.ts`) sem precisar de
+botão "salvar" separado. O arquivo vai pro **Vercel Blob**
+(`@vercel/blob`, `BLOB_READ_WRITE_TOKEN` — ver `.env.example`), e a URL
+pública fica em `User.avatarUrl` (`prisma/schema.prisma`). Sem foto
+enviada, continua caindo no fallback de iniciais. O mesmo avatar (foto ou
+iniciais) aparece também no círculo pequeno do Header.

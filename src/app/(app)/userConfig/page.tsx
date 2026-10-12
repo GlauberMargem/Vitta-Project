@@ -19,7 +19,14 @@ export default async function UserConfigPage() {
           severeHypoThreshold: true,
           hyperFastingThreshold: true,
           hyperPostprandialThreshold: true,
-          user: { select: { name: true, email: true, passwordHash: true } },
+          user: {
+            select: {
+              name: true,
+              email: true,
+              passwordHash: true,
+              avatarUrl: true,
+            },
+          },
         },
       }),
       db.patientDoctorLink.findFirst({
@@ -40,6 +47,7 @@ export default async function UserConfigPage() {
         name={profile.user.name}
         email={profile.user.email}
         hasPassword={profile.user.passwordHash !== null}
+        avatarUrl={profile.user.avatarUrl}
         birthDate={profile.birthDate}
         diabetesType={profile.diabetesType}
         hypoThreshold={profile.hypoThreshold}
@@ -57,7 +65,14 @@ export default async function UserConfigPage() {
       select: {
         crm: true,
         specialty: true,
-        user: { select: { name: true, email: true, passwordHash: true } },
+        user: {
+          select: {
+            name: true,
+            email: true,
+            passwordHash: true,
+            avatarUrl: true,
+          },
+        },
       },
     });
 
@@ -67,6 +82,7 @@ export default async function UserConfigPage() {
         name={profile.user.name}
         email={profile.user.email}
         hasPassword={profile.user.passwordHash !== null}
+        avatarUrl={profile.user.avatarUrl}
         crm={profile.crm}
         specialty={profile.specialty}
       />
