@@ -11,7 +11,7 @@ export function HistoricoList({ history }: { history: HistoryItem[] }) {
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
       {history.map((item) => (
         <li
           key={`${item.kind}-${item.id}`}
