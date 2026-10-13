@@ -109,7 +109,9 @@ src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRe
                                 (confirmação em Dialog antes de revogar vínculo — usado em `ProfileView`,
                                 não mais no dashboard), HbA1cCard, HistoricoList (reaproveitados no painel
                                 do médico)
-src/components/doctor/         GerarConviteCard, NovaAnotacaoForm (anotação clínica, só o médico vê)
+src/components/doctor/         GerarConviteCard, PendingInviteCodes (lista de códigos PENDING com botão
+                                "Revogar" + confirmação em Dialog), NovaAnotacaoForm (anotação clínica,
+                                só o médico vê)
 src/components/profile/        ProfileView (paginação + botão Sair + card de vínculo com médico fixo
                                 abaixo da paginação, só paciente), AvatarUpload (foto de perfil via
                                 Vercel Blob, com fallback de iniciais — ver 08-design-system.md,
@@ -154,6 +156,7 @@ src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por p
                                 trendAlertDetail + TrendAlert.readings expõem a base numérica da análise
                                 (médias + medições específicas), consumido pelo NotificationBell
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
+                                revokeInviteCode (só código PENDING do próprio médico),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
                                 updateAvatar (foto de perfil, sobe pro Vercel Blob e salva a URL em

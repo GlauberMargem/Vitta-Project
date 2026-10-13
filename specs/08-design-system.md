@@ -257,6 +257,22 @@ dela. Linhas com alerta de hipo/hiperglicemia saem destacadas com um tom
 claro da cor de alerta (`--alert`), igual ao padrão já usado em
 `HistoricoList.tsx` na tela.
 
+**Lista de pacientes do médico — HbA1c e revogar código** (2026-10-12,
+pedido do Glauber): cada paciente vinculado na lista "Pacientes
+vinculados" (dashboard do médico) agora mostra também a HbA1c estimada
+(últimos 90 dias, mesma fórmula do card do paciente — cor degradê
+verde→laranja via `hba1cColor`), junto do indicador de risco que já
+existia. Sem registro nos últimos 90 dias, mostra "Sem registros" no
+lugar. A lista fica ordenada por HbA1c decrescente (paciente com glicemia
+mais alta primeiro — prioriza quem precisa de mais atenção); quem não tem
+HbA1c calculável vai pro fim, mantendo a ordem anterior (mais recente
+primeiro) entre si. A seção "Códigos pendentes" virou um componente
+próprio (`PendingInviteCodes.tsx`) com um botão "Revogar" por código
+(confirmação em Dialog, mesmo padrão do "Revogar vínculo" em
+`VinculoMedicoCard.tsx`) — chama `revokeInviteCode`
+(`src/lib/doctor/actions.ts`), que só revoga código `PENDING` do próprio
+médico.
+
 **Confirmação antes de desvincular** (2026-10-12, pedido do Glauber):
 clicar em "Revogar vínculo" não envia mais a ação direto — abre um
 `Dialog` de confirmação ("Desvincular do médico? Você vai deixar de estar

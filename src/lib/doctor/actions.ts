@@ -62,6 +62,26 @@ export async function generateInviteCode(
   };
 }
 
+export async function revokeInviteCode(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const doctorId = await requireDoctorId();
+
+  const linkId = formData.get("linkId");
+  if (typeof linkId !== "string" || !linkId) {
+    return "Código inválido.";
+  }
+
+  await db.patientDoctorLink.updateMany({
+    where: { id: linkId, doctorId, status: "PENDING" },
+    data: { status: "REVOKED" },
+  });
+
+  revalidatePath("/dashboard");
+  return null;
+}
+
 export async function createClinicalNote(
   _previousState: string | null,
   formData: FormData

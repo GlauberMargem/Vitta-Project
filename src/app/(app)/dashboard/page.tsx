@@ -8,6 +8,7 @@ import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
+import { PendingInviteCodes } from "@/components/doctor/PendingInviteCodes";
 import { buildHistory } from "@/lib/patient/history";
 import {
   buildDailyGlucoseSeries,
@@ -18,6 +19,7 @@ import {
   estimateHbA1c,
   glucoseAlert,
   glucoseAlertLabel,
+  hba1cColor,
   mostSevereAlert,
   toGlucoseThresholds,
 } from "@/lib/patient/glucose";
@@ -162,14 +164,20 @@ async function DoctorDashboard({
     .filter((id): id is string => Boolean(id));
 
   const riskWindowStart = new Date(Date.now() - RISK_WINDOW_MS);
-  const [recentRecords, thresholdRows] = await Promise.all([
+  const ninetyDaysAgo = new Date(Date.now() - NINETY_DAYS_MS);
+  const [glucoseRecords90d, thresholdRows] = await Promise.all([
     patientIds.length
       ? db.glucoseRecord.findMany({
           where: {
             patientId: { in: patientIds },
-            measuredAt: { gte: riskWindowStart },
+            measuredAt: { gte: ninetyDaysAgo },
           },
-          select: { patientId: true, valueMgdl: true, context: true },
+          select: {
+            patientId: true,
+            valueMgdl: true,
+            context: true,
+            measuredAt: true,
+          },
         })
       : Promise.resolve([]),
     patientIds.length
@@ -191,7 +199,13 @@ async function DoctorDashboard({
   );
 
   const alertsByPatient = new Map<string, ReturnType<typeof glucoseAlert>[]>();
-  for (const record of recentRecords) {
+  const hba1cRecordsByPatient = new Map<string, { valueMgdl: number }[]>();
+  for (const record of glucoseRecords90d) {
+    const hba1cRecords = hba1cRecordsByPatient.get(record.patientId) ?? [];
+    hba1cRecords.push(record);
+    hba1cRecordsByPatient.set(record.patientId, hba1cRecords);
+
+    if (record.measuredAt < riskWindowStart) continue;
     const thresholds =
       thresholdsByPatient.get(record.patientId) ?? DEFAULT_GLUCOSE_THRESHOLDS;
     const alert = glucoseAlert(record.valueMgdl, record.context, thresholds);
@@ -201,45 +215,51 @@ async function DoctorDashboard({
     alertsByPatient.set(record.patientId, list);
   }
 
+  const hba1cByPatient = new Map(
+    [...hba1cRecordsByPatient.entries()].map(([patientId, records]) => [
+      patientId,
+      estimateHbA1c(records),
+    ])
+  );
+
+  const sortedLinks = [...activeLinks].sort((a, b) => {
+    const hba1cA = a.patientId ? (hba1cByPatient.get(a.patientId) ?? null) : null;
+    const hba1cB = b.patientId ? (hba1cByPatient.get(b.patientId) ?? null) : null;
+    if (hba1cA === null && hba1cB === null) return 0;
+    if (hba1cA === null) return 1;
+    if (hba1cB === null) return -1;
+    return hba1cB - hba1cA;
+  });
+
   return (
     <AppMain>
       <GreetingHeader name={name} />
 
       <GerarConviteCard />
 
-      {pendingCodes.length > 0 ? (
-        <section className="rounded-lg bg-card p-5 shadow-sm">
-          <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
-            Códigos pendentes
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {pendingCodes.map((link) => (
-              <li
-                key={link.id}
-                className="rounded-lg bg-muted px-4 py-2 text-center font-mono text-sm tracking-widest text-foreground"
-              >
-                {link.inviteCode}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <PendingInviteCodes
+        codes={pendingCodes.map((link) => ({
+          id: link.id,
+          code: link.inviteCode,
+        }))}
+      />
 
       <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Pacientes vinculados
         </h2>
-        {activeLinks.length === 0 ? (
+        {sortedLinks.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nenhum paciente vinculado ainda.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {activeLinks.map((link) => {
+            {sortedLinks.map((link) => {
               if (!link.patientId) return null;
               const risk = mostSevereAlert(
                 alertsByPatient.get(link.patientId) ?? []
               );
+              const hba1c = hba1cByPatient.get(link.patientId) ?? null;
               return (
                 <li key={link.id}>
                   <Link
@@ -252,11 +272,25 @@ async function DoctorDashboard({
                     <span className="font-medium text-foreground">
                       {link.patient?.user.name ?? "Paciente"}
                     </span>
-                    {risk ? (
-                      <span className="text-xs font-medium text-alert-foreground">
-                        {glucoseAlertLabel(risk)} (últimos 7 dias)
-                      </span>
-                    ) : null}
+                    <span className="flex flex-col items-end gap-0.5">
+                      {hba1c !== null ? (
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ color: hba1cColor(hba1c) }}
+                        >
+                          HbA1c {hba1c.toFixed(1)}%
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          Sem registros
+                        </span>
+                      )}
+                      {risk ? (
+                        <span className="text-xs font-medium text-alert-foreground">
+                          {glucoseAlertLabel(risk)} (últimos 7 dias)
+                        </span>
+                      ) : null}
+                    </span>
                   </Link>
                 </li>
               );
