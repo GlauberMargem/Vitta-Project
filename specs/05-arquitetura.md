@@ -458,3 +458,49 @@ nível sem sessão → 307 pro login; `/dashboard/pagina-fantasma` sem sessão
 → 307 pro login com `callbackUrl`; `/relatorios` sem sessão → 307 pro
 login (confirma o fix do matcher); rota inexistente **com** sessão válida
 → 404 de verdade (status HTTP 404, não redirect), com Header/Navbar.
+
+## Chat — polling simples, sem WebSocket (RF15, 2026-10-12)
+
+Pedido do Glauber: chat entre paciente e o médico vinculado. Ele
+perguntou especificamente se dava pra usar WebSocket.
+
+**Por que não WebSocket**: a hospedagem alvo é Vercel (funções
+serverless) — não mantém conexão WebSocket persistente. As alternativas
+seriam um servidor à parte (fora da Vercel, ex. Railway/Fly.io) ou um
+serviço gerenciado de tempo real (Pusher, Ably, Supabase Realtime), ambos
+adicionando uma dependência de infraestrutura nova e custo/complexidade
+extra pra explicar no TG-II. Confirmado com o Glauber: **polling
+simples** — o cliente busca mensagens novas a cada poucos segundos via
+server action chamada diretamente (não `<form action>`), sem rota de API
+nova, mesmo padrão de "sem API Routes próprias" já usado no resto do
+projeto.
+
+- `prisma/schema.prisma` — model `Message` (`linkId`, `senderId`, `body`,
+  `createdAt`), uma conversa por `PatientDoctorLink`.
+- `src/lib/chat/actions.ts` — `getMessages(linkId)` (chamada direta, não
+  só via form — Next.js permite invocar uma server action como função
+  normal a partir de um client component) e `sendMessage` (server action
+  de formulário, padrão `useActionState` igual o resto do app).
+  `requireActiveLink` garante que só paciente/médico do vínculo `ACTIVE`
+  correspondente lê/escreve — revogar o vínculo bloqueia acesso
+  imediatamente, mas não apaga o histórico de mensagens.
+- `src/components/chat/ChatPanel.tsx` — client component compartilhado
+  entre as duas pontas; busca mensagens a cada 4s (`setInterval`) e
+  também logo após enviar uma mensagem (não espera o próximo tick pra
+  mostrar a própria mensagem enviada).
+- Entrada pro paciente: botão "Abrir chat" dentro de `VinculoMedicoCard`
+  (`/userConfig`), leva pra rota própria `/chat` — só existe um vínculo
+  `ACTIVE` por paciente por vez (RF10), então não precisa de seletor de
+  conversa. Entrada pro médico: dentro da própria tela do paciente
+  (`dashboard/pacientes/[patientId]/`), já que o médico pode ter vários
+  pacientes vinculados ao mesmo tempo.
+- `middleware.ts`: `/chat/:path*` entrou no matcher desde o início, pra
+  não repetir o gap que aconteceu com `/relatorios`.
+
+Testado com `npm run build && npm run start`: `/chat` sem sessão → 307
+pro login; com paciente/médico de teste vinculados (`status: ACTIVE`) e
+mensagens seedadas direto no banco, as duas páginas renderizam o
+`ChatPanel` com o nome certo da outra pessoa. O conteúdo das mensagens em
+si só carrega no cliente (`useEffect`, depois da hidratação) — não dá pra
+confirmar por curl, precisa de teste manual no navegador pra validar o
+polling e o envio de verdade.

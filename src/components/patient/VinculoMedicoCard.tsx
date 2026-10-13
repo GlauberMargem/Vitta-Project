@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +61,10 @@ function RevokeLinkForm({ link }: { link: ActiveLink }) {
         Vinculado a{" "}
         <span className="font-semibold">Dr(a). {link.doctorName}</span>
       </p>
+
+      <Button asChild variant="outline" className="rounded-lg">
+        <Link href="/chat">Abrir chat</Link>
+      </Button>
 
       <form id="revoke-link-form" action={formAction}>
         <input type="hidden" name="linkId" value={link.id} />

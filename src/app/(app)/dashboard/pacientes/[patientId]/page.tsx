@@ -9,6 +9,7 @@ import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { RelatorioPdfButton } from "@/components/patient/RelatorioPdfButton";
 import { NovaAnotacaoForm } from "@/components/doctor/NovaAnotacaoForm";
+import { ChatPanel } from "@/components/chat/ChatPanel";
 import { buildHistory, buildReportHistories } from "@/lib/patient/history";
 import { formatDateTime } from "@/lib/patient/format";
 import {
@@ -143,6 +144,8 @@ export default async function PatientDetailPage({
         hba1c={hba1c}
         histories={reportHistories}
       />
+
+      <ChatPanel linkId={link.id} otherPersonLabel={patientName} />
 
       <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">

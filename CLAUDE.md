@@ -54,7 +54,7 @@ fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é 
 
 ```
 vitest.config.mts              config do Vitest (alias @/*, environment node) — ver 05-arquitetura.md
-middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig, /relatorios
+middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig, /relatorios, /chat
 src/app/not-found.tsx          404 global (fora da área logada, mesmo estilo visual de login/cadastro)
 src/app/page.tsx               "/" não renderiza nada: redireciona por sessão (com sessão vai pra
                                 /dashboard, sem sessão vai pra /login) — nunca é a home de fato
@@ -63,9 +63,9 @@ src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do
 src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
 src/app/cadastro/completar/    completa o cadastro depois de login via Google (role ainda null) — perfil +
                                 dados específicos, mesmo formulário da etapa 2 do cadastro normal
-src/app/(app)/                 route group com Header/Navbar: /dashboard, /relatorios, /userConfig. Layout é
-                                `async` (chama `auth()`) só pra saber o `role` e decidir se a Navbar mostra o
-                                ícone de Relatórios
+src/app/(app)/                 route group com Header/Navbar: /dashboard, /relatorios, /userConfig, /chat.
+                                Layout é `async` (chama `auth()`) só pra saber o `role` e decidir se a Navbar
+                                mostra o ícone de Relatórios
 src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico — sem
                                 relatório/vínculo, que viraram rota/tela própria em 2026-10-12) OU painel do
                                 médico (gerar convite, pacientes vinculados com indicador de risco), por role
@@ -73,6 +73,9 @@ src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um
                                 médico — continua com o botão de relatório dentro da própria tela (é sobre
                                 UM paciente, não é rota de navegação geral)
 src/app/(app)/relatorios/      RF08, só paciente — relatório em PDF, antes vivia dentro do dashboard
+src/app/(app)/chat/            RF15, só paciente — conversa com o médico vinculado (`ChatPanel`), usa o
+                                único vínculo ACTIVE do paciente (acesso pro médico fica dentro da própria
+                                tela de cada paciente, `dashboard/pacientes/[patientId]/`)
 src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
                                 dados clínicos (paciente) ou profissionais (médico); card de vínculo com
                                 médico sempre visível abaixo da paginação (só paciente, desde 2026-10-12)
@@ -112,6 +115,9 @@ src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRe
 src/components/doctor/         GerarConviteCard, PendingInviteCodes (lista de códigos PENDING com botão
                                 "Revogar" + confirmação em Dialog), NovaAnotacaoForm (anotação clínica,
                                 só o médico vê)
+src/components/chat/           ChatPanel (RF15 — conversa por vínculo ACTIVE, polling a cada 4s via
+                                server action chamada direta, sem WebSocket; usado em /chat do paciente
+                                e em dashboard/pacientes/[patientId]/ do médico)
 src/components/profile/        ProfileView (paginação + botão Sair + card de vínculo com médico fixo
                                 abaixo da paginação, só paciente), AvatarUpload (foto de perfil via
                                 Vercel Blob, com fallback de iniciais — ver 08-design-system.md,
@@ -158,6 +164,9 @@ src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por p
 src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
                                 revokeInviteCode (só código PENDING do próprio médico),
                                 createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
+src/lib/chat/actions.ts        getMessages (chamada direta, não só via form) + sendMessage (RF15) —
+                                requireActiveLink garante que só paciente/médico do vínculo ACTIVE
+                                correspondente lê/escreve
 src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
                                 updateAvatar (foto de perfil, sobe pro Vercel Blob e salva a URL em
                                 User.avatarUrl — apaga o blob antigo depois de trocar), 
@@ -205,6 +214,7 @@ seção "Login social Google").
 - Feedbacks motivacionais com base na consistência dos registros.
 - Autonomia total sobre os próprios dados. Vínculo a um médico é **opcional**, via
   código de convite — o app deve funcionar plenamente sem vínculo.
+- Chat com o médico vinculado (RF15), enquanto o vínculo estiver ativo.
 
 ### Médico
 - **Somente leitura/anotação** sobre dados clínicos do paciente: nunca pode inserir
@@ -215,6 +225,7 @@ seção "Login social Google").
 - Geração de relatórios glicêmicos exportáveis em PDF.
 - Acesso a um paciente só existe após vínculo por código de convite — nunca por
   busca livre de pacientes.
+- Chat com cada paciente vinculado (RF15), enquanto o vínculo estiver ativo.
 
 ## Segurança e privacidade (não negociável)
 

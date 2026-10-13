@@ -16,6 +16,7 @@
 | RF12 | Feedbacks motivacionais com base na consistência dos registros | Paciente | Baixa | ✅ concluído (pós-homologação, 2026-09-05) |
 | RF13 | Alerta quando a glicose costuma ficar alta ou baixa num período do dia (madrugada/manhã/tarde/noite) | Paciente | Baixa | ✅ concluído (pós-monografia, 2026-09-06) — não é um dos RF originais da monografia, adicionado a pedido do Glauber |
 | RF14 | Vínculo manual entre um registro de glicose e uma refeição, com sugestão automática de registrar refeição após uma glicose sem refeição próxima | Paciente | Baixa | ✅ concluído (pós-monografia, 2026-09-06) — idem, fora da monografia original |
+| RF15 | Chat entre paciente e o médico vinculado | Ambos | Baixa | ✅ concluído (pós-monografia, 2026-10-12) — idem, fora da monografia original |
 
 Regras de negócio associadas (não repetir no código como comentário — só aplicar):
 
@@ -81,3 +82,12 @@ Regras de negócio associadas (não repetir no código como comentário — só 
   confirmar salvando o modal de refeição sugerido — nunca é criado
   automaticamente. Ver `src/lib/patient/actions.ts` e
   `src/components/patient/AcoesRapidas.tsx`.
+- RF15: uma conversa por vínculo `ACTIVE` (paciente só tem um vínculo ativo
+  por vez — ver RF10 — então pro paciente é sempre "a" conversa com o
+  médico atual; pro médico, uma por paciente vinculado). Só funciona
+  enquanto o vínculo está `ACTIVE`; revogar o vínculo não apaga as
+  mensagens, só bloqueia leitura/envio novos (mesma regra de acesso do
+  histórico clínico). Atualização por polling simples (sem WebSocket nem
+  serviço externo — decisão confirmada com o Glauber em 2026-10-12, pela
+  hospedagem na Vercel não manter conexão persistente). Ver
+  `src/lib/chat/actions.ts` e `src/components/chat/ChatPanel.tsx`.

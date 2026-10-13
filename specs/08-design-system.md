@@ -273,6 +273,17 @@ próprio (`PendingInviteCodes.tsx`) com um botão "Revogar" por código
 (`src/lib/doctor/actions.ts`), que só revoga código `PENDING` do próprio
 médico.
 
+**Chat** (RF15, 2026-10-12 — ver `05-arquitetura.md`, "Chat — polling
+simples, sem WebSocket"): `ChatPanel.tsx` é um card com a lista de
+mensagens (bolhas: a própria mensagem alinhada à direita em `--primary`,
+a da outra pessoa à esquerda em `--card`, mesma lógica visual de qualquer
+app de mensagem) com altura máxima e rolagem própria, e um campo de texto
++ botão "Enviar" fixo embaixo. Pro paciente, acessível pelo botão "Abrir
+chat" dentro do card de vínculo em `/userConfig`, rota própria `/chat`.
+Pro médico, fica direto dentro da tela de cada paciente vinculado
+(`dashboard/pacientes/[patientId]/`), junto do histórico e das anotações
+clínicas.
+
 **Confirmação antes de desvincular** (2026-10-12, pedido do Glauber):
 clicar em "Revogar vínculo" não envia mais a ação direto — abre um
 `Dialog` de confirmação ("Desvincular do médico? Você vai deixar de estar
