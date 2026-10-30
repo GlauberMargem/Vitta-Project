@@ -9,9 +9,11 @@ import { updateBasicInfo, changePassword } from "@/lib/profile/actions";
 export function DadosPessoaisForm({
   name,
   email,
+  hasPassword,
 }: {
   name: string;
   email: string;
+  hasPassword: boolean;
 }) {
   const [error, formAction, isPending] = useActionState(
     updateBasicInfo,
@@ -46,9 +48,16 @@ export function DadosPessoaisForm({
             name="email"
             type="email"
             defaultValue={email}
+            readOnly={!hasPassword}
+            aria-describedby={hasPassword ? undefined : "email-google-hint"}
             required
-            className="font-support"
+            className="font-support read-only:bg-muted"
           />
+          {!hasPassword ? (
+            <p id="email-google-hint" className="text-xs text-muted-foreground">
+              Sua conta usa o email do Google, por isso ele não pode ser trocado aqui.
+            </p>
+          ) : null}
         </div>
 
         {error ? (

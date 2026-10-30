@@ -13,6 +13,12 @@
       "skillPath": ".agents/skills/next-best-practices/SKILL.md",
       "computedHash": "db85045827ebeb83ac8dbc992b69188755eeb74dcf01cbf5e694d58aa494a106"
     },
+    "security-review": {
+      "source": "getsentry/skills",
+      "sourceType": "github",
+      "skillPath": "skills/security-review/SKILL.md",
+      "computedHash": "57e404df6c743ec59b82ed5c1454a4a5234f5012e644ff7ffaa8beccfb1aba43"
+    },
     "sprint-planning": {
       "source": "anthropics/knowledge-work-plugins",
       "sourceType": "github",

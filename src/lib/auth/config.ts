@@ -47,16 +47,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Login social Google — não aceitar email que o Google não confirmou
       // (evita alguém reivindicar um email que não é dele). Ver
       // specs/05-arquitetura.md, "Login social Google".
-      if (account?.provider === "google" && profile?.email_verified !== true) {
-        return false;
+      if (account?.provider === "google") {
+        if (profile?.email_verified !== true || !profile.email) {
+          return false;
+        }
+        // Conta criada por senha nunca teve o email confirmado, então pode
+        // ter sido cadastrada por outra pessoa com o email da vítima. Vincular
+        // automaticamente colocaria a vítima dentro de uma conta cuja senha
+        // o atacante conhece. Ver specs/05-arquitetura.md, "Login social Google".
+        const existing = await db.user.findUnique({
+          where: { email: profile.email },
+          select: { passwordHash: true },
+        });
+        if (existing?.passwordHash) {
+          return "/login?erro=conta-com-senha";
+        }
       }
       return true;
     },
     async jwt({ token, user, account, profile }): Promise<JWT> {
       if (account?.provider === "google" && profile?.email) {
-        // Acha a conta pelo email (vínculo automático com conta já
-        // existente por senha, ou retomada de um cadastro Google
-        // incompleto) ou cria um User pendente (role null) na primeira
+        // Acha a conta pelo email (conta já criada pelo Google, completa
+        // ou com cadastro pendente; conta com senha já foi barrada no
+        // signIn) ou cria um User pendente (role null) na primeira
         // vez — ver specs/05-arquitetura.md, "Login social Google".
         const email = profile.email as string;
         const existing = await db.user.findUnique({ where: { email } });

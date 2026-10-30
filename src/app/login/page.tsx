@@ -7,11 +7,23 @@ import { auth, signIn } from "@/lib/auth/config";
 import logoIcon from "@/assets/images/logo-vitta.svg";
 import { LoginForm } from "./LoginForm";
 
-export default async function LoginPage() {
+const LOGIN_ERRORS: Record<string, string> = {
+  "conta-com-senha":
+    "Já existe uma conta com esse email criada com senha. Entre com seu email e senha.",
+};
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ erro?: string }>;
+}) {
   const session = await auth();
   if (session) {
     redirect(session.user.role ? "/dashboard" : "/cadastro/completar");
   }
+
+  const { erro } = await searchParams;
+  const loginError = erro ? LOGIN_ERRORS[erro] : undefined;
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-10">
@@ -28,6 +40,15 @@ export default async function LoginPage() {
             vitta
           </span>
         </div>
+
+        {loginError ? (
+          <p
+            className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
+            {loginError}
+          </p>
+        ) : null}
 
         <LoginForm />
 

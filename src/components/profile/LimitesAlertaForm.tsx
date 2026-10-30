@@ -42,7 +42,7 @@ export function LimitesAlertaForm(props: Thresholds) {
       <p className="mb-4 text-xs text-muted-foreground">
         Usados para marcar seus registros como hipo/hiperglicemia no
         histórico e nos gráficos. O padrão segue as diretrizes da Sociedade
-        Brasileira de Diabetes — ajuste só se seu médico recomendar valores
+        Brasileira de Diabetes. Ajuste só se seu médico recomendar valores
         diferentes.
       </p>
       <form action={formAction} className="flex flex-col gap-4">
