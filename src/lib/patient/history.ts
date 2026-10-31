@@ -1,0 +1,116 @@
+import type { GlucoseContext } from "@/generated/prisma/client";
+import { contextLabel } from "./format";
+import {
+  getPeriodRange,
+  glucoseAlert,
+  type GlucoseAlert,
+  type GlucoseThresholds,
+  type ReportPeriod,
+} from "./glucose";
+
+export type HistoryItem = {
+  kind: "glucose" | "meal";
+  id: string;
+  date: Date;
+  label: string;
+  detail: string;
+  alert: GlucoseAlert;
+};
+
+type GlucoseRecordLike = {
+  id: string;
+  measuredAt: Date;
+  valueMgdl: number;
+  context: GlucoseContext;
+  linkedMeal?: { name: string | null } | null;
+};
+
+type MealLike = {
+  id: string;
+  eatenAt: Date;
+  name: string | null;
+  carbsG: number;
+};
+
+/** Mescla glicose + refeição por data, mais recente primeiro. Usado na home do
+ * paciente e no histórico somente leitura do médico. */
+export function buildHistory(
+  glucoseRecords: GlucoseRecordLike[],
+  meals: MealLike[],
+  thresholds: GlucoseThresholds,
+  limit = 10
+): HistoryItem[] {
+  return [
+    ...glucoseRecords.map((record) => ({
+      kind: "glucose" as const,
+      id: record.id,
+      date: record.measuredAt,
+      label: `${record.valueMgdl} mg/dL`,
+      detail: record.linkedMeal
+        ? `${contextLabel(record.context)} · Refeição vinculada: ${
+            record.linkedMeal.name ?? "Refeição"
+          }`
+        : contextLabel(record.context),
+      alert: glucoseAlert(record.valueMgdl, record.context, thresholds),
+    })),
+    ...meals.map((meal) => ({
+      kind: "meal" as const,
+      id: meal.id,
+      date: meal.eatenAt,
+      label: meal.name ?? "Refeição",
+      detail: `${meal.carbsG} g de carboidratos`,
+      alert: null,
+    })),
+  ]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, limit);
+}
+
+export type HistoryDayGroup = { date: Date; items: HistoryItem[] };
+
+/** Agrupa um histórico já ordenado (mais recente primeiro, como
+ * `buildHistory`/`buildReportHistories` devolvem) por dia corrido,
+ * preservando a ordem. Usado no relatório em PDF (RF08) pra separar os
+ * registros por dia. */
+export function groupHistoryByDay(history: HistoryItem[]): HistoryDayGroup[] {
+  const groups: HistoryDayGroup[] = [];
+  for (const item of history) {
+    const last = groups[groups.length - 1];
+    const sameDay =
+      last !== undefined &&
+      last.date.getFullYear() === item.date.getFullYear() &&
+      last.date.getMonth() === item.date.getMonth() &&
+      last.date.getDate() === item.date.getDate();
+    if (sameDay) {
+      last.items.push(item);
+    } else {
+      groups.push({ date: item.date, items: [item] });
+    }
+  }
+  return groups;
+}
+
+const REPORT_PERIODS: ReportPeriod[] = ["daily", "weekly", "monthly"];
+
+/** Histórico completo (sem limite) de cada período — usado no relatório em PDF
+ * (RF08). `glucoseRecords`/`meals` devem cobrir pelo menos os últimos 30 dias
+ * (a maior janela), já que "diária"/"semanal" são recortes dela. */
+export function buildReportHistories(
+  glucoseRecords: GlucoseRecordLike[],
+  meals: MealLike[],
+  thresholds: GlucoseThresholds,
+  referenceDate: Date = new Date()
+): Record<ReportPeriod, HistoryItem[]> {
+  const result = {} as Record<ReportPeriod, HistoryItem[]>;
+  for (const period of REPORT_PERIODS) {
+    const { start, end } = getPeriodRange(period, referenceDate);
+    const records = glucoseRecords.filter(
+      (record) => record.measuredAt >= start && record.measuredAt < end
+    );
+    const periodMeals = meals.filter(
+      (meal) => meal.eatenAt >= start && meal.eatenAt < end
+    );
+    result[period] = buildHistory(records, periodMeals, thresholds, Infinity);
+  }
+  return result;
+}

@@ -1,0 +1,178 @@
+// Schema do Sistema Vitta — ver specs/04-modelo-de-dados.md para o modelo
+// conceitual. Nomes de tabela/coluna em snake_case (via @map/@@map) para bater
+// exatamente com o que está documentado nas specs; nomes de campo no client
+// Prisma ficam em camelCase, que é o padrão da ferramenta.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+
+  @@map("role")
+}
+
+enum DiabetesType {
+  TIPO_1
+  TIPO_2
+  GESTACIONAL
+  OUTRO
+
+  @@map("diabetes_type")
+}
+
+enum GlucoseContext {
+  JEJUM
+  POS_PRANDIAL
+  ANTES_DE_DORMIR
+  OUTRO
+
+  @@map("glucose_context")
+}
+
+enum LinkStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+
+  @@map("link_status")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  // null = cadastro via Google pendente de completar (escolher perfil +
+  // dados específicos) — ver specs/05-arquitetura.md, "Login social Google"
+  role         Role?
+  // URL pública do arquivo no Vercel Blob — ver specs/08-design-system.md,
+  // "Avatar" e src/lib/profile/actions.ts (updateAvatar)
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  patientProfile PatientProfile?
+  doctorProfile  DoctorProfile?
+  sentMessages   Message[]
+
+  @@map("users")
+}
+
+model PatientProfile {
+  userId       String       @id @map("user_id") @db.Uuid
+  birthDate    DateTime     @map("birth_date") @db.Date
+  diabetesType DiabetesType @map("diabetes_type")
+
+  // Limites de alerta de hipo/hiperglicemia (RF05). Default = valores da
+  // literatura (SBD, ver specs/04-modelo-de-dados.md); paciente pode
+  // ajustar em /userConfig (backlog pós-homologação, ver 09-sprints.md).
+  hypoThreshold              Int @default(70) @map("hypo_threshold")
+  severeHypoThreshold        Int @default(54) @map("severe_hypo_threshold")
+  hyperFastingThreshold      Int @default(130) @map("hyper_fasting_threshold")
+  hyperPostprandialThreshold Int @default(180) @map("hyper_postprandial_threshold")
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  glucoseRecords GlucoseRecord[]
+  meals          Meal[]
+  doctorLinks    PatientDoctorLink[]
+
+  @@map("patient_profiles")
+}
+
+model DoctorProfile {
+  userId    String @id @map("user_id") @db.Uuid
+  crm       String
+  specialty String
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patientLinks PatientDoctorLink[]
+
+  @@map("doctor_profiles")
+}
+
+model GlucoseRecord {
+  id           String         @id @default(uuid()) @db.Uuid
+  patientId    String         @map("patient_id") @db.Uuid
+  valueMgdl    Int            @map("value_mgdl")
+  context      GlucoseContext
+  measuredAt   DateTime       @map("measured_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  linkedMealId String?        @map("linked_meal_id") @db.Uuid
+
+  patient    PatientProfile @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  linkedMeal Meal?          @relation("MealGlucoseLink", fields: [linkedMealId], references: [id], onDelete: SetNull)
+
+  @@index([patientId, measuredAt])
+  @@map("glucose_records")
+}
+
+model Meal {
+  id        String   @id @default(uuid()) @db.Uuid
+  patientId String   @map("patient_id") @db.Uuid
+  name      String?
+  carbsG    Int      @map("carbs_g")
+  eatenAt   DateTime @map("eaten_at")
+
+  patient              PatientProfile  @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  linkedGlucoseRecords GlucoseRecord[] @relation("MealGlucoseLink")
+
+  @@index([patientId, eatenAt])
+  @@map("meals")
+}
+
+model PatientDoctorLink {
+  id         String     @id @default(uuid()) @db.Uuid
+  patientId  String?    @map("patient_id") @db.Uuid
+  doctorId   String     @map("doctor_id") @db.Uuid
+  inviteCode String     @unique @map("invite_code")
+  status     LinkStatus @default(PENDING)
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  patient  PatientProfile? @relation(fields: [patientId], references: [userId], onDelete: Cascade)
+  doctor   DoctorProfile   @relation(fields: [doctorId], references: [userId], onDelete: Cascade)
+  notes    ClinicalNote[]
+  messages Message[]
+
+  @@index([doctorId, status])
+  @@index([patientId, status])
+  @@map("patient_doctor_links")
+}
+
+// Chat entre paciente e médico (2026-10-12, pedido do Glauber) — uma
+// conversa por PatientDoctorLink. Só existe enquanto o vínculo está
+// ACTIVE (ver requireActiveLink em src/lib/chat/actions.ts); revogar o
+// vínculo não apaga o histórico, só bloqueia leitura/envio novos, igual
+// já acontece com o histórico clínico. Polling simples no cliente (sem
+// WebSocket/serviço externo), ver specs/05-arquitetura.md, "Chat".
+model Message {
+  id        String   @id @default(uuid()) @db.Uuid
+  linkId    String   @map("link_id") @db.Uuid
+  senderId  String   @map("sender_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  link   PatientDoctorLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  sender User              @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([linkId, createdAt])
+  @@map("messages")
+}
+
+model ClinicalNote {
+  id        String   @id @default(uuid()) @db.Uuid
+  linkId    String   @map("link_id") @db.Uuid
+  doctorId  String   @map("doctor_id") @db.Uuid
+  note      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  link PatientDoctorLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@map("clinical_notes")
+}

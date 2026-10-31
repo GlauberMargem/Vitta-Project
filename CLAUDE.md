@@ -1,0 +1,267 @@
+# Sistema Vitta
+
+Aplicação web para registro e monitoramento de glicemia, apoiando a autogestão do
+Diabetes Mellitus pelo paciente e o telemonitoramento assistido pelo médico. Projeto de
+TCC (UniRios) de Glauber Lima Margem Simplício — a monografia (TG-I) descreve
+fundamentação teórica, requisitos e protótipo; a implementação (TG-II) é este repositório.
+
+## Regras de colaboração
+
+- Linguagem simples e direta nas respostas.
+- Nunca usar emojis.
+- Se algo pedido estiver fora do escopo definido nas specs, explicar de forma
+  simples o porquê e perguntar antes de agir — não expandir escopo por conta própria.
+- Nunca inventar informação (endpoint, biblioteca, comportamento, valor). Se não
+  souber ou não estiver documentado nas specs/monografia, perguntar ao Glauber.
+
+## Stack obrigatória
+
+- **Next.js** (App Router) — frontend + backend unificados (API Routes), SSR.
+- **React** para componentização de UI.
+- **TypeScript** em toda a base de código — tipagem estática obrigatória.
+  `tsconfig.json` já configurado (`strict: true`). Migração de `.js`/`.jsx`
+  (bootstrap do create-next-app) pra `.tsx`/`.ts` concluída em 2026-09-06 —
+  não sobrou nenhum arquivo `.js`/`.jsx` em `src/`.
+  ⚠️ Versão do TypeScript **fixada em `5.9.3`** (`--save-exact`). A versão
+  `latest` do npm hoje é a `7.x` (reescrita nativa do compilador), que não tem
+  mais o arquivo `typescript/lib/typescript.js` — o Next.js 16.1.1 depende
+  desse arquivo pra detectar TypeScript e quebra o build sem ele (erro
+  genérico `The "id" argument must be of type string`). Não rodar
+  `npm update typescript` sem checar compatibilidade antes.
+- **Tailwind CSS** para toda a estilização (utilitário, mobile-first). Não introduzir
+  outra abordagem de estilização (CSS-in-JS, Sass, etc.).
+- **PostgreSQL** para persistência (dados clínicos e de perfis). Banco local
+  `vitta_dev` já criado (serviço Windows `postgresql-x64-17`). ORM: **Prisma 7**,
+  já configurado com o driver adapter `@prisma/adapter-pg` (ver
+  `specs/05-arquitetura.md`).
+- **NextAuth/OAuth** para autenticação. Configurado com **Auth.js v5**
+  (`next-auth@5.0.0-beta.32`, config em `src/lib/auth/config.ts`) — provider
+  de credenciais (email/senha com bcrypt) e Google, sessão JWT. Login
+  social Google implementado em 2026-10-10 (precisa de
+  `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` reais no `.env` pra funcionar de
+  verdade — ver `.env.example` e `specs/05-arquitetura.md`, seção
+  "Login social Google").
+- Componentes de UI seguem o padrão shadcn/ui (`components.json`, `src/components/ui`,
+  `class-variance-authority`, `tailwind-merge`, `lucide-react` para ícones).
+- Hospedagem alvo: Vercel. Armazenamento de arquivo (foto de perfil): **Vercel
+  Blob** (`@vercel/blob`), token em `BLOB_READ_WRITE_TOKEN` (ver `.env.example`
+  e `specs/08-design-system.md`, "Upload de foto de verdade").
+- **Vitest** para testes automatizados (`npm test`) — só funções puras de
+  `src/lib/**` por enquanto (regras de negócio), sem teste de componente
+  React. Ver `specs/05-arquitetura.md`, "Testes automatizados".
+
+## Estrutura atual do projeto
+
+```
+vitest.config.mts              config do Vitest (alias @/*, environment node) — ver 05-arquitetura.md
+middleware.ts                 guarda de rota (Auth.js) — protege /dashboard, /userConfig, /relatorios, /chat
+src/app/not-found.tsx          404 global (fora da área logada, mesmo estilo visual de login/cadastro)
+src/app/page.tsx               "/" não renderiza nada: redireciona por sessão (com sessão vai pra
+                                /dashboard, sem sessão vai pra /login) — nunca é a home de fato
+src/app/layout.tsx             layout raiz (fontes, sem Header/Navbar)
+src/app/login/                 tela de login (page.tsx + LoginForm.tsx), fora do grupo (app)
+src/app/cadastro/              tela de cadastro (page.tsx + CadastroForm.tsx), fora do grupo (app)
+src/app/cadastro/completar/    completa o cadastro depois de login via Google (role ainda null) — perfil +
+                                dados específicos, mesmo formulário da etapa 2 do cadastro normal
+src/app/(app)/                 route group com Header/Navbar: /dashboard, /relatorios, /userConfig, /chat.
+                                Layout é `async` (chama `auth()`) só pra saber o `role` e decidir se a Navbar
+                                mostra o ícone de Relatórios
+src/app/(app)/dashboard/       home real do paciente (HbA1c, gráfico semanal, Ações, histórico — sem
+                                relatório/vínculo, que viraram rota/tela própria em 2026-10-12) OU painel do
+                                médico (gerar convite, pacientes vinculados com indicador de risco), por role
+src/app/(app)/dashboard/pacientes/[patientId]/  histórico somente leitura de um paciente vinculado, pro
+                                médico — continua com o botão de relatório dentro da própria tela (é sobre
+                                UM paciente, não é rota de navegação geral)
+src/app/(app)/relatorios/      RF08, só paciente — relatório em PDF, antes vivia dentro do dashboard
+src/app/(app)/chat/            RF15, só paciente — conversa com o médico vinculado (`ChatPanel`), usa o
+                                único vínculo ACTIVE do paciente (acesso pro médico fica dentro da própria
+                                tela de cada paciente, `dashboard/pacientes/[patientId]/`)
+src/app/(app)/userConfig/      perfil real — 2 sub-telas paginadas: dados pessoais (nome/email/senha) +
+                                dados clínicos (paciente) ou profissionais (médico); card de vínculo com
+                                médico sempre visível abaixo da paginação (só paciente, desde 2026-10-12)
+src/app/(app)/not-found.tsx    404 dentro da área logada (com Header/Navbar) — ver [...slug]/ abaixo
+src/app/(app)/[...slug]/       catch-all: sem sessão redireciona pra /login, com sessão chama notFound().
+                                Route group não adiciona prefixo na URL — esse catch-all pega qualquer
+                                caminho não mapeado do app inteiro, não só "dentro" de /dashboard etc. Ver
+                                05-arquitetura.md, "404 e rota inexistente dentro da área logada"
+src/app/api/auth/[...nextauth]/route.ts  handler do Auth.js
+src/assets/images/              assets importados diretamente no código (logos etc.) — `import logo from
+                                "@/assets/images/arquivo.svg"` + `next/image`, dimensões inferidas
+                                automaticamente. `public/` é só pra arquivo que precisa de URL fixa
+                                (favicon já fica em `src/app/favicon.ico`, não em `public/`)
+src/assets/illustrations/      ilustrações maiores (cenas, personagens) de bancos de terceiros —
+                                mesmo padrão de `import` de `images/`, mas em pasta separada porque
+                                exigem crédito visível na tela (ver CREDITS.md na própria pasta e
+                                05-arquitetura.md). Não excluir o link de atribuição ao editar a tela
+                                que usa o arquivo
+src/components/                Navbar.tsx (recebe `role` via prop de `(app)/layout.tsx` — ícones de
+                                Relatórios e Chat só pro paciente, sempre visíveis mesmo sem vínculo/sem
+                                dado) /Header.tsx (arquivo plano, não pasta — consistente com o resto de
+                                `src/components/*`), tokens do design system, avatar/iniciais, toque de
+                                44px; src/components/ui (shadcn — inclui textarea/popover/sonner, ver nota
+                                abaixo sobre bug do gerador), icons/; AppMain.tsx (container padrão das
+                                telas da área logada — fundo bege #F2ECDE + faixa diagonal, ver
+                                08-design-system.md); GreetingHeader.tsx (saudação por horário + relógio,
+                                calculado no cliente — dashboard paciente e médico); NotificationBell.tsx
+                                (sino do Header — notificações de motivação RF12 + tendência RF13, só
+                                paciente, ver 08-design-system.md "Sistema de notificações");
+                                HelpPopover.tsx (ícone "?" genérico, abre em toque — usado em
+                                NovaGlicoseDialog e LimitesAlertaForm)
+src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
+                                sugestão de refeição, RF14), NovaGlicoseDialog (não sugere refeição quando
+                                context === JEJUM), NovaRefeicaoDialog (shadcn Dialog, toast de confirmação
+                                via sonner nos dois), GlicemiaChart (Recharts, domínio do eixo Y dinâmico +
+                                ReferenceArea da faixa-alvo) + GlicemiaChartCard (seletor de período
+                                dia/semana/mês/3 meses) + GlicemiaChartCardLazy (wrapper client-only que
+                                carrega o chart via next/dynamic ssr:false, usado nas páginas — Server
+                                Component não pode chamar dynamic com ssr:false direto),
+                                RelatorioPdfButton (jsPDF, RF08, usado em `/relatorios` e na tela do médico
+                                sobre um paciente), VinculoMedicoCard (confirmação em Dialog antes de
+                                revogar vínculo — usado em `ProfileView`, não mais no dashboard), HbA1cCard,
+                                HistoricoList (reaproveitados no painel do médico — prop `editable` só true
+                                na visão do próprio paciente, mostra DeleteHistoryItemButton por item)
+src/components/doctor/         GerarConviteCard, PendingInviteCodes (lista de códigos PENDING com botão
+                                "Revogar" + confirmação em Dialog), NovaAnotacaoForm (anotação clínica,
+                                só o médico vê)
+src/components/chat/           ChatPanel (RF15 — conversa por vínculo ACTIVE, polling a cada 4s via
+                                server action chamada direta, sem WebSocket; usado em /chat do paciente
+                                e em dashboard/pacientes/[patientId]/ do médico)
+src/components/profile/        ProfileView (paginação + botão Sair + card de vínculo com médico fixo
+                                abaixo da paginação, só paciente), AvatarUpload (foto de perfil via
+                                Vercel Blob, com fallback de iniciais — ver 08-design-system.md,
+                                "Upload de foto de verdade"), DadosPessoaisForm (+ troca de senha),
+                                DadosClinicosForm, DadosProfissionaisForm, LimitesAlertaForm
+                                (limites de hipo/hiperglicemia configuráveis, RF05)
+src/lib/utils.ts                helpers (cn, initials — iniciais do avatar, Header e tela de Perfil)
+src/lib/db/client.ts           singleton do Prisma Client (com driver adapter)
+src/lib/auth/config.base.ts    config Auth.js edge-safe (sem providers/banco) — usada por middleware.ts;
+                                authorized redireciona pra /cadastro/completar se role for null
+src/lib/auth/config.ts         config Auth.js completa (providers credenciais + Google) — usada no resto
+                                do app; signIn recusa Google se o email já tem conta por
+                                senha (sem vínculo automático, ver 05-arquitetura.md); jwt faz
+                                find-or-create por email (cadastro pendente, role null)
+src/lib/auth/actions.ts        server actions: authenticate (login), registerUser (cadastro),
+                                completeGoogleSignup (completa perfil pendente de login Google), logout
+src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linkedMealId opcional, retorna
+                                {error, recordId} — RF14), createMeal (aceita linkedGlucoseRecordId
+                                opcional), deleteGlucoseRecord, deleteMeal (exclusão permanente, só o
+                                próprio paciente — ver HistoricoList), consumeInviteCode, revokeLink
+src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
+src/lib/patient/limits.ts      limites de sanidade de dado de entrada (glicose 10-600 mg/dL, carboidratos
+                                0-999g) — diferente dos limites de alerta do RF05, não são valor clínico
+                                ajustável; ver 04-modelo-de-dados.md, "Limites de inserção de dados"
+src/lib/patient/*.test.ts      testes Vitest colocados ao lado do módulo testado (ex.: limits.test.ts,
+                                glucose.test.ts) — `npm test`, ver 05-arquitetura.md
+src/lib/patient/glucose.ts     limites clínicos (hipo/hiperglicemia, configuráveis por paciente desde
+                                2026-09-05 — GlucoseThresholds/DEFAULT_GLUCOSE_THRESHOLDS), estimativa de
+                                HbA1c (fórmula ADAG), hba1cColor (degradê verde→laranja pastel do card de
+                                HbA1c, meta 7% a pior 10%), agregação diária/semanal/mensal/trimestral
+                                (buildQuarterlyGlucoseSeries, média semanal dos últimos 90 dias), getPeriodRange
+                                (janelas dia/semana/mês, usada pelo gráfico e pelo PDF), risco mais grave
+                                — fontes em specs/04-modelo-de-dados.md
+src/lib/patient/history.ts     buildHistory: mescla glicose+refeição por data (paciente e médico usam a
+                                mesma); buildReportHistories: idem, sem limite de linhas, por período
+                                (RF08); groupHistoryByDay: agrupa por dia corrido, usado no PDF do
+                                relatório (com teste em history.test.ts)
+src/lib/patient/motivation.ts  RF12: dias distintos com glicose nos últimos 7 dias corridos + as 5
+                                mensagens motivacionais (textos exatos, não parafrasear)
+src/lib/patient/trend.ts       RF13: detecta padrão de glicose alta/baixa por período do dia (janela de
+                                30 dias, mínimo 3 medições por período, desvio mínimo de 20 mg/dL da
+                                média geral) — regra confirmada com o Glauber em 2026-09-06.
+                                trendAlertDetail + TrendAlert.readings expõem a base numérica da análise
+                                (médias + medições específicas), consumido pelo NotificationBell
+src/lib/doctor/actions.ts      server actions: generateInviteCode (código de 8 caracteres, sem 0/O/1/I/L),
+                                revokeInviteCode (só código PENDING do próprio médico),
+                                createClinicalNote (valida vínculo ACTIVE do médico antes de gravar)
+src/lib/chat/actions.ts        getMessages (chamada direta, não só via form) + sendMessage (RF15) —
+                                requireActiveLink garante que só paciente/médico do vínculo ACTIVE
+                                correspondente lê/escreve
+src/lib/profile/actions.ts     server actions: updateBasicInfo, changePassword (exige senha atual),
+                                updateAvatar (foto de perfil, sobe pro Vercel Blob e salva a URL em
+                                User.avatarUrl — apaga o blob antigo depois de trocar), 
+                                updatePatientClinicalData, updateDoctorProfessionalData,
+                                updateGlucoseThresholds (RF05)
+src/types/next-auth.d.ts       augmentation de tipos (Session/JWT com id/role — role é Role | null,
+                                null = cadastro via Google pendente)
+src/generated/prisma           client do Prisma gerado (não editar à mão, não commitado)
+prisma/schema.prisma           schema do banco — ver specs/04-modelo-de-dados.md
+```
+
+Rotas que precisam de Header/Navbar (área logada) vão dentro de `src/app/(app)/`;
+login/cadastro ficam fora desse grupo (tela cheia, sem navegação do app).
+
+Mutação de dados do paciente é sempre via server action (`src/lib/patient/actions.ts`),
+lendo direto do Prisma em Server Components — sem API Routes próprias, seguindo
+`data-patterns.md` da skill `next-best-practices` (API Route só se justifica pra
+acesso externo/webhook).
+
+⚠️ `middleware.ts` só funciona testado em `npm run build && npm run start` —
+há um bug confirmado onde `next dev` (Turbopack e Webpack) nunca invoca o
+middleware nesta versão do Next (16.1.1). Ver `specs/05-arquitetura.md`.
+Next atualizado pra `16.4.0` em 2026-10-12 (falhas de segurança apontadas
+pelo `npm audit`): middleware reconfirmado em `build && start`; o bug do
+`next dev` ainda não foi retestado nessa versão.
+
+**MVP pronto pra homologação** (RF01–RF07, RF09, RF10, RF11 — ver
+`specs/09-sprints.md`). Login social Google implementado em 2026-10-10 —
+falta só o Glauber gerar credenciais reais do Google Cloud Console pra
+testar de ponta a ponta (ver `.env.example` e `specs/05-arquitetura.md`,
+seção "Login social Google").
+
+## Dois perfis de usuário — regras de negócio
+
+### Paciente
+- Interface mobile-first, focada em reduzir carga cognitiva (Heurísticas de Nielsen,
+  Modelo de Fogg: motivação + capacidade + gatilho).
+- Registro de glicose: valor (mg/dL), data, horário, contexto (jejum, pós-prandial,
+  antes de dormir) — via modal simples sobre a tela, sem navegação.
+- Registro de refeição: busca de refeição cadastrada ou carboidratos + horário.
+- Dashboard: estimativa de HbA1c (média dos últimos 90 dias) em destaque, com meta
+  clínica de referência; gráfico de tendência glicêmica (diária/semanal/mensal).
+- Alertas visuais automáticos quando um registro estiver fora dos limites de
+  hipo/hiperglicemia configurados.
+- Feedbacks motivacionais com base na consistência dos registros.
+- Autonomia total sobre os próprios dados. Vínculo a um médico é **opcional**, via
+  código de convite — o app deve funcionar plenamente sem vínculo.
+- Chat com o médico vinculado (RF15), enquanto o vínculo estiver ativo.
+
+### Médico
+- **Somente leitura/anotação** sobre dados clínicos do paciente: nunca pode inserir
+  ou alterar registros de glicose/refeição do paciente. Pode adicionar anotações
+  clínicas próprias vinculadas ao histórico do paciente.
+- Painel centralizado com lista de pacientes vinculados; indicadores visuais para
+  pacientes em risco glicêmico (fora dos limites de referência).
+- Geração de relatórios glicêmicos exportáveis em PDF.
+- Acesso a um paciente só existe após vínculo por código de convite — nunca por
+  busca livre de pacientes.
+- Chat com cada paciente vinculado (RF15), enquanto o vínculo estiver ativo.
+
+## Segurança e privacidade (não negociável)
+
+- Dados de glicemia/saúde são "dados sensíveis" sob a LGPD (Lei 13.709/2018):
+  finalidade, necessidade e segurança devem guiar toda decisão de modelagem.
+- **Privacy by design**: controle de acesso deve isolar paciente e médico desde o
+  schema do banco — um perfil nunca acessa dados de outro sem autorização explícita
+  (vínculo por convite).
+- Autenticação via NextAuth/OAuth; nunca implementar autenticação própria "na mão".
+- Criptografar dados sensíveis em repouso quando aplicável.
+
+## Requisitos não funcionais a manter em mente
+
+- Tempo de resposta < 2s, mesmo em conexão móvel lenta (RNF01).
+- Responsivo mobile-first, para desktop/tablet também (RNF02).
+- Acessível a usuários com baixo letramento digital / idosos: fontes legíveis,
+  navegação intuitiva, poucos passos por tela (RNF05).
+- Código modular e documentado o suficiente para manutenção futura (RNF08) — sem
+  comentários redundantes, só o que não é óbvio pelo nome/estrutura.
+
+## Diretrizes de UX
+
+- Minimalismo: cada tela expõe só os campos essenciais (ex.: tela de login só
+  e-mail/senha + login social).
+- Onboarding progressivo: cadastro em duas etapas (dados gerais → dados específicos
+  do perfil paciente/médico), nunca um formulário longo único.
+- Ações frequentes (registrar glicose/refeição) devem ser alcançáveis em poucos
+  toques a partir da home.
+- Gráficos como ferramenta clínica, não decoração — priorizar leitura rápida de
+  tendências (ex.: gráfico de área) sobre estética pura.
