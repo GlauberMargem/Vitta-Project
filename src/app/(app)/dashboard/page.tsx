@@ -4,7 +4,7 @@ import { db } from "@/lib/db/client";
 import { AppMain } from "@/components/AppMain";
 import { GreetingHeader } from "@/components/GreetingHeader";
 import { AcoesRapidas } from "@/components/patient/AcoesRapidas";
-import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
+import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCardLazy";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { GerarConviteCard } from "@/components/doctor/GerarConviteCard";
@@ -128,13 +128,14 @@ export default async function DashboardPage() {
         weekly={weeklySeries}
         monthly={monthlySeries}
         quarterly={quarterlySeries}
+        thresholds={thresholds}
       />
 
       <section className="rounded-lg bg-card p-5 shadow-sm">
         <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
           Histórico recente
         </h2>
-        <HistoricoList history={history} />
+        <HistoricoList history={history} editable />
       </section>
     </AppMain>
   );
@@ -275,8 +276,11 @@ async function DoctorDashboard({
                     <span className="flex flex-col items-end gap-0.5">
                       {hba1c !== null ? (
                         <span
-                          className="text-xs font-semibold"
-                          style={{ color: hba1cColor(hba1c) }}
+                          className={cn(
+                            "text-xs font-semibold",
+                            risk ? "text-foreground" : undefined
+                          )}
+                          style={risk ? undefined : { color: hba1cColor(hba1c) }}
                         >
                           HbA1c {hba1c.toFixed(1)}%
                         </span>

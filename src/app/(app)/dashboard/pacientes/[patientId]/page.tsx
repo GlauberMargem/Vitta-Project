@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db/client";
 import { AppMain } from "@/components/AppMain";
-import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCard";
+import { GlicemiaChartCard } from "@/components/patient/GlicemiaChartCardLazy";
 import { HbA1cCard } from "@/components/patient/HbA1cCard";
 import { HistoricoList } from "@/components/patient/HistoricoList";
 import { RelatorioPdfButton } from "@/components/patient/RelatorioPdfButton";
@@ -130,6 +130,7 @@ export default async function PatientDetailPage({
         weekly={weeklySeries}
         monthly={monthlySeries}
         quarterly={quarterlySeries}
+        thresholds={thresholds}
       />
 
       <section className="rounded-lg bg-card p-5 shadow-sm">

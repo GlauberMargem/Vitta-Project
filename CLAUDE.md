@@ -94,24 +94,32 @@ src/assets/illustrations/      ilustrações maiores (cenas, personagens) de ban
                                 exigem crédito visível na tela (ver CREDITS.md na própria pasta e
                                 05-arquitetura.md). Não excluir o link de atribuição ao editar a tela
                                 que usa o arquivo
-src/components/                Navbar.tsx (recebe `role` via prop de `(app)/layout.tsx` — ícone de
-                                Relatórios só pro paciente) /Header.tsx (arquivo plano, não pasta —
-                                consistente com o resto de `src/components/*`), tokens do design system,
-                                avatar/iniciais, toque de 44px; src/components/ui (shadcn), icons/;
-                                AppMain.tsx (container padrão das telas da área logada — fundo bege
-                                #F2ECDE + faixa diagonal, ver 08-design-system.md); GreetingHeader.tsx
-                                (saudação por horário + relógio, calculado no cliente — dashboard paciente
-                                e médico); NotificationBell.tsx (sino do Header — notificações de
-                                motivação RF12 + tendência RF13, só paciente, ver 08-design-system.md
-                                "Sistema de notificações")
+src/components/                Navbar.tsx (recebe `role` via prop de `(app)/layout.tsx` — ícones de
+                                Relatórios e Chat só pro paciente, sempre visíveis mesmo sem vínculo/sem
+                                dado) /Header.tsx (arquivo plano, não pasta — consistente com o resto de
+                                `src/components/*`), tokens do design system, avatar/iniciais, toque de
+                                44px; src/components/ui (shadcn — inclui textarea/popover/sonner, ver nota
+                                abaixo sobre bug do gerador), icons/; AppMain.tsx (container padrão das
+                                telas da área logada — fundo bege #F2ECDE + faixa diagonal, ver
+                                08-design-system.md); GreetingHeader.tsx (saudação por horário + relógio,
+                                calculado no cliente — dashboard paciente e médico); NotificationBell.tsx
+                                (sino do Header — notificações de motivação RF12 + tendência RF13, só
+                                paciente, ver 08-design-system.md "Sistema de notificações");
+                                HelpPopover.tsx (ícone "?" genérico, abre em toque — usado em
+                                NovaGlicoseDialog e LimitesAlertaForm)
 src/components/patient/        AcoesRapidas (coordena NovaGlicoseDialog + NovaRefeicaoDialog + prompt de
-                                sugestão de refeição, RF14), NovaGlicoseDialog, NovaRefeicaoDialog (shadcn
-                                Dialog), GlicemiaChart (Recharts) + GlicemiaChartCard (seletor de período
-                                dia/semana/mês/3 meses), RelatorioPdfButton (jsPDF, RF08, usado em
-                                `/relatorios` e na tela do médico sobre um paciente), VinculoMedicoCard
-                                (confirmação em Dialog antes de revogar vínculo — usado em `ProfileView`,
-                                não mais no dashboard), HbA1cCard, HistoricoList (reaproveitados no painel
-                                do médico)
+                                sugestão de refeição, RF14), NovaGlicoseDialog (não sugere refeição quando
+                                context === JEJUM), NovaRefeicaoDialog (shadcn Dialog, toast de confirmação
+                                via sonner nos dois), GlicemiaChart (Recharts, domínio do eixo Y dinâmico +
+                                ReferenceArea da faixa-alvo) + GlicemiaChartCard (seletor de período
+                                dia/semana/mês/3 meses) + GlicemiaChartCardLazy (wrapper client-only que
+                                carrega o chart via next/dynamic ssr:false, usado nas páginas — Server
+                                Component não pode chamar dynamic com ssr:false direto),
+                                RelatorioPdfButton (jsPDF, RF08, usado em `/relatorios` e na tela do médico
+                                sobre um paciente), VinculoMedicoCard (confirmação em Dialog antes de
+                                revogar vínculo — usado em `ProfileView`, não mais no dashboard), HbA1cCard,
+                                HistoricoList (reaproveitados no painel do médico — prop `editable` só true
+                                na visão do próprio paciente, mostra DeleteHistoryItemButton por item)
 src/components/doctor/         GerarConviteCard, PendingInviteCodes (lista de códigos PENDING com botão
                                 "Revogar" + confirmação em Dialog), NovaAnotacaoForm (anotação clínica,
                                 só o médico vê)
@@ -136,7 +144,8 @@ src/lib/auth/actions.ts        server actions: authenticate (login), registerUse
                                 completeGoogleSignup (completa perfil pendente de login Google), logout
 src/lib/patient/actions.ts     server actions: createGlucoseRecord (aceita linkedMealId opcional, retorna
                                 {error, recordId} — RF14), createMeal (aceita linkedGlucoseRecordId
-                                opcional), consumeInviteCode, revokeLink
+                                opcional), deleteGlucoseRecord, deleteMeal (exclusão permanente, só o
+                                próprio paciente — ver HistoricoList), consumeInviteCode, revokeLink
 src/lib/patient/format.ts      helpers de exibição (contextLabel, formatDateTime)
 src/lib/patient/limits.ts      limites de sanidade de dado de entrada (glicose 10-600 mg/dL, carboidratos
                                 0-999g) — diferente dos limites de alerta do RF05, não são valor clínico

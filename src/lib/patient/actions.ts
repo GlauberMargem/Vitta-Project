@@ -141,6 +141,40 @@ export async function createMeal(
   return null;
 }
 
+export async function deleteGlucoseRecord(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const patientId = await requirePatientId();
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) {
+    return "Registro inválido.";
+  }
+
+  await db.glucoseRecord.deleteMany({ where: { id, patientId } });
+
+  revalidatePath("/dashboard");
+  return null;
+}
+
+export async function deleteMeal(
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  const patientId = await requirePatientId();
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) {
+    return "Registro inválido.";
+  }
+
+  await db.meal.deleteMany({ where: { id, patientId } });
+
+  revalidatePath("/dashboard");
+  return null;
+}
+
 export async function consumeInviteCode(
   _previousState: string | null,
   formData: FormData

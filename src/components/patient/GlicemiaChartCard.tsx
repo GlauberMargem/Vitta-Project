@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GlicemiaChart } from "@/components/patient/GlicemiaChart";
-import type { GlucosePoint } from "@/lib/patient/glucose";
+import type { GlucoseThresholds, GlucosePoint } from "@/lib/patient/glucose";
 import { cn } from "@/lib/utils";
 
 type Period = "daily" | "weekly" | "monthly" | "quarterly";
@@ -24,11 +24,13 @@ export function GlicemiaChartCard({
   weekly,
   monthly,
   quarterly,
+  thresholds,
 }: {
   daily: GlucosePoint[];
   weekly: GlucosePoint[];
   monthly: GlucosePoint[];
   quarterly: GlucosePoint[];
+  thresholds: GlucoseThresholds;
 }) {
   const [period, setPeriod] = useState<Period>("weekly");
   const current = PERIOD_OPTIONS.find((option) => option.value === period)!;
@@ -72,7 +74,7 @@ export function GlicemiaChartCard({
           Nenhum registro de glicose hoje.
         </p>
       ) : (
-        <GlicemiaChart data={data} />
+        <GlicemiaChart data={data} thresholds={thresholds} />
       )}
     </section>
   );

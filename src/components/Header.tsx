@@ -62,13 +62,13 @@ export async function Header() {
           ) : null}
           <Link
             href="/userConfig"
-            aria-label="Perfil"
+            aria-label={`Perfil de ${session.user.name}`}
             className="relative flex size-11 items-center justify-center overflow-hidden rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-80"
           >
             {avatarUrl ? (
               <Image src={avatarUrl} alt="" fill sizes="44px" className="object-cover" />
             ) : (
-              initials(session.user.name)
+              <span aria-hidden>{initials(session.user.name)}</span>
             )}
           </Link>
         </div>

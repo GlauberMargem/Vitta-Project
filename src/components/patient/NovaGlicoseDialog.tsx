@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import { HelpPopover } from "@/components/HelpPopover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,9 +66,15 @@ export function NovaGlicoseDialog({
           Math.abs(meal.eatenAt.getTime() - submittedAt.getTime()) <=
           TWO_HOURS_MS
       );
-      if (!linkedMealId && !hasNearbyMeal && !Number.isNaN(submittedAt.getTime())) {
+      if (
+        !linkedMealId &&
+        !hasNearbyMeal &&
+        context !== "JEJUM" &&
+        !Number.isNaN(submittedAt.getTime())
+      ) {
         onSuggestMealLink?.(state.recordId, submittedAt);
       }
+      toast.success("Glicose registrada");
       setOpen(false);
       setContext("");
       setLinkedMealId("");
@@ -74,7 +82,7 @@ export function NovaGlicoseDialog({
       setMeasuredAt("");
     }
     wasPending.current = isPending;
-  }, [isPending, state, recentMeals, linkedMealId, onSuggestMealLink]);
+  }, [isPending, state, recentMeals, linkedMealId, context, onSuggestMealLink]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -167,8 +175,22 @@ export function NovaGlicoseDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="context" className="font-support">
+            <Label htmlFor="context" className="flex items-center gap-1.5 font-support">
               Contexto
+              <HelpPopover>
+                <p>
+                  <strong>Jejum</strong>: sem comer nada nas últimas horas
+                  (geralmente ao acordar).
+                </p>
+                <p className="mt-2">
+                  <strong>Depois de comer</strong>: até cerca de 2h depois de
+                  uma refeição.
+                </p>
+                <p className="mt-2">
+                  <strong>Antes de dormir</strong>: medição feita perto da
+                  hora de deitar.
+                </p>
+              </HelpPopover>
             </Label>
             <Select value={context} onValueChange={setContext}>
               <SelectTrigger id="context" className="w-full font-support">

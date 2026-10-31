@@ -95,11 +95,11 @@ describe("estimateHbA1c", () => {
 
 describe("hba1cColor", () => {
   it(`na meta (${HBA1C_TARGET_PERCENT}%) é verde puro`, () => {
-    expect(hba1cColor(HBA1C_TARGET_PERCENT)).toBe("rgb(76, 175, 80)");
+    expect(hba1cColor(HBA1C_TARGET_PERCENT)).toBe("rgb(46, 125, 50)");
   });
 
   it("abaixo da meta continua verde puro (não existe \"verde demais\")", () => {
-    expect(hba1cColor(5)).toBe("rgb(76, 175, 80)");
+    expect(hba1cColor(5)).toBe("rgb(46, 125, 50)");
   });
 
   it("no pior ponto da escala (10%) é laranja pastel puro", () => {

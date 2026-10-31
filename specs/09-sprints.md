@@ -366,6 +366,72 @@ médico vinculado a esse paciente viu o mesmo resultado (nem no indicador
 de risco, nem no histórico), confirmando que o limite é por paciente, não
 global. Ver `07-roadmap.md`, bloco 3, e `04-modelo-de-dados.md`.
 
+✅ **Correções do levantamento de avaliação heurística (30/10/2026)** —
+feito em 2026-10-30. O Glauber fez um levantamento (`vitta-correcoes.md`,
+fora do repositório) rodando o sistema em build de produção, emulação de
+iPhone 13, Lighthouse e leitura de código, dividido em P0 (quebra o
+sistema), P1 (problemas de uso) e P2 (acessibilidade/acabamento):
+
+- **P0 — build quebrado**: `DadosPessoaisForm` não aceitava a prop
+  `hasPassword` que `ProfileView` já passava. A correção já existia no
+  diretório de trabalho havia vários commits (junto da recusa de
+  vínculo automático do login Google por email já cadastrado por senha,
+  `?erro=conta-com-senha`), só nunca tinha sido commitada — comitado
+  agora.
+- **Excluir registro de glicose/refeição** (RF02/RF03, H3 — controle e
+  liberdade do usuário): botão de excluir em cada item do histórico
+  (`DeleteHistoryItemButton.tsx`, confirmação em Dialog), só na visão do
+  próprio paciente — a visão do médico continua 100% somente leitura.
+  `deleteGlucoseRecord`/`deleteMeal` em `src/lib/patient/actions.ts`.
+  Edição não entrou (fora do pedido original, fica pra depois).
+- **"Esqueci minha senha"**: trocado por um link `mailto:` de contato
+  (antes era um `<span>` sem função).
+- **Sugestão de refeição não dispara mais em jejum**: por definição,
+  quem está em jejum não comeu — `NovaGlicoseDialog.tsx` não oferece mais
+  o modal de refeição sugerida quando `context === "JEJUM"`.
+- **Gráfico de glicemia** (RF04): domínio do eixo Y passou a ser
+  dinâmico (`[40, Math.max(hiperPostprandial + 20, dataMax + 20)]`, em
+  vez de fixo `[50, 500]`) e ganhou uma `ReferenceArea` marcando a
+  faixa-alvo (limites de hipo/hiperglicemia do próprio paciente, RF05) —
+  antes uma hipoglicemia real quase encostava no eixo e não se destacava
+  visualmente. Eixo Y também ganhou mais largura (32px → 40px, rótulos de
+  3 dígitos cortavam).
+- **Chat no Navbar**: RF15 ganhou um quarto ícone na `Navbar` pro
+  paciente (igual já tinha acontecido com Relatórios) — antes só existia
+  um link dentro do card de vínculo em `/userConfig`, de difícil
+  descoberta (H6).
+- **Contraste (WCAG AA, Lighthouse)**: `--primary` (`#6993C5` →
+  `#3B6EA8`) e `--muted-foreground` (`#9CA3AF` → `#6B7280`) em
+  `globals.css`; verde do card de HbA1c (`#4CAF50` → `#2E7D32`,
+  `HBA1C_GOOD_COLOR` em `glucose.ts`) — os 3 valores vieram prontos do
+  levantamento (contraste já calculado), não foram escolhidos aqui.
+- **Avatar do Header**: `aria-label` virou `Perfil de {nome}` (antes só
+  "Perfil", inconsistente com o texto visível pro leitor de tela —
+  achado do Lighthouse, `label-content-name-mismatch`).
+- **Mensagem do card de HbA1c**: só diz "Não desanime" quando o valor
+  está acima da meta; dentro da meta, mostra "Muito bem, você está dentro
+  da meta de até".
+- **HbA1c no painel do médico**: fica com cor neutra (não o degradê
+  verde→laranja) quando o paciente tem um alerta de risco ativo — evita
+  mostrar "HbA1c 4.3%" em verde ao lado de "Hipoglicemia".
+- **Confirmação visual ao salvar**: toast (`sonner`, componente shadcn,
+  tema fixo claro — o app não tem alternância de tema) depois de
+  registrar glicose ou refeição.
+- **Ajuda inline**: `HelpPopover.tsx` (ícone "?", abre em toque — não
+  depende de hover, mobile-first) ao lado de "Contexto" em
+  `NovaGlicoseDialog` e do título de "Limites de alerta" em
+  `LimitesAlertaForm`, explicando os termos em linguagem simples.
+- **Performance**: `GlicemiaChartCard` (Recharts) passou a carregar via
+  `next/dynamic` com `ssr: false` (wrapper `GlicemiaChartCardLazy.tsx`,
+  já que `ssr: false` não é permitido direto num Server Component) — tira
+  peso do carregamento inicial das páginas com gráfico. jsPDF já
+  carregava sob demanda desde a implementação do RF08, nada a mudar ali.
+
+Dois componentes shadcn novos (`textarea`, depois `popover` e `sonner`)
+vieram com um bug do próprio gerador: `import { cn } from "cn"` em vez de
+`import { cn } from "@/lib/utils"` — corrigido à mão nos três arquivos, e
+o pacote `cn` (instalado à toa pelo CLI) removido do `package.json`.
+
 ## Resumo
 
 Os 6 sprints planejados aqui estão **concluídos**. O ritmo real não seguiu o

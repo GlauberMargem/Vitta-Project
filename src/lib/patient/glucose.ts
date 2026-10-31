@@ -116,7 +116,7 @@ export const HBA1C_TARGET_PERCENT = 7;
  * (>= 9%) com uma margem de transição até 10%. Abaixo da meta (7%), sempre
  * verde puro. */
 const HBA1C_WORST_PERCENT = 10;
-const HBA1C_GOOD_COLOR = { r: 0x4c, g: 0xaf, b: 0x50 }; // #4CAF50
+const HBA1C_GOOD_COLOR = { r: 0x2e, g: 0x7d, b: 0x32 }; // #2E7D32 (contraste AA sobre branco)
 const HBA1C_BAD_COLOR = { r: 0xff, g: 0xd6, b: 0xa5 }; // #FFD6A5 (pêssego pastel)
 
 /** Interpola do verde (na meta ou melhor) ao laranja pastel (HBA1C_WORST_PERCENT

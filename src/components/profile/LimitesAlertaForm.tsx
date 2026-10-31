@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { HelpPopover } from "@/components/HelpPopover";
 import { updateGlucoseThresholds } from "@/lib/profile/actions";
 import { DEFAULT_GLUCOSE_THRESHOLDS } from "@/lib/patient/glucose";
 
@@ -36,8 +37,19 @@ export function LimitesAlertaForm(props: Thresholds) {
 
   return (
     <section className="rounded-lg bg-card p-5 shadow-sm">
-      <h2 className="mb-1 font-heading text-base font-semibold text-foreground">
+      <h2 className="mb-1 flex items-center gap-1.5 font-heading text-base font-semibold text-foreground">
         Limites de alerta
+        <HelpPopover>
+          <p>
+            <strong>Hipoglicemia</strong> é quando a glicose fica baixa
+            demais; <strong>hiperglicemia</strong>, alta demais. Os dois
+            trazem risco à saúde se acontecerem com frequência.
+          </p>
+          <p className="mt-2">
+            Os limites abaixo definem a partir de que valor um registro
+            aparece marcado como alerta no histórico e nos gráficos.
+          </p>
+        </HelpPopover>
       </h2>
       <p className="mb-4 text-xs text-muted-foreground">
         Usados para marcar seus registros como hipo/hiperglicemia no
