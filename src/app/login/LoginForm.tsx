@@ -36,9 +36,12 @@ export function LoginForm() {
           autoComplete="current-password"
           required
         />
-        <span className="self-end text-xs text-muted-foreground">
-          Esqueci minha senha
-        </span>
+        <a
+          href="mailto:glauberlima42@hotmail.com?subject=Vitta%20-%20Esqueci%20minha%20senha"
+          className="self-end text-xs text-muted-foreground underline-offset-2 hover:underline"
+        >
+          Esqueci minha senha? Fale com o suporte
+        </a>
       </div>
 
       {errorMessage ? (
